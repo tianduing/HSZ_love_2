@@ -83,8 +83,9 @@ function createMainWindow() {
     height: 960,
     minWidth: 1240,
     minHeight: 760,
-    backgroundColor: "#f4efe6",
+    backgroundColor: "#f7f4ee",
     title: "Study Quest 学练闯关",
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -92,6 +93,7 @@ function createMainWindow() {
     }
   });
 
+  mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(path.join(__dirname, "src", "index.html"));
 }
 

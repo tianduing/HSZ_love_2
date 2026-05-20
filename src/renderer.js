@@ -8,29 +8,29 @@ const FALLBACK_TEMPLATES = [
 
 const VIEW_META = {
   home: {
-    eyebrow: "学习中心",
-    title: "先给我学习内容，我来替你拆成主线关卡",
-    subtitle: "预览版先把体验做顺：卡片化首页、可选字段、主线闯关、记录沉淀和复习回炉。"
+    eyebrow: "学习工作台",
+    title: "学习工作台",
+    subtitle: "从项目、主线和复习队列继续往前。"
   },
   library: {
-    eyebrow: "我的学习",
-    title: "把所有项目放进一个更像产品的学习项目库",
-    subtitle: "这里不再是堆在一起的表单，而是项目卡、进度卡和摘要卡组成的可浏览主界面。"
+    eyebrow: "项目库",
+    title: "项目库",
+    subtitle: "左侧看列表，右侧看检视信息。"
   },
   learn: {
     eyebrow: "闯关学习",
-    title: "三栏专注答题：左边主线图，中间当前关卡，右边教练反馈",
-    subtitle: "这页只做一件事：把当前问题讲明白，然后留下可回看的记录。"
+    title: "闯关学习",
+    subtitle: "左侧路线，中间答题，右侧反馈与记录。"
   },
   review: {
     eyebrow: "复习中心",
-    title: "随机抽题、当前项目回炉和薄弱节点复盘都放在这里",
-    subtitle: "这版先提供真实可用的几种复习方式，后续再继续加自动复习队列。"
+    title: "复习中心",
+    subtitle: "随时抽题，优先回看不稳的节点。"
   },
   settings: {
     eyebrow: "设置",
-    title: "主题、接口参数和标准化流程单独收口",
-    subtitle: "先把预览版做好看、做顺，再继续往安装包和正式发布推进。"
+    title: "设置",
+    subtitle: "主题、接口和发布流程。"
   }
 };
 
@@ -644,6 +644,7 @@ const dom = {
   homeStatReviewable: document.querySelector("#home-stat-reviewable"),
   homeStatUpdated: document.querySelector("#home-stat-updated"),
   homeProjectList: document.querySelector("#home-project-list"),
+  homeFocusCard: document.querySelector("#home-focus-card"),
   homeReviewList: document.querySelector("#home-review-list"),
   libraryProjectCount: document.querySelector("#library-project-count"),
   libraryProjectList: document.querySelector("#library-project-list"),
@@ -1133,7 +1134,45 @@ function projectCardMarkup(summary, { active = false, compact = false } = {}) {
   `;
 }
 
+function projectRowMarkup(summary, { active = false } = {}) {
+  const status = getQuestStatusMeta(summary);
+  const progress = getQuestProgressPercent(summary);
+  return `
+    <article class="project-row ${active ? "active" : ""}">
+      <button class="project-row-main" data-select-quest="${escapeHtml(summary.id)}" type="button">
+        <div class="project-row-head">
+          <div class="project-row-copy">
+            <p class="eyebrow">${escapeHtml(getTemplateLabel(summary.templateKey))}</p>
+            <strong>${escapeHtml(summary.title)}</strong>
+          </div>
+          <span class="status-pill ${status.tone}">${escapeHtml(status.label)}</span>
+        </div>
+        <p class="muted">${escapeHtml(summary.missionBrief || "这条主线还没有摘要，可以先进入路线图看问题分布。")}</p>
+        <div class="progress-track project-row-progress">
+          <span style="width:${progress}%"></span>
+        </div>
+        <div class="project-row-meta">
+          <span>主线 ${summary.stats.completedRoots}/${summary.stats.totalRoots}</span>
+          <span>节点 ${summary.stats.completedNodes}/${summary.stats.totalNodes}</span>
+          <span>${formatDateTime(summary.updatedAt)}</span>
+        </div>
+      </button>
+      <div class="project-row-actions">
+        <button class="ghost-button" data-continue-quest="${escapeHtml(summary.id)}" type="button">继续</button>
+        <button class="ghost-button" data-review-scope="${escapeHtml(summary.id)}" type="button">复习</button>
+      </div>
+    </article>
+  `;
+}
+
 function wireProjectActions(container) {
+  container.querySelectorAll("[data-select-quest]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      await selectQuest(button.dataset.selectQuest);
+      renderAll();
+    });
+  });
+
   container.querySelectorAll("[data-continue-quest]").forEach((button) => {
     button.addEventListener("click", async () => {
       await selectQuest(button.dataset.continueQuest);
@@ -1156,6 +1195,7 @@ function renderHomeView() {
   const completedRoots = appState.quests.reduce((sum, quest) => sum + Number(quest.stats.completedRoots || 0), 0);
   const reviewable = appState.quests.reduce((sum, quest) => sum + Number(quest.stats.completedNodes || 0), 0);
   const latestUpdated = appState.quests[0]?.updatedAt || null;
+  const focusQuestSummary = appState.activeQuest || appState.questDetails.get(appState.quests[0]?.id) || appState.quests[0] || null;
 
   dom.homeStatProjects.textContent = String(totalProjects);
   dom.homeStatRoots.textContent = `${completedRoots} / ${totalRoots}`;
@@ -1165,8 +1205,79 @@ function renderHomeView() {
   if (!appState.quests.length) {
     dom.homeProjectList.innerHTML = `<div class="empty-inline"><p class="muted">还没有项目。先贴一段学习内容，我们再一起看主线关卡够不够像一个真正的学习教练。</p></div>`;
   } else {
-    dom.homeProjectList.innerHTML = appState.quests.slice(0, 3).map((quest) => projectCardMarkup(quest, { active: quest.id === appState.activeQuestId, compact: true })).join("");
+    dom.homeProjectList.innerHTML = appState.quests
+      .slice(0, 6)
+      .map((quest) => projectRowMarkup(quest, { active: quest.id === appState.activeQuestId }))
+      .join("");
     wireProjectActions(dom.homeProjectList);
+  }
+
+  if (!focusQuestSummary) {
+    dom.homeFocusCard.innerHTML = `
+      <div class="empty-inline">
+        <p class="muted">这里会固定显示你当前正在看的项目摘要、主线进度和下一步动作。先新建一个项目，工作台就会真正活起来。</p>
+      </div>
+    `;
+  } else {
+    const latestTimeline = (focusQuestSummary.timeline || []).slice(0, 3);
+    const activeQuestNode = getActiveNode(focusQuestSummary);
+    const metaChips = [
+      focusQuestSummary.level ? `当前水平：${focusQuestSummary.level}` : null,
+      focusQuestSummary.goal ? `学习目标：${focusQuestSummary.goal}` : null,
+      focusQuestSummary.timebox ? `时间限制：${focusQuestSummary.timebox}` : null,
+      `训练模式：${getTemplateLabel(focusQuestSummary.templateKey)}`
+    ]
+      .filter(Boolean)
+      .map((item) => `<span class="meta-chip">${escapeHtml(item)}</span>`)
+      .join("");
+
+    dom.homeFocusCard.innerHTML = `
+      <div class="project-card active focus-card">
+        <div class="project-card-head">
+          <div>
+            <p class="eyebrow">当前项目</p>
+            <h4>${escapeHtml(focusQuestSummary.title)}</h4>
+          </div>
+          <span class="status-pill success">${focusQuestSummary.stats.completedRoots}/${focusQuestSummary.stats.totalRoots} 主线</span>
+        </div>
+        <p class="muted">${escapeHtml(focusQuestSummary.missionBrief || focusQuestSummary.launchNote || "继续把这条主线往前推。")}</p>
+        <div class="meta-chip-row">${metaChips}</div>
+        <div class="inline-stat-grid">
+          ${buildInlineStatCard("总节点", `${focusQuestSummary.stats.completedNodes}/${focusQuestSummary.stats.totalNodes}`)}
+          ${buildInlineStatCard("可复习", String(focusQuestSummary.stats.completedNodes || 0))}
+          ${buildInlineStatCard("当前关卡", activeQuestNode?.path || "待进入")}
+        </div>
+        <div class="project-actions">
+          <button class="primary-button" data-continue-quest="${escapeHtml(focusQuestSummary.id)}" type="button">进入闯关页</button>
+          <button class="ghost-button" data-review-scope="${escapeHtml(focusQuestSummary.id)}" type="button">复习这一条</button>
+        </div>
+      </div>
+      <div class="detail-stack">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">最近记录</p>
+            <h3>这条主线最近发生了什么</h3>
+          </div>
+        </div>
+        <div class="timeline-list">
+          ${
+            latestTimeline.length
+              ? latestTimeline
+                  .map(
+                    (item) => `
+                      <div class="timeline-item">
+                        <strong>${escapeHtml(item.summary)}</strong>
+                        <p class="muted">${formatDateTime(item.createdAt)}</p>
+                      </div>
+                    `
+                  )
+                  .join("")
+              : `<div class="empty-inline"><p class="muted">还没有记录。</p></div>`
+          }
+        </div>
+      </div>
+    `;
+    wireProjectActions(dom.homeFocusCard);
   }
 
   const reviewSuggestions = appState.quests
@@ -1179,19 +1290,16 @@ function renderHomeView() {
   } else {
     dom.homeReviewList.innerHTML = reviewSuggestions
       .map((quest) => {
-        const status = getQuestStatusMeta(quest);
         return `
-          <article class="project-card">
-            <div class="project-card-head">
-              <div>
-                <p class="eyebrow">优先抽查</p>
-                <h4>${escapeHtml(quest.title)}</h4>
-              </div>
-              <span class="status-pill ${status.tone}">${quest.stats.completedNodes} 个可抽查节点</span>
+          <article class="queue-row">
+            <div>
+              <p class="eyebrow">优先抽查</p>
+              <strong>${escapeHtml(quest.title)}</strong>
+              <span class="muted">${quest.stats.completedNodes} 个可抽查节点 · ${formatDateTime(quest.updatedAt)}</span>
             </div>
-            <p class="muted">${escapeHtml(quest.missionBrief || "适合拿来做一轮随机抽题。")}</p>
-            <div class="project-actions">
-              <button class="primary-button" data-review-scope="${escapeHtml(quest.id)}" type="button">现在复习</button>
+            <div class="project-row-actions">
+              <button class="ghost-button" data-select-quest="${escapeHtml(quest.id)}" type="button">检视</button>
+              <button class="primary-button" data-review-scope="${escapeHtml(quest.id)}" type="button">抽题</button>
             </div>
           </article>
         `;
@@ -1208,7 +1316,7 @@ function renderLibraryView() {
   if (!visibleQuests.length) {
     dom.libraryProjectList.innerHTML = `<div class="empty-inline"><p class="muted">项目库还是空的。先新建一个任务，我们再把首页和学习页跑起来。</p></div>`;
   } else {
-    dom.libraryProjectList.innerHTML = visibleQuests.map((quest) => projectCardMarkup(quest, { active: quest.id === appState.activeQuestId })).join("");
+    dom.libraryProjectList.innerHTML = visibleQuests.map((quest) => projectRowMarkup(quest, { active: quest.id === appState.activeQuestId })).join("");
     wireProjectActions(dom.libraryProjectList);
   }
 
@@ -1218,7 +1326,7 @@ function renderLibraryView() {
   }
 
   const quest = appState.activeQuest;
-  const latestTimeline = (quest.timeline || []).slice(0, 4);
+  const latestTimeline = (quest.timeline || []).slice(0, 5);
   const chips = [
     quest.level ? `当前水平：${quest.level}` : null,
     quest.goal ? `学习目标：${quest.goal}` : null,
@@ -1230,7 +1338,7 @@ function renderLibraryView() {
     .join("");
 
   dom.librarySpotlight.innerHTML = `
-    <div class="project-card active">
+    <div class="project-card active focus-card">
       <div class="project-card-head">
         <div>
           <p class="eyebrow">当前项目</p>
@@ -1250,11 +1358,11 @@ function renderLibraryView() {
         <button class="ghost-button" data-review-scope="${escapeHtml(quest.id)}" type="button">当前项目复习</button>
       </div>
     </div>
-    <div class="panel" style="padding:0;border:0;box-shadow:none;background:transparent;">
-      <div class="section-head" style="margin-bottom:4px;">
+    <div class="detail-stack">
+      <div class="section-head">
         <div>
           <p class="eyebrow">最近记录</p>
-          <h3 style="margin-top:6px;">这条主线最近发生了什么</h3>
+          <h3>这条主线最近发生了什么</h3>
         </div>
       </div>
       <div class="timeline-list">

@@ -118,61 +118,20 @@
         </p>
 
         <section id="home-view" class="view-pane">
-          <div class="hero-grid">
-            <article class="panel hero-panel">
-              <div class="hero-copy">
-                <p class="eyebrow">开始方式</p>
-                <h3>只填学习内容也能开始</h3>
-                <p class="muted">
-                  “学习主题、当前水平、学习目标、时间限制、主线关卡数”都已经降级成可选项。你只需要把材料贴进来，系统会自动命名并生成主线问题。
-                </p>
-              </div>
-              <div class="hero-actions">
-                <button class="primary-button" data-open-create type="button">输入内容开始闯关</button>
-                <button id="go-library" class="ghost-button" type="button">先看已有项目</button>
-              </div>
-              <div class="hero-tags">
-                <span class="soft-chip">卡片化布局</span>
-                <span class="soft-chip">主线关卡</span>
-                <span class="soft-chip">追问与子问题</span>
-                <span class="soft-chip">记录可回看</span>
-              </div>
-            </article>
+          <article class="panel desk-toolbar">
+            <div class="desk-toolbar-copy">
+              <p class="eyebrow">快速开始</p>
+              <h3>只填学习内容也能开始</h3>
+              <p class="muted">把材料贴进来，系统会自动命名、生成主线问题，其它字段都可以后补。</p>
+            </div>
+            <div class="desk-toolbar-actions">
+              <button class="primary-button" data-open-create type="button">新建学习项目</button>
+              <button id="go-library" class="ghost-button" type="button">打开项目库</button>
+              <button id="start-global-review" class="ghost-button" type="button">开始复习</button>
+            </div>
+          </article>
 
-            <article class="panel onboarding-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">使用节奏</p>
-                  <h3>先预览，再打包成安装版</h3>
-                </div>
-              </div>
-              <div class="step-list">
-                <div class="step-card">
-                  <span class="step-index">01</span>
-                  <div>
-                    <strong>贴入材料</strong>
-                    <p class="muted">先不折腾复杂配置，只把你真正要学的内容放进来。</p>
-                  </div>
-                </div>
-                <div class="step-card">
-                  <span class="step-index">02</span>
-                  <div>
-                    <strong>看主线够不够像教练</strong>
-                    <p class="muted">这版先把主线感、追问感和目标感做顺，再谈正式打包。</p>
-                  </div>
-                </div>
-                <div class="step-card">
-                  <span class="step-index">03</span>
-                  <div>
-                    <strong>每轮都同步 GitHub</strong>
-                    <p class="muted">改完即提交、可回退、可对比，后续再产出新的安装包。</p>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </div>
-
-          <div class="metrics-grid">
+          <div class="metrics-grid compact-metrics">
             <article class="panel metric-card">
               <span>学习项目</span>
               <strong id="home-stat-projects">0</strong>
@@ -195,28 +154,39 @@
             </article>
           </div>
 
-          <div class="home-content-grid">
-            <article class="panel section-panel">
+          <div class="home-workbench">
+            <article class="panel section-panel project-catalog-panel">
               <div class="section-head">
                 <div>
-                  <p class="eyebrow">我的学习</p>
+                  <p class="eyebrow">项目库</p>
                   <h3>最近项目</h3>
                 </div>
                 <button class="ghost-button" data-view-jump="library" type="button">查看全部</button>
               </div>
-              <div id="home-project-list" class="project-list"></div>
+              <div id="home-project-list" class="project-row-list"></div>
             </article>
 
-            <article class="panel section-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">复习建议</p>
-                  <h3>优先回看这些项目</h3>
+            <div class="home-side-stack">
+              <article class="panel section-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">当前焦点</p>
+                    <h3>项目检视</h3>
+                  </div>
                 </div>
-                <button id="start-global-review" class="ghost-button" type="button">开始复习</button>
-              </div>
-              <div id="home-review-list" class="review-suggestion-list"></div>
-            </article>
+                <div id="home-focus-card" class="spotlight-detail"></div>
+              </article>
+
+              <article class="panel section-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">复习队列</p>
+                    <h3>优先回看这些项目</h3>
+                  </div>
+                </div>
+                <div id="home-review-list" class="queue-list"></div>
+              </article>
+            </div>
           </div>
         </section>
 
@@ -233,7 +203,7 @@
               <p class="muted section-tip">
                 这里保留所有主线任务。你可以继续学习、切换到复习中心，或者先把项目当作预览版路线图来审一遍。
               </p>
-              <div id="library-project-list" class="project-grid"></div>
+              <div id="library-project-list" class="project-row-list"></div>
             </article>
 
             <article class="panel section-panel">
