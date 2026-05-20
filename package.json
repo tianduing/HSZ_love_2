@@ -54,5 +54,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Study Quest 学练闯关"
     }
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0"
   }
 }

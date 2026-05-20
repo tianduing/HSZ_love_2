@@ -73,6 +73,15 @@ const THEME_PRESETS = [
 
 const UI_STORAGE_KEY = "study-quest-ui-v3";
 
+function createDefaultBackgroundState() {
+  return {
+    image: "",
+    opacity: 55,
+    positionX: 50,
+    positionY: 50
+  };
+}
+
 function cleanText(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -117,18 +126,27 @@ function loadUiState() {
     if (!raw) {
       return {
         theme: "forest",
-        focusMode: false
+        focusMode: false,
+        background: createDefaultBackgroundState()
       };
     }
     const parsed = JSON.parse(raw);
+    const background = parsed.background || {};
     return {
       theme: ["forest", "ocean", "graphite"].includes(parsed.theme) ? parsed.theme : "forest",
-      focusMode: Boolean(parsed.focusMode)
+      focusMode: Boolean(parsed.focusMode),
+      background: {
+        image: typeof background.image === "string" ? background.image : "",
+        opacity: clamp(Number(background.opacity ?? 55), 0, 100),
+        positionX: clamp(Number(background.positionX ?? 50), 0, 100),
+        positionY: clamp(Number(background.positionY ?? 50), 0, 100)
+      }
     };
   } catch (_error) {
     return {
       theme: "forest",
-      focusMode: false
+      focusMode: false,
+      background: createDefaultBackgroundState()
     };
   }
 }
@@ -138,7 +156,8 @@ function saveUiState() {
     UI_STORAGE_KEY,
     JSON.stringify({
       theme: appState.ui.theme,
-      focusMode: appState.ui.focusMode
+      focusMode: appState.ui.focusMode,
+      background: appState.ui.background
     })
   );
 }
@@ -627,6 +646,8 @@ const dom = {
   viewSubtitle: document.querySelector("#view-subtitle"),
   apiStatusPill: document.querySelector("#api-status-pill"),
   questCountPill: document.querySelector("#quest-count-pill"),
+  themeToggle: document.querySelector("#theme-toggle"),
+  themeToggleIcon: document.querySelector("#theme-toggle-icon"),
   projectSearch: document.querySelector("#project-search"),
   sidebarStartReviewButton: document.querySelector("#sidebar-start-review"),
   sidebarLibraryCount: document.querySelector("#sidebar-library-count"),
@@ -690,6 +711,17 @@ const dom = {
   settingsApiHint: document.querySelector("#settings-api-hint"),
   settingsProjectRoot: document.querySelector("#settings-project-root"),
   settingsDataRoot: document.querySelector("#settings-data-root"),
+  backgroundFileInput: document.querySelector("#background-file-input"),
+  pickBackgroundButton: document.querySelector("#pick-background"),
+  clearBackgroundButton: document.querySelector("#clear-background"),
+  backgroundPreview: document.querySelector("#background-preview"),
+  backgroundPreviewCaption: document.querySelector("#background-preview-caption"),
+  backgroundOpacity: document.querySelector("#background-opacity"),
+  backgroundOpacityValue: document.querySelector("#background-opacity-value"),
+  backgroundPositionX: document.querySelector("#background-position-x"),
+  backgroundPositionXValue: document.querySelector("#background-position-x-value"),
+  backgroundPositionY: document.querySelector("#background-position-y"),
+  backgroundPositionYValue: document.querySelector("#background-position-y-value"),
   createModal: document.querySelector("#create-modal"),
   questForm: document.querySelector("#quest-form"),
   topicInput: document.querySelector("#topic-input"),
@@ -921,7 +953,19 @@ function playPositiveTone() {
 function applyUiState() {
   dom.body.dataset.theme = appState.ui.theme;
   dom.body.classList.toggle("focus-mode", appState.ui.focusMode && appState.currentView === "learn");
+  const background = appState.ui.background || createDefaultBackgroundState();
+  dom.body.classList.toggle("has-custom-background", Boolean(background.image));
+  dom.body.style.setProperty("--custom-bg-image", background.image ? `url("${background.image}")` : "none");
+  dom.body.style.setProperty("--custom-bg-opacity", String(clamp(Number(background.opacity || 0), 0, 100) / 100));
+  dom.body.style.setProperty("--custom-bg-position-x", `${clamp(Number(background.positionX || 50), 0, 100)}%`);
+  dom.body.style.setProperty("--custom-bg-position-y", `${clamp(Number(background.positionY || 50), 0, 100)}%`);
   dom.toggleFocusModeButton.textContent = appState.ui.focusMode ? "退出沉浸模式" : "沉浸模式";
+  if (dom.themeToggleIcon) {
+    dom.themeToggleIcon.className = `fa-solid ${appState.ui.theme === "graphite" ? "fa-sun" : "fa-moon"}`;
+  }
+  if (dom.themeToggle) {
+    dom.themeToggle.title = appState.ui.theme === "graphite" ? "切换为浅色工作台" : "切换为夜读工作台";
+  }
 }
 
 function setTheme(themeKey) {
@@ -935,6 +979,40 @@ function setFocusMode(enabled) {
   appState.ui.focusMode = enabled;
   saveUiState();
   applyUiState();
+}
+
+function updateBackgroundSetting(key, value) {
+  appState.ui.background = {
+    ...createDefaultBackgroundState(),
+    ...appState.ui.background,
+    [key]: value
+  };
+  saveUiState();
+  applyUiState();
+  renderBackgroundControls();
+}
+
+function clearCustomBackground() {
+  appState.ui.background = createDefaultBackgroundState();
+  saveUiState();
+  applyUiState();
+  renderBackgroundControls();
+}
+
+function loadCustomBackgroundFile(file) {
+  if (!file) {
+    return;
+  }
+  if (!String(file.type || "").startsWith("image/")) {
+    showToast("请选择图片文件作为背景。", "warning");
+    return;
+  }
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    updateBackgroundSetting("image", typeof reader.result === "string" ? reader.result : "");
+    showToast("已更新自定义背景。");
+  });
+  reader.readAsDataURL(file);
 }
 
 function switchView(viewKey) {
@@ -1045,7 +1123,7 @@ async function selectQuest(questId) {
 }
 
 function renderPreviewBanner() {
-  dom.previewBanner.classList.add("hidden");
+  dom.previewBanner.classList.toggle("hidden", !appState.previewMode);
 }
 
 function renderHeaderAndSidebar() {
@@ -1720,6 +1798,26 @@ function renderThemeOptions() {
   });
 }
 
+function renderBackgroundControls() {
+  const background = appState.ui.background || createDefaultBackgroundState();
+  dom.backgroundOpacity.value = String(background.opacity);
+  dom.backgroundPositionX.value = String(background.positionX);
+  dom.backgroundPositionY.value = String(background.positionY);
+  dom.backgroundOpacityValue.textContent = `${background.opacity}%`;
+  dom.backgroundPositionXValue.textContent = `${background.positionX}%`;
+  dom.backgroundPositionYValue.textContent = `${background.positionY}%`;
+  dom.backgroundPreview.classList.toggle("has-image", Boolean(background.image));
+  dom.backgroundPreview.style.backgroundImage = background.image
+    ? `linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)), url("${background.image}")`
+    : "none";
+  dom.backgroundPreview.style.backgroundPosition = `${background.positionX}% ${background.positionY}%`;
+  dom.backgroundPreview.style.setProperty("--preview-bg-opacity", String(clamp(Number(background.opacity || 0), 0, 100) / 100));
+  dom.backgroundPreviewCaption.textContent = background.image
+    ? `透明度 ${background.opacity}% · 水平 ${background.positionX}% · 垂直 ${background.positionY}%`
+    : "还没有自定义背景";
+  dom.clearBackgroundButton.disabled = !background.image;
+}
+
 function renderSettingsView() {
   const runtimeRoot = appState.bootstrap?.runtime?.dataRoot || "-";
   dom.projectRootText.textContent = "E:\\study-quest-desktop";
@@ -1727,6 +1825,7 @@ function renderSettingsView() {
   dom.settingsProjectRoot.textContent = "E:\\study-quest-desktop";
   dom.settingsDataRoot.textContent = runtimeRoot;
   renderThemeOptions();
+  renderBackgroundControls();
 }
 
 function renderAll() {
@@ -1964,6 +2063,37 @@ dom.reviewModeButtons.forEach((button) => {
   button.addEventListener("click", () => {
     void startReviewMode(button.dataset.reviewMode, false);
   });
+});
+
+dom.themeToggle?.addEventListener("click", () => {
+  setTheme(appState.ui.theme === "graphite" ? "forest" : "graphite");
+});
+
+dom.pickBackgroundButton?.addEventListener("click", () => {
+  dom.backgroundFileInput?.click();
+});
+
+dom.clearBackgroundButton?.addEventListener("click", () => {
+  clearCustomBackground();
+  showToast("已清除自定义背景。");
+});
+
+dom.backgroundFileInput?.addEventListener("change", () => {
+  const [file] = dom.backgroundFileInput.files || [];
+  loadCustomBackgroundFile(file);
+  dom.backgroundFileInput.value = "";
+});
+
+dom.backgroundOpacity?.addEventListener("input", () => {
+  updateBackgroundSetting("opacity", clamp(Number(dom.backgroundOpacity.value || 55), 0, 100));
+});
+
+dom.backgroundPositionX?.addEventListener("input", () => {
+  updateBackgroundSetting("positionX", clamp(Number(dom.backgroundPositionX.value || 50), 0, 100));
+});
+
+dom.backgroundPositionY?.addEventListener("input", () => {
+  updateBackgroundSetting("positionY", clamp(Number(dom.backgroundPositionY.value || 50), 0, 100));
 });
 
 dom.toggleFocusModeButton.addEventListener("click", () => {

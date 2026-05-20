@@ -3,68 +3,88 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>智学闯关 · Study Quest</title>
+    <title>智学闯关 · 次世代 AI 学习教练</title>
+    <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body data-theme="forest">
-    <div class="app-shell">
-      <aside class="sidebar">
-        <section class="panel brand-panel">
-          <div class="brand-lockup">
-            <span class="app-mark">SQ</span>
-            <div>
+    <div class="ambient-orbs" aria-hidden="true">
+      <div class="orb"></div>
+      <div class="orb"></div>
+      <div class="orb"></div>
+      <div class="orb"></div>
+    </div>
+
+    <div class="layout-wrapper">
+      <aside class="sidebar glass-panel">
+        <section class="brand-panel">
+          <div class="brand">
+            <div class="brand-icon">
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <div class="brand-copy">
               <p class="eyebrow">Study Quest</p>
               <h1>智学闯关</h1>
+              <p class="muted">把学习内容变成一张可闯关、可复习、可追踪的问题地图。</p>
             </div>
           </div>
         </section>
 
-        <section class="panel sidebar-tools">
+        <section class="sidebar-tools glass-subpanel">
           <label class="search-shell">
-            <span class="search-icon">⌕</span>
-            <input id="project-search" placeholder="搜索学习项目..." spellcheck="false" />
+            <span class="search-icon">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input id="project-search" type="search" placeholder="搜索学习项目..." spellcheck="false" />
           </label>
+
           <div class="sidebar-quick-actions">
-            <button class="ghost-button sidebar-action" data-open-create type="button">+ 新建</button>
-            <button class="ghost-button sidebar-action" id="sidebar-start-review" type="button">↺ 复习</button>
+            <button class="ghost-button sidebar-action" data-open-create type="button">
+              <i class="fa-solid fa-plus"></i>
+              <span>新建项目</span>
+            </button>
+            <button class="ghost-button sidebar-action" id="sidebar-start-review" type="button">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>开始复习</span>
+            </button>
           </div>
         </section>
 
-        <nav class="panel nav-panel">
-          <button class="nav-button active" data-view="home" type="button">
+        <nav class="nav-panel glass-subpanel">
+          <button class="nav-button nav-item active" data-view="home" type="button">
+            <i class="fa-solid fa-house"></i>
             <span class="nav-label">学习中心</span>
-            <span class="nav-copy">从这里开始新项目和查看全局进度</span>
           </button>
-          <button class="nav-button" data-view="library" type="button">
-            <span class="nav-label">我的学习</span>
-            <span class="nav-copy">查看所有项目、进度和最近活跃内容</span>
+          <button class="nav-button nav-item" data-view="library" type="button">
+            <i class="fa-solid fa-layer-group"></i>
+            <span class="nav-label">我的项目</span>
           </button>
-          <button class="nav-button" data-view="learn" type="button">
+          <button class="nav-button nav-item" data-view="learn" type="button">
+            <i class="fa-solid fa-bolt"></i>
             <span class="nav-label">闯关学习</span>
-            <span class="nav-copy">三栏专注答题，保留问题树和教练反馈</span>
           </button>
-          <button class="nav-button" data-view="review" type="button">
+          <button class="nav-button nav-item" data-view="review" type="button">
+            <i class="fa-solid fa-calendar-check"></i>
             <span class="nav-label">复习中心</span>
-            <span class="nav-copy">随机抽题、薄弱回炉和当前项目复盘</span>
           </button>
-          <button class="nav-button" data-view="settings" type="button">
+          <button class="nav-button nav-item" data-view="settings" type="button">
+            <i class="fa-solid fa-sliders"></i>
             <span class="nav-label">设置</span>
-            <span class="nav-copy">主题、接口参数和后续打包流程都放这里</span>
           </button>
         </nav>
 
-        <section class="panel sidebar-library">
+        <section class="sidebar-section glass-subpanel">
           <div class="section-head compact-head">
             <div>
-              <p class="eyebrow">学习项目</p>
-              <h3>项目列表</h3>
+              <p class="eyebrow">项目列表</p>
+              <h3>最近学习路线</h3>
             </div>
-            <span id="sidebar-library-count" class="status-pill neutral">0</span>
+            <span id="sidebar-library-count" class="badge subtle-badge">0</span>
           </div>
           <div id="sidebar-project-list" class="sidebar-project-list"></div>
         </section>
 
-        <section class="panel spotlight-panel">
+        <section class="sidebar-section glass-subpanel">
           <div class="section-head compact-head">
             <div>
               <p class="eyebrow">当前焦点</p>
@@ -72,12 +92,11 @@
             </div>
             <span id="api-status-pill" class="status-pill neutral">接口待配置</span>
           </div>
-          <p id="sidebar-quest-brief" class="muted">
-            暂无当前项目
-          </p>
 
-          <div class="mini-progress-card">
-            <div class="mini-progress-head">
+          <p id="sidebar-quest-brief" class="section-copy">先贴学习内容，系统会替你生成主线问题。</p>
+
+          <div class="progress-card">
+            <div class="progress-head">
               <span>主线进度</span>
               <strong id="sidebar-progress-text">0 / 0</strong>
             </div>
@@ -97,148 +116,185 @@
             </div>
           </div>
         </section>
+
+        <div class="user-profile">
+          <div class="avatar-shell">
+            <div class="avatar">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+          </div>
+          <div class="user-info">
+            <h4>学习者 01</h4>
+            <p>持续推进主线</p>
+          </div>
+        </div>
       </aside>
 
-      <main class="main-shell">
-        <header class="panel topbar">
-            <div>
-              <p id="view-eyebrow" class="eyebrow">学习中心</p>
-            <h2 id="view-title">学习工作台</h2>
-            <p id="view-subtitle" class="muted">项目、主线、复习队列</p>
+      <main class="main-content">
+        <header class="header glass-panel topbar">
+          <div class="header-copy">
+            <p id="view-eyebrow" class="eyebrow">学习工作台</p>
+            <div class="header-title-row">
+              <h2 id="view-title">学习工作台</h2>
+              <span id="quest-count-pill" class="badge">0 个项目</span>
+            </div>
+            <p id="view-subtitle" class="header-subtitle">项目、主线、复习队列都收在同一处。</p>
           </div>
-          <div class="topbar-actions">
-            <span id="quest-count-pill" class="status-pill">0 个项目</span>
-            <button id="open-create-modal" class="primary-button" type="button">新建项目</button>
+
+          <div class="toolbar">
+            <button id="theme-toggle" class="icon-btn" type="button" title="切换日夜主题">
+              <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+            </button>
+            <button class="icon-btn" data-view-jump="settings" type="button" title="打开设置">
+              <i class="fa-solid fa-gear"></i>
+            </button>
+            <button id="open-create-modal" class="primary-button" type="button">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>新建项目</span>
+            </button>
           </div>
         </header>
 
-        <p id="preview-banner" class="preview-banner hidden">
-          预览模式
-        </p>
+        <p id="preview-banner" class="preview-banner hidden">当前是浏览器预览版，桌面安装版会沿用同一套界面。</p>
 
         <section id="home-view" class="view-pane">
-          <article class="panel desk-toolbar">
-            <div class="desk-toolbar-copy">
-              <p class="eyebrow">快速入口</p>
-              <h3>新建学习项目</h3>
-              <p class="muted">材料输入为必填，其余保持可选。</p>
-            </div>
-            <div class="desk-toolbar-actions">
-              <button class="primary-button" data-open-create type="button">新建项目</button>
-              <button id="go-library" class="ghost-button" type="button">打开项目库</button>
-              <button id="start-global-review" class="ghost-button" type="button">开始复习</button>
-            </div>
-          </article>
+          <section class="dashboard">
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="home-stat-projects" class="stat-value">0</div>
+                <div class="stat-label">学习项目</div>
+              </div>
+              <div class="stat-icon">
+                <i class="fa-solid fa-compass-drafting"></i>
+              </div>
+            </article>
 
-          <div class="metrics-grid compact-metrics">
-            <article class="panel metric-card">
-              <span>学习项目</span>
-              <strong id="home-stat-projects">0</strong>
-              <p class="muted">已保存项目</p>
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="home-stat-roots" class="stat-value">0 / 0</div>
+                <div class="stat-label">主线完成</div>
+              </div>
+              <div class="stat-icon accent-blue">
+                <i class="fa-solid fa-flag-checkered"></i>
+              </div>
             </article>
-            <article class="panel metric-card">
-              <span>主线完成</span>
-              <strong id="home-stat-roots">0 / 0</strong>
-              <p class="muted">主问题进度</p>
-            </article>
-            <article class="panel metric-card">
-              <span>可抽查节点</span>
-              <strong id="home-stat-reviewable">0</strong>
-              <p class="muted">复习池</p>
-            </article>
-            <article class="panel metric-card">
-              <span>最近更新</span>
-              <strong id="home-stat-updated">还没有</strong>
-              <p class="muted">活动时间</p>
-            </article>
-          </div>
 
-          <div class="home-workbench">
-            <article class="panel section-panel project-catalog-panel">
-              <div class="section-head">
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="home-stat-reviewable" class="stat-value">0</div>
+                <div class="stat-label">可抽查节点</div>
+              </div>
+              <div class="stat-icon accent-gold">
+                <i class="fa-solid fa-history"></i>
+              </div>
+            </article>
+
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="home-stat-updated" class="stat-value small-value">还没有</div>
+                <div class="stat-label">最近更新</div>
+              </div>
+              <div class="stat-icon accent-green">
+                <i class="fa-solid fa-wave-square"></i>
+              </div>
+            </article>
+          </section>
+
+          <section class="workspace home-workspace">
+            <article class="path-panel glass-panel">
+              <div class="path-title-row">
                 <div>
-                  <p class="eyebrow">项目库</p>
+                  <p class="path-title">项目列表</p>
                   <h3>最近项目</h3>
                 </div>
-                <button class="ghost-button" data-view-jump="library" type="button">查看全部</button>
+                <button class="mini-action" data-view-jump="library" type="button">查看全部</button>
               </div>
-              <div id="home-project-list" class="project-row-list"></div>
+              <div id="home-project-list" class="project-collection"></div>
             </article>
 
-            <div class="home-side-stack">
-              <article class="panel section-panel">
-                <div class="section-head">
-                  <div>
-                    <p class="eyebrow">当前焦点</p>
-                    <h3>项目检视</h3>
-                  </div>
-                </div>
-                <div id="home-focus-card" class="spotlight-detail"></div>
-              </article>
+            <article class="quiz-panel glass-panel home-focus-panel">
+              <div class="quiz-header">
+                <span class="tag">
+                  <i class="fa-solid fa-bullseye"></i>
+                  当前项目
+                </span>
+                <button id="go-library" class="icon-btn compact-icon-btn" type="button" title="打开项目库">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+              <div id="home-focus-card" class="focus-stack"></div>
+            </article>
 
-              <article class="panel section-panel">
+            <aside class="coach-rail">
+              <article class="glass-panel rail-card">
                 <div class="section-head">
                   <div>
                     <p class="eyebrow">复习队列</p>
-                    <h3>优先回看这些项目</h3>
+                    <h3>优先回看</h3>
                   </div>
+                  <button id="start-global-review" class="mini-action" type="button">开始复习</button>
                 </div>
                 <div id="home-review-list" class="queue-list"></div>
               </article>
-            </div>
-          </div>
+            </aside>
+          </section>
         </section>
 
         <section id="library-view" class="view-pane hidden">
-          <div class="library-layout">
-            <article class="panel section-panel">
-              <div class="section-head">
+          <section class="workspace library-workspace">
+            <article class="path-panel glass-panel">
+              <div class="path-title-row">
                 <div>
-                  <p class="eyebrow">项目库</p>
-                  <h3>我的学习项目</h3>
+                  <p class="path-title">项目库</p>
+                  <h3>全部学习项目</h3>
                 </div>
-                <span id="library-project-count" class="status-pill neutral">0 个项目</span>
+                <span id="library-project-count" class="badge subtle-badge">0 个项目</span>
               </div>
-              <p class="muted section-tip">
-                所有学习项目都会保存在这里。
-              </p>
-              <div id="library-project-list" class="project-row-list"></div>
+              <div id="library-project-list" class="project-collection"></div>
             </article>
 
-            <article class="panel section-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">当前项目概览</p>
-                  <h3>主线摘要</h3>
-                </div>
+            <article class="quiz-panel glass-panel library-focus-panel">
+              <div class="quiz-header">
+                <span class="tag">
+                  <i class="fa-solid fa-layer-group"></i>
+                  项目检视
+                </span>
               </div>
-              <div id="library-spotlight" class="spotlight-detail"></div>
+              <div id="library-spotlight" class="focus-stack"></div>
             </article>
-          </div>
+          </section>
         </section>
 
         <section id="learn-view" class="view-pane hidden">
-          <div id="learn-empty-state" class="panel empty-panel">
-            <h3>暂无学习项目</h3>
-            <p class="muted">新建项目或从项目库选择一条主线。</p>
-            <button class="primary-button" data-open-create type="button">现在开始</button>
-          </div>
+          <article id="learn-empty-state" class="empty-state glass-panel">
+            <div class="empty-state-icon">
+              <i class="fa-solid fa-sparkles"></i>
+            </div>
+            <h3>还没有进入主线</h3>
+            <p class="muted">先创建一个学习项目，系统会自动生成主线问题和可追踪节点。</p>
+            <button class="primary-button" data-open-create type="button">
+              <i class="fa-solid fa-plus"></i>
+              <span>创建第一个项目</span>
+            </button>
+          </article>
 
-          <div id="learn-layout" class="learn-layout hidden">
-            <aside class="panel roadmap-panel">
-              <div class="section-head">
+          <section id="learn-layout" class="workspace learn-workspace hidden">
+            <article class="path-panel glass-panel">
+              <div class="path-title-row">
                 <div>
-                  <p class="eyebrow">主线地图</p>
-                  <h3 id="learn-project-title">-</h3>
+                  <p class="path-title">学习路径</p>
+                  <h3 id="learn-project-title">当前项目</h3>
                 </div>
-                <span id="learn-node-progress" class="status-pill neutral">0 / 0</span>
+                <button id="toggle-focus-mode" class="mini-action" type="button">沉浸模式</button>
               </div>
 
-              <div id="learn-meta-chips" class="meta-chip-row"></div>
+              <p id="learn-project-brief" class="section-copy">系统会在这里显示项目摘要。</p>
 
-              <div class="mini-progress-card">
-                <div class="mini-progress-head">
-                  <span>主线完成</span>
+              <div class="meta-chip-row" id="learn-meta-chips"></div>
+
+              <div class="progress-card">
+                <div class="progress-head">
+                  <span>主线进度</span>
                   <strong id="learn-root-progress-text">0 / 0</strong>
                 </div>
                 <div class="progress-track">
@@ -246,306 +302,386 @@
                 </div>
               </div>
 
+              <div class="section-head condensed-head">
+                <div>
+                  <p class="eyebrow">节点进度</p>
+                  <h3 id="learn-node-progress">0/0 节点</h3>
+                </div>
+              </div>
+
+              <div id="learn-stat-grid" class="inline-stat-grid learn-inline-grid"></div>
+
+              <div class="section-head condensed-head">
+                <div>
+                  <p class="eyebrow">问题地图</p>
+                  <h3>主线与子问题</h3>
+                </div>
+              </div>
               <div id="roadmap-tree" class="roadmap-tree"></div>
-            </aside>
+            </article>
 
-            <section class="learn-main">
-              <article class="panel mission-panel">
+            <article class="quiz-panel glass-panel">
+              <div class="quiz-header">
+                <div class="quiz-header-copy">
+                  <span id="current-question-tag" class="status-pill neutral">主线关卡</span>
+                  <p id="current-question-path" class="eyebrow">Q1</p>
+                </div>
+                <div id="current-question-difficulty" class="difficulty-badge">难度 3</div>
+              </div>
+
+              <div id="question-empty" class="empty-inline question-empty">
+                <strong>当前没有待回答问题</strong>
+                <p class="muted">把这条主线推完后，新的子问题会在这里继续出现。</p>
+              </div>
+
+              <div id="question-panel" class="question-panel hidden">
+                <h3 id="current-question-title" class="question-text">问题标题</h3>
+
+                <div class="question-support-grid">
+                  <article class="support-card">
+                    <p class="eyebrow">这一关要讲清什么</p>
+                    <p id="current-question-goal" class="support-copy">目标说明</p>
+                  </article>
+                  <article class="support-card">
+                    <p class="eyebrow">为什么重要</p>
+                    <p id="current-question-why" class="support-copy">意义说明</p>
+                  </article>
+                </div>
+
+                <form id="answer-form" class="answer-form">
+                  <div class="editor-wrapper">
+                    <div class="editor-toolbar">
+                      <span><i class="fa-solid fa-keyboard"></i> 支持长回答</span>
+                      <span><i class="fa-solid fa-list-ul"></i> 用分点更清楚</span>
+                      <span><i class="fa-solid fa-bolt"></i> Ctrl / Cmd + Enter 提交</span>
+                    </div>
+                    <textarea
+                      id="answer-input"
+                      class="quiz-input"
+                      rows="12"
+                      placeholder="现在开始复述你的理解。尽量讲定义、原理、场景和边界，不用刻意写得像考试答案。"
+                      spellcheck="false"
+                    ></textarea>
+                  </div>
+
+                  <div class="action-bar">
+                    <p class="muted form-tip">每次提交后都会保留记录，并根据回答继续追问或放行。</p>
+                    <button id="submit-answer" class="primary-button" type="submit">
+                      <i class="fa-solid fa-paper-plane"></i>
+                      <span>提交答案</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </article>
+
+            <aside class="coach-rail">
+              <article class="glass-panel rail-card">
                 <div class="section-head">
                   <div>
-                    <p class="eyebrow">本轮任务</p>
-                    <h3>当前关卡</h3>
-                  </div>
-                  <div class="hero-actions">
-                    <span id="current-question-tag" class="status-pill neutral">等待问题</span>
-                    <button id="toggle-focus-mode" class="ghost-button" type="button">沉浸模式</button>
-                  </div>
-                </div>
-                <p id="learn-project-brief" class="muted">
-                  回答时尽量用自己的话说明“是什么、为什么、怎么用、什么时候不成立”。
-                </p>
-                <div id="learn-stat-grid" class="inline-stat-grid"></div>
-              </article>
-
-              <article class="panel question-panel-card">
-                <div id="question-panel" class="question-panel">
-                  <div class="question-head">
-                    <div>
-                      <p id="current-question-path" class="question-path">Q1</p>
-                      <h3 id="current-question-title">当前问题</h3>
-                    </div>
-                    <span id="current-question-difficulty" class="status-pill neutral">难度 3</span>
-                  </div>
-
-                  <div class="question-intent">
-                    <p class="intent-label">这一关希望你讲清楚</p>
-                    <p id="current-question-goal" class="intent-copy">-</p>
-                  </div>
-
-                  <p id="current-question-why" class="muted"></p>
-
-                  <form id="answer-form" class="stack-form">
-                    <label class="field-block">
-                      <span>你的回答</span>
-                      <textarea
-                        id="answer-input"
-                        rows="9"
-                        placeholder="尽量别只写结论。试着把主干逻辑、应用场景、取舍和边界都说出来。"
-                        spellcheck="false"
-                      ></textarea>
-                    </label>
-                    <div class="form-actions">
-                      <button id="submit-answer" class="primary-button" type="submit">提交这一关</button>
-                    </div>
-                  </form>
-                </div>
-
-                <div id="question-empty" class="empty-inline hidden">
-                  <p class="muted">当前没有待回答的问题，可能这条主线已经全部完成。</p>
-                </div>
-              </article>
-            </section>
-
-            <aside class="learn-right">
-              <article class="panel coach-panel">
-                <div class="section-head">
-                  <div>
-                    <p class="eyebrow">教练反馈</p>
-                    <h3>这次回答哪里稳、哪里还差一口气</h3>
+                    <p class="eyebrow">即时反馈</p>
+                    <h3>AI 教练回放</h3>
                   </div>
                   <span id="feedback-verdict" class="status-pill neutral">等待回答</span>
                 </div>
                 <div id="feedback-panel" class="feedback-panel"></div>
               </article>
 
-              <article class="panel timeline-panel">
+              <article class="glass-panel rail-card">
                 <div class="section-head">
                   <div>
-                    <p class="eyebrow">学习时间线</p>
-                    <h3>记录会一直留下来</h3>
+                    <p class="eyebrow">时间线</p>
+                    <h3>最近记录</h3>
                   </div>
                 </div>
                 <div id="timeline-list" class="timeline-list"></div>
               </article>
             </aside>
-          </div>
+          </section>
         </section>
 
         <section id="review-view" class="view-pane hidden">
-          <div class="review-modes-grid">
-            <button class="panel review-mode-card active" data-review-mode="random" type="button">
-              <strong>随机抽题</strong>
-              <span class="muted">从所有已完成节点里随机抽一题，看看是否真掌握了。</span>
-            </button>
-            <button class="panel review-mode-card" data-review-mode="current" type="button">
-              <strong>当前项目</strong>
-              <span class="muted">只在当前学习项目里回炉，适合学完一轮后立刻抽查。</span>
-            </button>
-            <button class="panel review-mode-card" data-review-mode="weak" type="button">
-              <strong>薄弱节点</strong>
-              <span class="muted">优先抽最近答得不稳、被追问过的节点。</span>
-            </button>
-            <button class="panel review-mode-card" data-review-mode="recent" type="button">
-              <strong>最新完成</strong>
-              <span class="muted">把刚完成的节点再拉出来，避免“刚看完就忘”。</span>
-            </button>
-          </div>
+          <section class="review-topbar glass-panel">
+            <div class="review-mode-group">
+              <button class="review-mode-button active" data-review-mode="random" type="button">
+                <i class="fa-solid fa-shuffle"></i>
+                <span>随机抽题</span>
+              </button>
+              <button class="review-mode-button" data-review-mode="current" type="button">
+                <i class="fa-solid fa-book-open"></i>
+                <span>当前项目</span>
+              </button>
+              <button class="review-mode-button" data-review-mode="weak" type="button">
+                <i class="fa-solid fa-heart-crack"></i>
+                <span>薄弱点</span>
+              </button>
+              <button class="review-mode-button" data-review-mode="recent" type="button">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>最近完成</span>
+              </button>
+            </div>
 
-          <div class="review-layout">
-            <article class="panel review-active-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">复习工作台</p>
-                  <h3 id="review-mode-title">随机抽题</h3>
-                </div>
-                <button id="draw-review" class="primary-button" type="button">抽一题</button>
+            <div class="toolbar">
+              <div class="review-mode-display">
+                <p class="eyebrow">当前模式</p>
+                <h3 id="review-mode-title">随机抽题</h3>
               </div>
-              <div id="review-summary" class="inline-stat-grid"></div>
-              <div id="review-panel" class="review-panel"></div>
+              <button id="draw-review" class="primary-button" type="button">
+                <i class="fa-solid fa-dice"></i>
+                <span>抽一题</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="workspace review-workspace">
+            <article class="path-panel glass-panel">
+              <div class="path-title-row">
+                <div>
+                  <p class="path-title">复习摘要</p>
+                  <h3>今天该看什么</h3>
+                </div>
+              </div>
+              <div id="review-summary" class="inline-stat-grid review-summary-grid"></div>
             </article>
 
-            <article class="panel review-records-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">最近记录</p>
-                  <h3>复习与答题都会记在这里</h3>
-                </div>
+            <article class="quiz-panel glass-panel">
+              <div class="quiz-header">
+                <span class="tag">
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                  复习答题面板
+                </span>
               </div>
-              <div id="review-records" class="timeline-list"></div>
+              <div id="review-panel" class="focus-stack"></div>
             </article>
-          </div>
+
+            <aside class="coach-rail">
+              <article class="glass-panel rail-card">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">复习历史</p>
+                    <h3>最近回放</h3>
+                  </div>
+                </div>
+                <div id="review-records" class="timeline-list"></div>
+              </article>
+            </aside>
+          </section>
         </section>
 
         <section id="settings-view" class="view-pane hidden">
-          <div class="settings-layout">
-            <article class="panel appearance-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">外观主题</p>
-                  <h3>主题</h3>
+          <form id="settings-form" class="settings-shell">
+            <section class="settings-column">
+              <article class="glass-panel settings-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">外观主题</p>
+                    <h3>选择你的工作台</h3>
+                  </div>
                 </div>
-              </div>
-              <div id="theme-options" class="theme-grid"></div>
-            </article>
+                <div id="theme-options" class="theme-options"></div>
+              </article>
 
-            <article class="panel settings-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">AI 设置</p>
-                  <h3>接口与默认参数</h3>
+              <article class="glass-panel settings-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">自定义背景</p>
+                    <h3>上传你自己的工作台背景</h3>
+                  </div>
                 </div>
-                <span id="settings-api-hint" class="status-pill neutral">待配置</span>
-              </div>
 
-              <form id="settings-form" class="stack-form">
-                <label class="field-block">
-                  <span>Base URL</span>
-                  <input id="settings-base-url" placeholder="https://codex.ximuai.com" spellcheck="false" />
-                </label>
+                <input id="background-file-input" class="hidden" type="file" accept="image/*" />
 
-                <label class="field-block">
-                  <span>模型名称</span>
-                  <input id="settings-model" placeholder="gpt-5.4" spellcheck="false" />
-                </label>
+                <div id="background-preview" class="background-preview">
+                  <div class="background-preview-overlay">
+                    <span class="eyebrow">Background Preview</span>
+                    <strong>当前背景预览</strong>
+                    <p id="background-preview-caption" class="muted">还没有自定义背景</p>
+                  </div>
+                </div>
 
-                <label class="field-block">
-                  <span>API Key</span>
-                  <input id="settings-api-key" type="password" placeholder="留空则保留当前 key" spellcheck="false" />
-                </label>
+                <div class="background-actions">
+                  <button id="pick-background" class="ghost-button" type="button">
+                    <i class="fa-solid fa-image"></i>
+                    <span>选择背景</span>
+                  </button>
+                  <button id="clear-background" class="ghost-button" type="button">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>清除背景</span>
+                  </button>
+                </div>
 
-                <div class="two-column-grid">
+                <div class="field-grid single-column-grid">
+                  <label class="field-block">
+                    <span>背景透明度 <strong id="background-opacity-value">55%</strong></span>
+                    <input id="background-opacity" type="range" min="0" max="100" value="55" />
+                  </label>
+
+                  <label class="field-block">
+                    <span>水平位置 <strong id="background-position-x-value">50%</strong></span>
+                    <input id="background-position-x" type="range" min="0" max="100" value="50" />
+                  </label>
+
+                  <label class="field-block">
+                    <span>垂直位置 <strong id="background-position-y-value">50%</strong></span>
+                    <input id="background-position-y" type="range" min="0" max="100" value="50" />
+                  </label>
+                </div>
+              </article>
+
+              <article class="glass-panel settings-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">运行信息</p>
+                    <h3>本地目录</h3>
+                  </div>
+                </div>
+                <div class="runtime-stack">
+                  <div class="runtime-item">
+                    <span>项目目录</span>
+                    <strong id="settings-project-root">E:\study-quest-desktop</strong>
+                  </div>
+                  <div class="runtime-item">
+                    <span>数据目录</span>
+                    <strong id="settings-data-root">E:\StudyQuestData\app-data</strong>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <section class="settings-column wide">
+              <article class="glass-panel settings-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">接口设置</p>
+                    <h3>模型与默认策略</h3>
+                  </div>
+                  <span id="settings-api-hint" class="status-pill neutral">待配置</span>
+                </div>
+
+                <div class="field-grid">
+                  <label class="field-block">
+                    <span>Base URL</span>
+                    <input id="settings-base-url" type="url" placeholder="https://codex.ximuai.com" spellcheck="false" />
+                  </label>
+
+                  <label class="field-block">
+                    <span>模型</span>
+                    <input id="settings-model" type="text" placeholder="gpt-5.4" spellcheck="false" />
+                  </label>
+
+                  <label class="field-block full-span">
+                    <span>API Key</span>
+                    <input id="settings-api-key" type="password" placeholder="输入后会保存到本地配置中" spellcheck="false" />
+                  </label>
+
                   <label class="field-block">
                     <span>默认训练模式</span>
                     <select id="settings-template"></select>
                   </label>
 
                   <label class="field-block">
-                    <span>默认主线关卡数</span>
-                    <input id="settings-root-count" type="number" min="5" max="30" spellcheck="false" />
+                    <span>默认主线题数</span>
+                    <input id="settings-root-count" type="number" min="5" max="30" />
                   </label>
                 </div>
 
                 <div class="form-actions">
-                  <button id="save-settings" class="primary-button" type="submit">保存设置</button>
+                  <button class="primary-button" type="submit">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>保存设置</span>
+                  </button>
                 </div>
-              </form>
-            </article>
-
-            <article class="panel runtime-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">运行信息</p>
-                  <h3>路径</h3>
-                </div>
-              </div>
-              <div class="runtime-stack large">
-                <div class="runtime-item">
-                  <span>项目目录</span>
-                  <strong id="settings-project-root">E:\study-quest-desktop</strong>
-                </div>
-                <div class="runtime-item">
-                  <span>本地存档</span>
-                  <strong id="settings-data-root">-</strong>
-                </div>
-                <div class="runtime-item">
-                  <span>安装包输出目录</span>
-                  <strong>E:\study-quest-desktop\release</strong>
-                </div>
-              </div>
-            </article>
-
-            <article class="panel workflow-panel">
-              <div class="section-head">
-                <div>
-                  <p class="eyebrow">标准流程</p>
-                  <h3>发布</h3>
-                </div>
-              </div>
-              <ol class="workflow-list">
-                <li>预览确认</li>
-                <li>提交 GitHub</li>
-                <li>构建 Windows 安装包</li>
-              </ol>
-            </article>
-          </div>
+              </article>
+            </section>
+          </form>
         </section>
       </main>
     </div>
 
-    <div id="create-modal" class="modal hidden" aria-hidden="true">
-      <div class="modal-backdrop" data-close-modal="true"></div>
-      <div class="modal-card">
-        <div class="section-head">
+    <div id="create-modal" class="modal-shell hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+
+      <div class="modal-card glass-panel" role="dialog" aria-modal="true" aria-labelledby="create-modal-title">
+        <div class="modal-head">
           <div>
-            <p class="eyebrow">新建学习项目</p>
-            <h3>新建项目</h3>
+            <p class="eyebrow">Create Quest</p>
+            <h3 id="create-modal-title">新建学习项目</h3>
+            <p class="muted">只填学习内容也能开始，其他项全部是可选增强。</p>
           </div>
-          <button class="icon-button" data-close-modal="true" type="button">×</button>
+          <button class="icon-btn" data-close-modal type="button" title="关闭">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
 
-        <form id="quest-form" class="stack-form">
-          <label class="field-block">
-            <span>学习主题（可选）</span>
-            <input id="topic-input" name="topic" placeholder="例如：掌握模型服务与部署" spellcheck="false" />
-          </label>
+        <form id="quest-form" class="modal-form">
+          <div class="derived-topic">
+            <span class="eyebrow">自动识别标题</span>
+            <strong id="derived-topic-label">未命名学习项目</strong>
+          </div>
 
           <label class="field-block">
             <span>学习内容</span>
             <textarea
               id="material-input"
-              name="material"
-              rows="7"
-              placeholder="把课程提纲、论文摘要、项目说明、岗位知识点或者你自己写的学习描述贴进来。"
+              rows="9"
+              required
+              placeholder="把你真正要学的材料贴进来。可以是提纲、正文、笔记、面试范围、论文摘要、部署方案等。"
               spellcheck="false"
             ></textarea>
           </label>
 
-          <p class="helper-text">
-            自动命名：
-            <strong id="derived-topic-label">未命名学习项目</strong>
-          </p>
-
-          <button id="toggle-advanced" class="ghost-button subtle-button" type="button">展开可选项</button>
-
-          <div id="advanced-fields" class="advanced-fields hidden">
-            <div class="two-column-grid">
-              <label class="field-block">
-                <span>当前水平（可选）</span>
-                <input id="level-input" name="level" placeholder="例如：会基础但不太会应用" spellcheck="false" />
-              </label>
-              <label class="field-block">
-                <span>学习目标（可选）</span>
-                <input id="goal-input" name="goal" placeholder="例如：能独立讲清并完成最小闭环" spellcheck="false" />
-              </label>
-            </div>
-
-            <div class="two-column-grid">
-              <label class="field-block">
-                <span>时间限制（可选）</span>
-                <input id="timebox-input" name="timebox" placeholder="例如：一周内吃透 / 三晚过完" spellcheck="false" />
-              </label>
-              <label class="field-block">
-                <span>主线关卡数（可选）</span>
-                <input id="count-input" name="rootQuestionCount" type="number" min="5" max="30" spellcheck="false" />
-              </label>
-            </div>
-
-            <label class="field-block">
-              <span>训练模式（可选）</span>
-              <select id="template-select" name="templateKey"></select>
-            </label>
+          <div class="modal-inline-actions">
+            <button id="toggle-advanced" class="ghost-button" type="button">展开可选项</button>
+            <p class="muted">可选项只会帮助 AI 更稳地出题，不填也能正常生成。</p>
           </div>
 
-          <div class="form-actions split-actions">
-            <button class="ghost-button" data-close-modal="true" type="button">取消</button>
-            <button id="create-quest" class="primary-button" type="submit">生成主线关卡</button>
+          <div id="advanced-fields" class="advanced-fields hidden">
+            <div class="field-grid">
+              <label class="field-block">
+                <span>学习主题</span>
+                <input id="topic-input" type="text" placeholder="例如：掌握模型服务与部署" spellcheck="false" />
+              </label>
+
+              <label class="field-block">
+                <span>当前水平</span>
+                <input id="level-input" type="text" placeholder="例如：知道基础概念，但不会落地" spellcheck="false" />
+              </label>
+
+              <label class="field-block">
+                <span>学习目标</span>
+                <input id="goal-input" type="text" placeholder="例如：能独立部署并解释关键设计" spellcheck="false" />
+              </label>
+
+              <label class="field-block">
+                <span>时间限制</span>
+                <input id="timebox-input" type="text" placeholder="例如：1 周 / 3 晚" spellcheck="false" />
+              </label>
+
+              <label class="field-block">
+                <span>主线题数</span>
+                <input id="count-input" type="number" min="5" max="30" value="10" />
+              </label>
+
+              <label class="field-block">
+                <span>训练模式</span>
+                <select id="template-select"></select>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions end-aligned">
+            <button class="ghost-button" data-close-modal type="button">取消</button>
+            <button id="create-quest" class="primary-button" type="submit">
+              <i class="fa-solid fa-sparkles"></i>
+              <span>生成主线</span>
+            </button>
           </div>
         </form>
       </div>
     </div>
 
-    <div id="toast-region" class="toast-region" aria-live="polite"></div>
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
-    <script type="module" src="./renderer.js"></script>
+    <script src="./renderer.js"></script>
   </body>
 </html>
