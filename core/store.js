@@ -32,7 +32,7 @@ function deriveTopicFromInput(input) {
 function getDefaultSettings() {
   return {
     provider: "OpenAI",
-    baseUrl: "https://api.openai.com/v1",
+    baseUrl: "https://codex.ximuai.com",
     model: "gpt-5.4",
     defaultTemplateKey: "general",
     defaultRootQuestionCount: 10,
@@ -78,10 +78,17 @@ function loadState(dataRoot) {
     return {
       ...createDefaultState(),
       ...parsed,
-      settings: {
-        ...getDefaultSettings(),
-        ...(parsed.settings || {})
-      },
+      settings: (() => {
+        const defaults = getDefaultSettings();
+        const merged = {
+          ...defaults,
+          ...(parsed.settings || {})
+        };
+        if (!cleanText(parsed?.settings?.baseUrl) || cleanText(merged.baseUrl) === "https://api.openai.com/v1") {
+          merged.baseUrl = defaults.baseUrl;
+        }
+        return merged;
+      })(),
       quests: Array.isArray(parsed.quests) ? parsed.quests : []
     };
   } catch (error) {

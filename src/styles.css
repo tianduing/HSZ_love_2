@@ -1487,7 +1487,7 @@ body[data-theme="graphite"] .roadmap-item {
   display: grid;
   gap: 12px;
   text-align: left;
-  padding: 16px;
+  padding: 14px;
   cursor: pointer;
 }
 
@@ -1635,8 +1635,8 @@ body[data-theme="graphite"] .roadmap-item {
 
 .background-preview {
   position: relative;
-  min-height: 180px;
-  margin-top: 16px;
+  min-height: 140px;
+  margin-top: 14px;
   overflow: hidden;
   border-radius: 24px;
   border: 1px solid var(--line-soft);
@@ -1670,8 +1670,8 @@ body[data-theme="graphite"] .background-preview {
   flex-direction: column;
   justify-content: flex-end;
   gap: 8px;
-  min-height: 180px;
-  padding: 18px;
+  min-height: 140px;
+  padding: 16px;
   background: linear-gradient(180deg, rgba(15, 20, 27, 0.06), rgba(15, 20, 27, 0.36));
 }
 
@@ -1689,6 +1689,10 @@ body[data-theme="graphite"] .background-preview {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 16px;
+}
+
+.background-actions.top-actions {
+  margin-top: 0;
 }
 
 .toast-region {

@@ -22,6 +22,63 @@ const {
 } = require("./core/openai");
 
 const DEFAULT_E_DRIVE_DATA_ROOT = path.join("E:\\", "StudyQuestData", "app-data");
+const UI_PREFS_FILE_NAME = "study-quest-ui.json";
+
+function getDefaultUiPrefs() {
+  return {
+    theme: "forest",
+    focusMode: false,
+    background: {
+      image: "",
+      opacity: 55,
+      positionX: 50,
+      positionY: 50
+    }
+  };
+}
+
+function getUiPrefsPath() {
+  return path.join(appDataRoot, UI_PREFS_FILE_NAME);
+}
+
+function loadUiPrefs() {
+  const defaults = getDefaultUiPrefs();
+  const prefsPath = getUiPrefsPath();
+  try {
+    if (!fs.existsSync(prefsPath)) {
+      return defaults;
+    }
+    const raw = fs.readFileSync(prefsPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    return {
+      ...defaults,
+      ...parsed,
+      background: {
+        ...defaults.background,
+        ...(parsed.background || {})
+      }
+    };
+  } catch (_error) {
+    return defaults;
+  }
+}
+
+function saveUiPrefs(input) {
+  const defaults = getDefaultUiPrefs();
+  const current = loadUiPrefs();
+  const next = {
+    ...defaults,
+    ...current,
+    ...input,
+    background: {
+      ...defaults.background,
+      ...(current.background || {}),
+      ...((input && input.background) || {})
+    }
+  };
+  fs.writeFileSync(getUiPrefsPath(), JSON.stringify(next, null, 2), "utf-8");
+  return next;
+}
 
 function resolveAppDataRoot() {
   const envRoot = process.env.STUDY_QUEST_DATA_ROOT;
@@ -100,6 +157,14 @@ function createMainWindow() {
 ipcMain.handle("bootstrap:load", async () => {
   const state = getState();
   return buildBootstrapPayload(state);
+});
+
+ipcMain.handle("ui:load", async () => {
+  return loadUiPrefs();
+});
+
+ipcMain.handle("ui:save", async (_event, input) => {
+  return saveUiPrefs(input);
 });
 
 ipcMain.handle("settings:save", async (_event, input) => {

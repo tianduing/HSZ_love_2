@@ -72,6 +72,8 @@ const THEME_PRESETS = [
 ];
 
 const UI_STORAGE_KEY = "study-quest-ui-v3";
+const DEFAULT_BASE_URL = "https://codex.ximuai.com";
+const LEGACY_BASE_URL = "https://api.openai.com/v1";
 
 function createDefaultBackgroundState() {
   return {
@@ -79,6 +81,14 @@ function createDefaultBackgroundState() {
     opacity: 55,
     positionX: 50,
     positionY: 50
+  };
+}
+
+function createDefaultUiState() {
+  return {
+    theme: "forest",
+    focusMode: false,
+    background: createDefaultBackgroundState()
   };
 }
 
@@ -121,14 +131,11 @@ function deriveTopicFromMaterial(material, topic = "") {
 }
 
 function loadUiState() {
+  const defaults = createDefaultUiState();
   try {
     const raw = localStorage.getItem(UI_STORAGE_KEY);
     if (!raw) {
-      return {
-        theme: "forest",
-        focusMode: false,
-        background: createDefaultBackgroundState()
-      };
+      return defaults;
     }
     const parsed = JSON.parse(raw);
     const background = parsed.background || {};
@@ -143,23 +150,33 @@ function loadUiState() {
       }
     };
   } catch (_error) {
-    return {
-      theme: "forest",
-      focusMode: false,
-      background: createDefaultBackgroundState()
-    };
+    return defaults;
   }
 }
 
 function saveUiState() {
-  localStorage.setItem(
-    UI_STORAGE_KEY,
-    JSON.stringify({
+  const cachedUiState = {
+    theme: appState.ui.theme,
+    focusMode: appState.ui.focusMode,
+    background: {
+      ...appState.ui.background,
+      image: appState.previewMode ? appState.ui.background.image : ""
+    }
+  };
+  try {
+    localStorage.setItem(UI_STORAGE_KEY, JSON.stringify(cachedUiState));
+  } catch (_error) {
+    if (appState.previewMode && appState.ui.background.image) {
+      showToast("这张图太大，浏览器预览版只会临时显示，安装版里会更稳。", "warning");
+    }
+  }
+  if (window.studyCoachApi?.saveUiPrefs) {
+    void window.studyCoachApi.saveUiPrefs({
       theme: appState.ui.theme,
       focusMode: appState.ui.focusMode,
       background: appState.ui.background
-    })
-  );
+    }).catch(() => {});
+  }
 }
 
 function buildPreviewRoadmap(topic, rootQuestionCount, templateKey) {
@@ -222,27 +239,34 @@ function createPreviewApi() {
   const storageKey = "study-quest-preview-db-v3";
 
   function loadPreviewState() {
+    const normalizePreviewSettings = (settings = {}) => ({
+      baseUrl:
+        !cleanText(settings.baseUrl) || cleanText(settings.baseUrl) === LEGACY_BASE_URL
+          ? DEFAULT_BASE_URL
+          : cleanText(settings.baseUrl),
+      model: cleanText(settings.model) || "gpt-5.4",
+      apiKey: cleanText(settings.apiKey),
+      defaultTemplateKey: cleanText(settings.defaultTemplateKey) || "general",
+      defaultRootQuestionCount: clamp(Number(settings.defaultRootQuestionCount || 10), 5, 30)
+    });
+
     try {
       const raw = localStorage.getItem(storageKey);
       return raw
-        ? JSON.parse(raw)
+        ? (() => {
+            const parsed = JSON.parse(raw);
+            return {
+              ...parsed,
+              settings: normalizePreviewSettings(parsed.settings || {})
+            };
+          })()
         : {
-            settings: {
-              baseUrl: "https://codex.ximuai.com/v1",
-              model: "gpt-5.4",
-              defaultTemplateKey: "general",
-              defaultRootQuestionCount: 10
-            },
+            settings: normalizePreviewSettings(),
             quests: []
           };
     } catch (_error) {
       return {
-        settings: {
-          baseUrl: "https://codex.ximuai.com/v1",
-          model: "gpt-5.4",
-          defaultTemplateKey: "general",
-          defaultRootQuestionCount: 10
-        },
+        settings: normalizePreviewSettings(),
         quests: []
       };
     }
@@ -337,7 +361,7 @@ function createPreviewApi() {
         },
         settings: {
           ...state.settings,
-          hasApiKey: false
+          hasApiKey: Boolean(state.settings.apiKey)
         },
         quests: state.quests.map(summarizeQuest).sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
       };
@@ -348,13 +372,17 @@ function createPreviewApi() {
       state.settings = {
         ...state.settings,
         ...payload,
+        baseUrl:
+          !cleanText(payload.baseUrl) || cleanText(payload.baseUrl) === LEGACY_BASE_URL
+            ? DEFAULT_BASE_URL
+            : cleanText(payload.baseUrl),
         defaultRootQuestionCount: clamp(Number(payload.defaultRootQuestionCount || 10), 5, 30)
       };
       savePreviewState(state);
       return {
         settings: {
           ...state.settings,
-          hasApiKey: false
+          hasApiKey: Boolean(state.settings.apiKey)
         }
       };
     },
@@ -1009,7 +1037,22 @@ function loadCustomBackgroundFile(file) {
   }
   const reader = new FileReader();
   reader.addEventListener("load", () => {
-    updateBackgroundSetting("image", typeof reader.result === "string" ? reader.result : "");
+    const imageData = typeof reader.result === "string" ? reader.result : "";
+    if (!imageData) {
+      showToast("背景图片读取失败，请换一张图再试。", "warning");
+      return;
+    }
+    if (appState.previewMode && imageData.length > 1_500_000) {
+      appState.ui.background = {
+        ...appState.ui.background,
+        image: imageData
+      };
+      applyUiState();
+      renderBackgroundControls();
+      showToast("大图在预览版里只做临时显示；安装版会正常保存。", "warning");
+      return;
+    }
+    updateBackgroundSetting("image", imageData);
     showToast("已更新自定义背景。");
   });
   reader.readAsDataURL(file);
@@ -1069,6 +1112,9 @@ function syncFormsFromSettings() {
   dom.settingsBaseUrl.value = settings.baseUrl || "";
   dom.settingsModel.value = settings.model || "";
   dom.settingsApiKey.value = "";
+  dom.settingsApiKey.placeholder = appState.previewMode
+    ? "预览模式不校验真实 key，正式桌面版会使用本地已保存配置"
+    : (settings.hasApiKey ? "已保存 key，如需替换再输入新的 key" : "输入后会保存到本地配置中");
   dom.settingsTemplate.value = settings.defaultTemplateKey || "general";
   dom.settingsRootCount.value = clamp(Number(settings.defaultRootQuestionCount || 10), 5, 30);
   dom.countInput.value = clamp(Number(settings.defaultRootQuestionCount || 10), 5, 30);
@@ -1129,10 +1175,10 @@ function renderPreviewBanner() {
 function renderHeaderAndSidebar() {
   const settings = appState.bootstrap?.settings;
   const hasApiKey = Boolean(settings?.hasApiKey);
-  dom.apiStatusPill.textContent = hasApiKey ? "接口已就绪" : "接口待配置";
-  dom.apiStatusPill.className = `status-pill ${hasApiKey ? "success" : "neutral"}`;
-  dom.settingsApiHint.textContent = hasApiKey ? "已保存 key" : "待配置";
-  dom.settingsApiHint.className = `status-pill ${hasApiKey ? "success" : "neutral"}`;
+  dom.apiStatusPill.textContent = appState.previewMode ? "预览模式" : (hasApiKey ? "接口已就绪" : "接口待配置");
+  dom.apiStatusPill.className = `status-pill ${appState.previewMode ? "neutral" : (hasApiKey ? "success" : "neutral")}`;
+  dom.settingsApiHint.textContent = appState.previewMode ? "预览模式" : (hasApiKey ? "已保存 key" : "待配置");
+  dom.settingsApiHint.className = `status-pill ${appState.previewMode ? "neutral" : (hasApiKey ? "success" : "neutral")}`;
   dom.questCountPill.textContent = `${appState.quests.length} 个项目`;
 
   if (!appState.activeQuest) {
@@ -1839,10 +1885,26 @@ function renderAll() {
 }
 
 async function bootstrap() {
+  if (window.studyCoachApi?.loadUiPrefs) {
+    try {
+      const persistedUi = await window.studyCoachApi.loadUiPrefs();
+      appState.ui = {
+        ...createDefaultUiState(),
+        ...persistedUi,
+        background: {
+          ...createDefaultBackgroundState(),
+          ...(persistedUi?.background || {})
+        }
+      };
+    } catch (_error) {
+      appState.ui = loadUiState();
+    }
+  }
   appState.bootstrap = await api.loadBootstrap();
   hydrateQuestSummaries(appState.bootstrap.quests || []);
   syncFormsFromSettings();
   renderPreviewBanner();
+  applyUiState();
   renderAll();
 
   if (appState.quests.length) {

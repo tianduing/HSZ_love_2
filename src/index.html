@@ -474,16 +474,6 @@
               <article class="glass-panel settings-panel">
                 <div class="section-head">
                   <div>
-                    <p class="eyebrow">外观主题</p>
-                    <h3>选择你的工作台</h3>
-                  </div>
-                </div>
-                <div id="theme-options" class="theme-options"></div>
-              </article>
-
-              <article class="glass-panel settings-panel">
-                <div class="section-head">
-                  <div>
                     <p class="eyebrow">自定义背景</p>
                     <h3>上传你自己的工作台背景</h3>
                   </div>
@@ -491,23 +481,23 @@
 
                 <input id="background-file-input" class="hidden" type="file" accept="image/*" />
 
+                <div class="background-actions top-actions">
+                  <button id="pick-background" class="ghost-button" type="button">
+                    <i class="fa-solid fa-image"></i>
+                    <span>选择背景图片</span>
+                  </button>
+                  <button id="clear-background" class="ghost-button" type="button">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>清除背景</span>
+                  </button>
+                </div>
+
                 <div id="background-preview" class="background-preview">
                   <div class="background-preview-overlay">
                     <span class="eyebrow">Background Preview</span>
                     <strong>当前背景预览</strong>
                     <p id="background-preview-caption" class="muted">还没有自定义背景</p>
                   </div>
-                </div>
-
-                <div class="background-actions">
-                  <button id="pick-background" class="ghost-button" type="button">
-                    <i class="fa-solid fa-image"></i>
-                    <span>选择背景</span>
-                  </button>
-                  <button id="clear-background" class="ghost-button" type="button">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>清除背景</span>
-                  </button>
                 </div>
 
                 <div class="field-grid single-column-grid">
@@ -526,6 +516,16 @@
                     <input id="background-position-y" type="range" min="0" max="100" value="50" />
                   </label>
                 </div>
+              </article>
+
+              <article class="glass-panel settings-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">外观主题</p>
+                    <h3>选择你的工作台</h3>
+                  </div>
+                </div>
+                <div id="theme-options" class="theme-options"></div>
               </article>
 
               <article class="glass-panel settings-panel">
