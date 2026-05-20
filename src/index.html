@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Study Quest 学练闯关</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="nav-rail">
+        <div class="brand-card panel-card">
+          <p class="eyebrow">Study Quest</p>
+          <h1>学练闯关</h1>
+          <p class="muted">
+            先把知识拆成关卡，再通过追问、纠错、复习和过关提示，慢慢形成稳定的正反馈。
+          </p>
+        </div>
+
+        <nav class="nav-card panel-card">
+          <button class="nav-button active" data-view="dashboard" type="button">任务总览</button>
+          <button class="nav-button" data-view="learn" type="button">闯关答题</button>
+          <button class="nav-button" data-view="review" type="button">随机复习</button>
+          <button class="nav-button" data-view="settings" type="button">接口设置</button>
+        </nav>
+
+        <div class="panel-card status-card">
+          <div class="section-head">
+            <h2>当前任务</h2>
+            <span id="topbar-progress" class="pill-chip">0 / 0</span>
+          </div>
+          <h3 id="nav-active-quest-title">还没有任务</h3>
+          <p id="nav-active-quest-brief" class="muted">先创建一条学习主线。</p>
+          <div class="storage-note">
+            <span>项目目录</span>
+            <strong id="project-root-text">E:\study-quest-desktop</strong>
+          </div>
+          <div class="storage-note">
+            <span>本地存档</span>
+            <strong id="data-root-text">E:\StudyQuestData\app-data</strong>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar panel-card">
+          <div>
+            <p class="eyebrow" id="view-eyebrow">任务总览</p>
+            <h2 id="view-title">把学习任务拆成卡片式关卡</h2>
+            <p id="view-subtitle" class="muted">先建任务，再进闯关房答题，最后去复习区随机抽问。</p>
+          </div>
+          <div class="topbar-side">
+            <span id="api-status-pill" class="pill-chip neutral-chip">待配置接口</span>
+            <span id="quest-count-pill" class="pill-chip">0 个任务</span>
+          </div>
+        </header>
+
+        <p id="preview-banner" class="preview-banner hidden">
+          当前是浏览器预览模式：界面和交互可以演示，但不会真的请求 AI 接口。
+        </p>
+
+        <section id="dashboard-view" class="view-pane">
+          <div class="dashboard-grid">
+            <article class="panel-card create-card">
+              <div class="section-head">
+                <h2>新建学习任务</h2>
+                <button id="jump-settings" class="ghost-button" type="button">先看接口设置</button>
+              </div>
+
+              <form id="quest-form" class="stack-form">
+                <label>
+                  <span>学习主题</span>
+                  <input id="topic-input" name="topic" placeholder="例如：掌握模型服务与部署" required />
+                </label>
+
+                <label>
+                  <span>待学内容</span>
+                  <textarea
+                    id="material-input"
+                    name="material"
+                    rows="6"
+                    placeholder="把课程提纲、论文摘要、问题背景或你自己写的学习说明贴进来"
+                    required
+                  ></textarea>
+                </label>
+
+                <div class="two-column-grid">
+                  <label>
+                    <span>当前水平</span>
+                    <input id="level-input" name="level" placeholder="例如：会基础但不会应用" required />
+                  </label>
+                  <label>
+                    <span>学习目标</span>
+                    <input id="goal-input" name="goal" placeholder="例如：能独立部署并解释关键取舍" required />
+                  </label>
+                </div>
+
+                <div class="two-column-grid">
+                  <label>
+                    <span>时间限制</span>
+                    <input id="timebox-input" name="timebox" placeholder="例如：1 周 / 3 晚" required />
+                  </label>
+                  <label>
+                    <span>主线关卡数</span>
+                    <input id="count-input" name="rootQuestionCount" type="number" min="3" max="15" value="8" required />
+                  </label>
+                </div>
+
+                <label>
+                  <span>训练模式</span>
+                  <select id="template-select" name="templateKey"></select>
+                </label>
+
+                <button id="create-quest" class="primary-button" type="submit">生成任务卡组</button>
+              </form>
+            </article>
+
+            <article class="panel-card library-card">
+              <div class="section-head">
+                <h2>任务卡库</h2>
+                <span id="dashboard-quest-count" class="pill-chip">0</span>
+              </div>
+              <div id="dashboard-quest-list" class="quest-list"></div>
+            </article>
+          </div>
+
+          <div class="dashboard-summary-grid">
+            <article class="panel-card feature-card">
+              <p class="eyebrow">当前焦点</p>
+              <h3 id="dashboard-active-title">还没有任务</h3>
+              <p id="dashboard-active-brief" class="muted">创建第一条任务后，这里会显示主线摘要和节奏提醒。</p>
+              <div id="dashboard-active-stats" class="stat-row"></div>
+            </article>
+
+            <article class="panel-card feature-card">
+              <p class="eyebrow">闯关规则</p>
+              <h3>不是听懂，而是打出来</h3>
+              <ul class="clean-list">
+                <li>AI 先给主线，再逐题拷问。</li>
+                <li>每答一次就留档，后续可回看。</li>
+                <li>答得不够稳，就继续追问或拆子关卡。</li>
+                <li>过关后会点亮进度，并能进入随机复习。</li>
+              </ul>
+            </article>
+
+            <article class="panel-card feature-card">
+              <p class="eyebrow">推荐使用方式</p>
+              <h3>把材料贴完整一些</h3>
+              <ul class="clean-list">
+                <li>课程提纲、论文摘要、项目需求都可以直接贴。</li>
+                <li>主题越清楚，主问题路线越不容易跑偏。</li>
+                <li>如果你是面试准备，把目标写成“能讲清并举例”。</li>
+                <li>如果你是项目学习，把目标写成“能做出一个最小闭环”。</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="learn-view" class="view-pane hidden">
+          <div id="learn-empty-state" class="panel-card empty-card">
+            <h3>还没有进入闯关房</h3>
+            <p class="muted">先在任务总览里创建任务，或者从任务卡库里选择一个已有任务。</p>
+          </div>
+
+          <div id="learn-content" class="learn-grid hidden">
+            <div class="learn-main">
+              <article class="panel-card hero-card">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">当前战役</p>
+                    <h3 id="active-quest-title">-</h3>
+                  </div>
+                  <div class="hero-badges">
+                    <span id="root-progress" class="pill-chip">0 / 0</span>
+                    <span id="node-progress" class="pill-chip">0 / 0</span>
+                  </div>
+                </div>
+                <p id="active-quest-brief" class="muted"></p>
+              </article>
+
+              <article class="panel-card question-card">
+                <div class="section-head">
+                  <h2>当前问题</h2>
+                  <span id="current-question-tag" class="pill-chip neutral-chip">待命中</span>
+                </div>
+                <div id="question-panel" class="question-panel hidden">
+                  <div class="question-header">
+                    <div>
+                      <p id="current-question-path" class="question-path">Q1</p>
+                      <h3 id="current-question-title">问题标题</h3>
+                    </div>
+                    <span id="current-question-difficulty" class="pill-chip">难度 3</span>
+                  </div>
+                  <p id="current-question-goal" class="goal-copy"></p>
+                  <p id="current-question-why" class="muted"></p>
+
+                  <form id="answer-form" class="stack-form">
+                    <label>
+                      <span>你的回答</span>
+                      <textarea
+                        id="answer-input"
+                        rows="8"
+                        placeholder="尽量用自己的话解释：是什么、为什么、怎么用、什么时候不成立。"
+                        required
+                      ></textarea>
+                    </label>
+                    <button id="submit-answer" class="primary-button" type="submit">提交这一关</button>
+                  </form>
+                </div>
+
+                <div id="question-empty" class="empty-inline">
+                  <p class="muted">当前没有待回答的问题，可能这条任务已经通关完成。</p>
+                </div>
+              </article>
+
+              <article class="panel-card feedback-card">
+                <div class="section-head">
+                  <h2>教练反馈</h2>
+                  <span id="feedback-verdict" class="pill-chip neutral-chip">等待回答</span>
+                </div>
+                <div id="feedback-panel" class="feedback-panel">
+                  <p class="muted">每次回答之后，这里会沉淀你的纠错记录、提示和改进建议。</p>
+                </div>
+              </article>
+            </div>
+
+            <div class="learn-side">
+              <article class="panel-card roadmap-card">
+                <div class="section-head">
+                  <h2>路线图</h2>
+                  <span id="completion-dots" class="completion-dots"></span>
+                </div>
+                <div id="roadmap-tree" class="roadmap-tree"></div>
+              </article>
+
+              <article class="panel-card timeline-card">
+                <div class="section-head">
+                  <h2>战报时间线</h2>
+                </div>
+                <div id="timeline-list" class="timeline-list"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="review-view" class="view-pane hidden">
+          <div class="review-grid">
+            <article class="panel-card review-launch-card">
+              <div class="section-head">
+                <h2>随机复习</h2>
+                <button id="draw-review" class="primary-button" type="button">抽一题</button>
+              </div>
+              <p class="muted">
+                从已经完成的节点中随机抽问，再答一轮，看看它是不是已经从“看懂”变成“会说、会用、会辨错”。
+              </p>
+              <div id="review-summary" class="stat-row"></div>
+              <div id="review-panel" class="review-panel">
+                <p class="muted">先完成几个节点，再来这里抽题复习。</p>
+              </div>
+            </article>
+
+            <article class="panel-card review-record-card">
+              <div class="section-head">
+                <h2>最近记录</h2>
+              </div>
+              <div id="review-records" class="timeline-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="settings-view" class="view-pane hidden">
+          <div class="settings-grid">
+            <article class="panel-card settings-card">
+              <div class="section-head">
+                <h2>接口设置</h2>
+                <span id="settings-api-hint" class="pill-chip neutral-chip">待配置</span>
+              </div>
+
+              <form id="settings-form" class="stack-form">
+                <label>
+                  <span>Base URL</span>
+                  <input id="settings-base-url" placeholder="https://codex.ximuai.com" required />
+                </label>
+
+                <label>
+                  <span>模型名称</span>
+                  <input id="settings-model" placeholder="gpt-5.4" required />
+                </label>
+
+                <label>
+                  <span>API Key</span>
+                  <input id="settings-api-key" type="password" placeholder="留空则保留当前 key" />
+                </label>
+
+                <label>
+                  <span>默认训练模式</span>
+                  <select id="settings-template"></select>
+                </label>
+
+                <label>
+                  <span>默认主线关卡数</span>
+                  <input id="settings-root-count" type="number" min="3" max="15" />
+                </label>
+
+                <button id="save-settings" class="primary-button" type="submit">保存设置</button>
+              </form>
+            </article>
+
+            <article class="panel-card runtime-card">
+              <p class="eyebrow">运行信息</p>
+              <h3>目录与构建</h3>
+              <div class="runtime-list">
+                <div class="runtime-row">
+                  <span>项目目录</span>
+                  <strong id="settings-project-root">E:\study-quest-desktop</strong>
+                </div>
+                <div class="runtime-row">
+                  <span>本地存档</span>
+                  <strong id="settings-data-root">-</strong>
+                </div>
+                <div class="runtime-row">
+                  <span>默认安装包输出</span>
+                  <strong>E:\study-quest-desktop\release</strong>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel-card runtime-card">
+              <p class="eyebrow">桌面安装包</p>
+              <h3>当前已经按 exe 安装包方向配置</h3>
+              <ul class="clean-list">
+                <li>目标平台：Windows x64</li>
+                <li>打包方式：NSIS 安装程序</li>
+                <li>支持自选安装目录</li>
+                <li>生成桌面与开始菜单快捷方式</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./renderer.js"></script>
+  </body>
+</html>

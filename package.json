@@ -1,0 +1,58 @@
+{
+  "name": "study-quest-desktop",
+  "version": "0.2.0",
+  "description": "Gamified Windows desktop study coach with quest cards and review flows.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "check": "node --check main.js && node --check preload.js && node --check core\\store.js && node --check core\\openai.js && node --check src\\renderer.js",
+    "dist:win": "electron-builder --win nsis --x64",
+    "dist:dir": "electron-builder --dir --win nsis --x64"
+  },
+  "keywords": [
+    "electron",
+    "study",
+    "ai",
+    "learning"
+  ],
+  "author": "Codex",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^42.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.tianduing.studyquest",
+    "productName": "Study Quest 学练闯关",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "core/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Study-Quest-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Study Quest 学练闯关"
+    }
+  }
+}
