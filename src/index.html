@@ -3,265 +3,404 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Study Quest 学练闯关</title>
+    <title>智学闯关 · Study Quest</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
+  <body data-theme="forest">
     <div class="app-shell">
-      <aside class="nav-rail">
-        <div class="brand-card panel-card">
+      <aside class="sidebar">
+        <section class="panel brand-panel">
           <p class="eyebrow">Study Quest</p>
-          <h1>学练闯关</h1>
-          <p class="muted">
-            先把知识拆成关卡，再通过追问、纠错、复习和过关提示，慢慢形成稳定的正反馈。
-          </p>
-        </div>
+          <div class="brand-row">
+            <h1>智学闯关</h1>
+            <span class="brand-caption">学习工作台</span>
+          </div>
+          <p class="muted">更轻、更静、更像桌面工作台，但核心不是记录，而是被追问到真正会。</p>
+        </section>
 
-        <nav class="nav-card panel-card">
-          <button class="nav-button active" data-view="dashboard" type="button">任务总览</button>
-          <button class="nav-button" data-view="learn" type="button">闯关答题</button>
-          <button class="nav-button" data-view="review" type="button">随机复习</button>
-          <button class="nav-button" data-view="settings" type="button">接口设置</button>
+        <section class="panel sidebar-tools">
+          <label class="search-shell">
+            <span class="search-icon">⌕</span>
+            <input id="project-search" placeholder="搜索学习项目..." spellcheck="false" />
+          </label>
+          <div class="sidebar-quick-actions">
+            <button class="ghost-button sidebar-action" data-open-create type="button">+ 新建项目</button>
+            <button class="ghost-button sidebar-action" id="sidebar-start-review" type="button">↺ 开始复习</button>
+          </div>
+        </section>
+
+        <nav class="panel nav-panel">
+          <button class="nav-button active" data-view="home" type="button">
+            <span class="nav-label">学习中心</span>
+            <span class="nav-copy">从这里开始新项目和查看全局进度</span>
+          </button>
+          <button class="nav-button" data-view="library" type="button">
+            <span class="nav-label">我的学习</span>
+            <span class="nav-copy">查看所有项目、进度和最近活跃内容</span>
+          </button>
+          <button class="nav-button" data-view="learn" type="button">
+            <span class="nav-label">闯关学习</span>
+            <span class="nav-copy">三栏专注答题，保留问题树和教练反馈</span>
+          </button>
+          <button class="nav-button" data-view="review" type="button">
+            <span class="nav-label">复习中心</span>
+            <span class="nav-copy">随机抽题、薄弱回炉和当前项目复盘</span>
+          </button>
+          <button class="nav-button" data-view="settings" type="button">
+            <span class="nav-label">设置</span>
+            <span class="nav-copy">主题、接口参数和后续打包流程都放这里</span>
+          </button>
         </nav>
 
-        <div class="panel-card status-card">
-          <div class="section-head">
-            <h2>当前任务</h2>
-            <span id="topbar-progress" class="pill-chip">0 / 0</span>
+        <section class="panel sidebar-library">
+          <div class="section-head compact-head">
+            <div>
+              <p class="eyebrow">学习项目</p>
+              <h3>项目列表</h3>
+            </div>
+            <span id="sidebar-library-count" class="status-pill neutral">0</span>
           </div>
-          <h3 id="nav-active-quest-title">还没有任务</h3>
-          <p id="nav-active-quest-brief" class="muted">先创建一条学习主线。</p>
-          <div class="storage-note">
-            <span>项目目录</span>
-            <strong id="project-root-text">E:\study-quest-desktop</strong>
+          <div id="sidebar-project-list" class="sidebar-project-list"></div>
+        </section>
+
+        <section class="panel spotlight-panel">
+          <div class="section-head compact-head">
+            <div>
+              <p class="eyebrow">当前焦点</p>
+              <h3 id="sidebar-quest-title">还没有学习项目</h3>
+            </div>
+            <span id="api-status-pill" class="status-pill neutral">接口待配置</span>
           </div>
-          <div class="storage-note">
-            <span>本地存档</span>
-            <strong id="data-root-text">E:\StudyQuestData\app-data</strong>
+          <p id="sidebar-quest-brief" class="muted">
+            先创建一个项目，后面的主线关卡、复习抽题和追问记录才会跑起来。
+          </p>
+
+          <div class="mini-progress-card">
+            <div class="mini-progress-head">
+              <span>主线进度</span>
+              <strong id="sidebar-progress-text">0 / 0</strong>
+            </div>
+            <div class="progress-track">
+              <span id="sidebar-progress-bar"></span>
+            </div>
           </div>
-        </div>
+
+          <div class="runtime-stack">
+            <div class="runtime-item">
+              <span>项目目录</span>
+              <strong id="project-root-text">E:\study-quest-desktop</strong>
+            </div>
+            <div class="runtime-item">
+              <span>本地存档</span>
+              <strong id="data-root-text">E:\StudyQuestData\app-data</strong>
+            </div>
+          </div>
+        </section>
       </aside>
 
-      <main class="workspace">
-        <header class="topbar panel-card">
+      <main class="main-shell">
+        <header class="panel topbar">
           <div>
-            <p class="eyebrow" id="view-eyebrow">任务总览</p>
-            <h2 id="view-title">把学习任务拆成卡片式关卡</h2>
-            <p id="view-subtitle" class="muted">先建任务，再进闯关房答题，最后去复习区随机抽问。</p>
+            <p id="view-eyebrow" class="eyebrow">学习中心</p>
+            <h2 id="view-title">先给我学习内容，我来替你拆成主线关卡</h2>
+            <p id="view-subtitle" class="muted">
+              预览版优先把流程和体验做对：输入内容、生成主线、逐题追问、留下记录，再去做复习回炉。
+            </p>
           </div>
-          <div class="topbar-side">
-            <span id="api-status-pill" class="pill-chip neutral-chip">待配置接口</span>
-            <span id="quest-count-pill" class="pill-chip">0 个任务</span>
+          <div class="topbar-actions">
+            <span id="quest-count-pill" class="status-pill">0 个项目</span>
+            <button id="open-create-modal" class="primary-button" type="button">新建学习项目</button>
           </div>
         </header>
 
         <p id="preview-banner" class="preview-banner hidden">
-          当前是浏览器预览模式：界面和交互可以演示，但不会真的请求 AI 接口。
+          当前是浏览器预览模式：可以完整体验界面、任务创建和答题流程，但不会真正调用桌面端的本地接口。
         </p>
 
-        <section id="dashboard-view" class="view-pane">
-          <div class="dashboard-grid">
-            <article class="panel-card create-card">
-              <div class="section-head">
-                <h2>新建学习任务</h2>
-                <button id="jump-settings" class="ghost-button" type="button">先看接口设置</button>
+        <section id="home-view" class="view-pane">
+          <div class="hero-grid">
+            <article class="panel hero-panel">
+              <div class="hero-copy">
+                <p class="eyebrow">开始方式</p>
+                <h3>只填学习内容也能开始</h3>
+                <p class="muted">
+                  “学习主题、当前水平、学习目标、时间限制、主线关卡数”都已经降级成可选项。你只需要把材料贴进来，系统会自动命名并生成主线问题。
+                </p>
               </div>
-
-              <form id="quest-form" class="stack-form">
-                <label>
-                  <span>学习主题</span>
-                  <input id="topic-input" name="topic" placeholder="例如：掌握模型服务与部署" required />
-                </label>
-
-                <label>
-                  <span>待学内容</span>
-                  <textarea
-                    id="material-input"
-                    name="material"
-                    rows="6"
-                    placeholder="把课程提纲、论文摘要、问题背景或你自己写的学习说明贴进来"
-                    required
-                  ></textarea>
-                </label>
-
-                <div class="two-column-grid">
-                  <label>
-                    <span>当前水平</span>
-                    <input id="level-input" name="level" placeholder="例如：会基础但不会应用" required />
-                  </label>
-                  <label>
-                    <span>学习目标</span>
-                    <input id="goal-input" name="goal" placeholder="例如：能独立部署并解释关键取舍" required />
-                  </label>
-                </div>
-
-                <div class="two-column-grid">
-                  <label>
-                    <span>时间限制</span>
-                    <input id="timebox-input" name="timebox" placeholder="例如：1 周 / 3 晚" required />
-                  </label>
-                  <label>
-                    <span>主线关卡数</span>
-                    <input id="count-input" name="rootQuestionCount" type="number" min="3" max="15" value="8" required />
-                  </label>
-                </div>
-
-                <label>
-                  <span>训练模式</span>
-                  <select id="template-select" name="templateKey"></select>
-                </label>
-
-                <button id="create-quest" class="primary-button" type="submit">生成任务卡组</button>
-              </form>
+              <div class="hero-actions">
+                <button class="primary-button" data-open-create type="button">输入内容开始闯关</button>
+                <button id="go-library" class="ghost-button" type="button">先看已有项目</button>
+              </div>
+              <div class="hero-tags">
+                <span class="soft-chip">卡片化布局</span>
+                <span class="soft-chip">主线关卡</span>
+                <span class="soft-chip">追问与子问题</span>
+                <span class="soft-chip">记录可回看</span>
+              </div>
             </article>
 
-            <article class="panel-card library-card">
+            <article class="panel onboarding-panel">
               <div class="section-head">
-                <h2>任务卡库</h2>
-                <span id="dashboard-quest-count" class="pill-chip">0</span>
+                <div>
+                  <p class="eyebrow">使用节奏</p>
+                  <h3>先预览，再打包成安装版</h3>
+                </div>
               </div>
-              <div id="dashboard-quest-list" class="quest-list"></div>
+              <div class="step-list">
+                <div class="step-card">
+                  <span class="step-index">01</span>
+                  <div>
+                    <strong>贴入材料</strong>
+                    <p class="muted">先不折腾复杂配置，只把你真正要学的内容放进来。</p>
+                  </div>
+                </div>
+                <div class="step-card">
+                  <span class="step-index">02</span>
+                  <div>
+                    <strong>看主线够不够像教练</strong>
+                    <p class="muted">这版先把主线感、追问感和目标感做顺，再谈正式打包。</p>
+                  </div>
+                </div>
+                <div class="step-card">
+                  <span class="step-index">03</span>
+                  <div>
+                    <strong>每轮都同步 GitHub</strong>
+                    <p class="muted">改完即提交、可回退、可对比，后续再产出新的安装包。</p>
+                  </div>
+                </div>
+              </div>
             </article>
           </div>
 
-          <div class="dashboard-summary-grid">
-            <article class="panel-card feature-card">
-              <p class="eyebrow">当前焦点</p>
-              <h3 id="dashboard-active-title">还没有任务</h3>
-              <p id="dashboard-active-brief" class="muted">创建第一条任务后，这里会显示主线摘要和节奏提醒。</p>
-              <div id="dashboard-active-stats" class="stat-row"></div>
+          <div class="metrics-grid">
+            <article class="panel metric-card">
+              <span>学习项目</span>
+              <strong id="home-stat-projects">0</strong>
+              <p class="muted">当前一共保存了多少条学习主线</p>
+            </article>
+            <article class="panel metric-card">
+              <span>主线完成</span>
+              <strong id="home-stat-roots">0 / 0</strong>
+              <p class="muted">已经点亮的主问题数量</p>
+            </article>
+            <article class="panel metric-card">
+              <span>可抽查节点</span>
+              <strong id="home-stat-reviewable">0</strong>
+              <p class="muted">已经答过、可以立即拿来复习的节点</p>
+            </article>
+            <article class="panel metric-card">
+              <span>最近更新</span>
+              <strong id="home-stat-updated">还没有</strong>
+              <p class="muted">最后一次保存学习记录的时间</p>
+            </article>
+          </div>
+
+          <div class="home-content-grid">
+            <article class="panel section-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">我的学习</p>
+                  <h3>最近项目</h3>
+                </div>
+                <button class="ghost-button" data-view-jump="library" type="button">查看全部</button>
+              </div>
+              <div id="home-project-list" class="project-list"></div>
             </article>
 
-            <article class="panel-card feature-card">
-              <p class="eyebrow">闯关规则</p>
-              <h3>不是听懂，而是打出来</h3>
-              <ul class="clean-list">
-                <li>AI 先给主线，再逐题拷问。</li>
-                <li>每答一次就留档，后续可回看。</li>
-                <li>答得不够稳，就继续追问或拆子关卡。</li>
-                <li>过关后会点亮进度，并能进入随机复习。</li>
-              </ul>
+            <article class="panel section-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">复习建议</p>
+                  <h3>优先回看这些项目</h3>
+                </div>
+                <button id="start-global-review" class="ghost-button" type="button">开始复习</button>
+              </div>
+              <div id="home-review-list" class="review-suggestion-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="library-view" class="view-pane hidden">
+          <div class="library-layout">
+            <article class="panel section-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">项目库</p>
+                  <h3>我的学习项目</h3>
+                </div>
+                <span id="library-project-count" class="status-pill neutral">0 个项目</span>
+              </div>
+              <p class="muted section-tip">
+                这里保留所有主线任务。你可以继续学习、切换到复习中心，或者先把项目当作预览版路线图来审一遍。
+              </p>
+              <div id="library-project-list" class="project-grid"></div>
             </article>
 
-            <article class="panel-card feature-card">
-              <p class="eyebrow">推荐使用方式</p>
-              <h3>把材料贴完整一些</h3>
-              <ul class="clean-list">
-                <li>课程提纲、论文摘要、项目需求都可以直接贴。</li>
-                <li>主题越清楚，主问题路线越不容易跑偏。</li>
-                <li>如果你是面试准备，把目标写成“能讲清并举例”。</li>
-                <li>如果你是项目学习，把目标写成“能做出一个最小闭环”。</li>
-              </ul>
+            <article class="panel section-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">当前项目概览</p>
+                  <h3>主线摘要</h3>
+                </div>
+              </div>
+              <div id="library-spotlight" class="spotlight-detail"></div>
             </article>
           </div>
         </section>
 
         <section id="learn-view" class="view-pane hidden">
-          <div id="learn-empty-state" class="panel-card empty-card">
-            <h3>还没有进入闯关房</h3>
-            <p class="muted">先在任务总览里创建任务，或者从任务卡库里选择一个已有任务。</p>
+          <div id="learn-empty-state" class="panel empty-panel">
+            <h3>还没有进入闯关学习</h3>
+            <p class="muted">先创建一个学习项目，或者从“我的学习”里选一条已有主线继续。</p>
+            <button class="primary-button" data-open-create type="button">现在开始</button>
           </div>
 
-          <div id="learn-content" class="learn-grid hidden">
-            <div class="learn-main">
-              <article class="panel-card hero-card">
+          <div id="learn-layout" class="learn-layout hidden">
+            <aside class="panel roadmap-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">主线地图</p>
+                  <h3 id="learn-project-title">-</h3>
+                </div>
+                <span id="learn-node-progress" class="status-pill neutral">0 / 0</span>
+              </div>
+
+              <div id="learn-meta-chips" class="meta-chip-row"></div>
+
+              <div class="mini-progress-card">
+                <div class="mini-progress-head">
+                  <span>主线完成</span>
+                  <strong id="learn-root-progress-text">0 / 0</strong>
+                </div>
+                <div class="progress-track">
+                  <span id="learn-root-progress-bar"></span>
+                </div>
+              </div>
+
+              <div id="roadmap-tree" class="roadmap-tree"></div>
+            </aside>
+
+            <section class="learn-main">
+              <article class="panel mission-panel">
                 <div class="section-head">
                   <div>
-                    <p class="eyebrow">当前战役</p>
-                    <h3 id="active-quest-title">-</h3>
+                    <p class="eyebrow">本轮任务</p>
+                    <h3>当前关卡</h3>
                   </div>
-                  <div class="hero-badges">
-                    <span id="root-progress" class="pill-chip">0 / 0</span>
-                    <span id="node-progress" class="pill-chip">0 / 0</span>
+                  <div class="hero-actions">
+                    <span id="current-question-tag" class="status-pill neutral">等待问题</span>
+                    <button id="toggle-focus-mode" class="ghost-button" type="button">沉浸模式</button>
                   </div>
                 </div>
-                <p id="active-quest-brief" class="muted"></p>
+                <p id="learn-project-brief" class="muted">
+                  回答时尽量用自己的话说明“是什么、为什么、怎么用、什么时候不成立”。
+                </p>
+                <div id="learn-stat-grid" class="inline-stat-grid"></div>
               </article>
 
-              <article class="panel-card question-card">
-                <div class="section-head">
-                  <h2>当前问题</h2>
-                  <span id="current-question-tag" class="pill-chip neutral-chip">待命中</span>
-                </div>
-                <div id="question-panel" class="question-panel hidden">
-                  <div class="question-header">
+              <article class="panel question-panel-card">
+                <div id="question-panel" class="question-panel">
+                  <div class="question-head">
                     <div>
                       <p id="current-question-path" class="question-path">Q1</p>
-                      <h3 id="current-question-title">问题标题</h3>
+                      <h3 id="current-question-title">当前问题</h3>
                     </div>
-                    <span id="current-question-difficulty" class="pill-chip">难度 3</span>
+                    <span id="current-question-difficulty" class="status-pill neutral">难度 3</span>
                   </div>
-                  <p id="current-question-goal" class="goal-copy"></p>
+
+                  <div class="question-intent">
+                    <p class="intent-label">这一关希望你讲清楚</p>
+                    <p id="current-question-goal" class="intent-copy">-</p>
+                  </div>
+
                   <p id="current-question-why" class="muted"></p>
 
                   <form id="answer-form" class="stack-form">
-                    <label>
+                    <label class="field-block">
                       <span>你的回答</span>
                       <textarea
                         id="answer-input"
-                        rows="8"
-                        placeholder="尽量用自己的话解释：是什么、为什么、怎么用、什么时候不成立。"
-                        required
+                        rows="9"
+                        placeholder="尽量别只写结论。试着把主干逻辑、应用场景、取舍和边界都说出来。"
+                        spellcheck="false"
                       ></textarea>
                     </label>
-                    <button id="submit-answer" class="primary-button" type="submit">提交这一关</button>
+                    <div class="form-actions">
+                      <button id="submit-answer" class="primary-button" type="submit">提交这一关</button>
+                    </div>
                   </form>
                 </div>
 
-                <div id="question-empty" class="empty-inline">
-                  <p class="muted">当前没有待回答的问题，可能这条任务已经通关完成。</p>
+                <div id="question-empty" class="empty-inline hidden">
+                  <p class="muted">当前没有待回答的问题，可能这条主线已经全部完成。</p>
                 </div>
               </article>
+            </section>
 
-              <article class="panel-card feedback-card">
+            <aside class="learn-right">
+              <article class="panel coach-panel">
                 <div class="section-head">
-                  <h2>教练反馈</h2>
-                  <span id="feedback-verdict" class="pill-chip neutral-chip">等待回答</span>
+                  <div>
+                    <p class="eyebrow">教练反馈</p>
+                    <h3>这次回答哪里稳、哪里还差一口气</h3>
+                  </div>
+                  <span id="feedback-verdict" class="status-pill neutral">等待回答</span>
                 </div>
-                <div id="feedback-panel" class="feedback-panel">
-                  <p class="muted">每次回答之后，这里会沉淀你的纠错记录、提示和改进建议。</p>
-                </div>
-              </article>
-            </div>
-
-            <div class="learn-side">
-              <article class="panel-card roadmap-card">
-                <div class="section-head">
-                  <h2>路线图</h2>
-                  <span id="completion-dots" class="completion-dots"></span>
-                </div>
-                <div id="roadmap-tree" class="roadmap-tree"></div>
+                <div id="feedback-panel" class="feedback-panel"></div>
               </article>
 
-              <article class="panel-card timeline-card">
+              <article class="panel timeline-panel">
                 <div class="section-head">
-                  <h2>战报时间线</h2>
+                  <div>
+                    <p class="eyebrow">学习时间线</p>
+                    <h3>记录会一直留下来</h3>
+                  </div>
                 </div>
                 <div id="timeline-list" class="timeline-list"></div>
               </article>
-            </div>
+            </aside>
           </div>
         </section>
 
         <section id="review-view" class="view-pane hidden">
-          <div class="review-grid">
-            <article class="panel-card review-launch-card">
+          <div class="review-modes-grid">
+            <button class="panel review-mode-card active" data-review-mode="random" type="button">
+              <strong>随机抽题</strong>
+              <span class="muted">从所有已完成节点里随机抽一题，看看是否真掌握了。</span>
+            </button>
+            <button class="panel review-mode-card" data-review-mode="current" type="button">
+              <strong>当前项目</strong>
+              <span class="muted">只在当前学习项目里回炉，适合学完一轮后立刻抽查。</span>
+            </button>
+            <button class="panel review-mode-card" data-review-mode="weak" type="button">
+              <strong>薄弱节点</strong>
+              <span class="muted">优先抽最近答得不稳、被追问过的节点。</span>
+            </button>
+            <button class="panel review-mode-card" data-review-mode="recent" type="button">
+              <strong>最新完成</strong>
+              <span class="muted">把刚完成的节点再拉出来，避免“刚看完就忘”。</span>
+            </button>
+          </div>
+
+          <div class="review-layout">
+            <article class="panel review-active-panel">
               <div class="section-head">
-                <h2>随机复习</h2>
+                <div>
+                  <p class="eyebrow">复习工作台</p>
+                  <h3 id="review-mode-title">随机抽题</h3>
+                </div>
                 <button id="draw-review" class="primary-button" type="button">抽一题</button>
               </div>
-              <p class="muted">
-                从已经完成的节点中随机抽问，再答一轮，看看它是不是已经从“看懂”变成“会说、会用、会辨错”。
-              </p>
-              <div id="review-summary" class="stat-row"></div>
-              <div id="review-panel" class="review-panel">
-                <p class="muted">先完成几个节点，再来这里抽题复习。</p>
-              </div>
+              <div id="review-summary" class="inline-stat-grid"></div>
+              <div id="review-panel" class="review-panel"></div>
             </article>
 
-            <article class="panel-card review-record-card">
+            <article class="panel review-records-panel">
               <div class="section-head">
-                <h2>最近记录</h2>
+                <div>
+                  <p class="eyebrow">最近记录</p>
+                  <h3>复习与答题都会记在这里</h3>
+                </div>
               </div>
               <div id="review-records" class="timeline-list"></div>
             </article>
@@ -269,76 +408,177 @@
         </section>
 
         <section id="settings-view" class="view-pane hidden">
-          <div class="settings-grid">
-            <article class="panel-card settings-card">
+          <div class="settings-layout">
+            <article class="panel appearance-panel">
               <div class="section-head">
-                <h2>接口设置</h2>
-                <span id="settings-api-hint" class="pill-chip neutral-chip">待配置</span>
+                <div>
+                  <p class="eyebrow">外观主题</p>
+                  <h3>先把界面做得更像一个能长期用的桌面应用</h3>
+                </div>
+              </div>
+              <p class="muted section-tip">
+                这一版先提供 3 套护眼主题。后续如果你满意，再继续加背景图库、自定义背景和更多动画细节。
+              </p>
+              <div id="theme-options" class="theme-grid"></div>
+            </article>
+
+            <article class="panel settings-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">AI 设置</p>
+                  <h3>接口与默认参数</h3>
+                </div>
+                <span id="settings-api-hint" class="status-pill neutral">待配置</span>
               </div>
 
               <form id="settings-form" class="stack-form">
-                <label>
+                <label class="field-block">
                   <span>Base URL</span>
-                  <input id="settings-base-url" placeholder="https://codex.ximuai.com" required />
+                  <input id="settings-base-url" placeholder="https://codex.ximuai.com" spellcheck="false" />
                 </label>
 
-                <label>
+                <label class="field-block">
                   <span>模型名称</span>
-                  <input id="settings-model" placeholder="gpt-5.4" required />
+                  <input id="settings-model" placeholder="gpt-5.4" spellcheck="false" />
                 </label>
 
-                <label>
+                <label class="field-block">
                   <span>API Key</span>
-                  <input id="settings-api-key" type="password" placeholder="留空则保留当前 key" />
+                  <input id="settings-api-key" type="password" placeholder="留空则保留当前 key" spellcheck="false" />
                 </label>
 
-                <label>
-                  <span>默认训练模式</span>
-                  <select id="settings-template"></select>
-                </label>
+                <div class="two-column-grid">
+                  <label class="field-block">
+                    <span>默认训练模式</span>
+                    <select id="settings-template"></select>
+                  </label>
 
-                <label>
-                  <span>默认主线关卡数</span>
-                  <input id="settings-root-count" type="number" min="3" max="15" />
-                </label>
+                  <label class="field-block">
+                    <span>默认主线关卡数</span>
+                    <input id="settings-root-count" type="number" min="5" max="30" spellcheck="false" />
+                  </label>
+                </div>
 
-                <button id="save-settings" class="primary-button" type="submit">保存设置</button>
+                <div class="form-actions">
+                  <button id="save-settings" class="primary-button" type="submit">保存设置</button>
+                </div>
               </form>
             </article>
 
-            <article class="panel-card runtime-card">
-              <p class="eyebrow">运行信息</p>
-              <h3>目录与构建</h3>
-              <div class="runtime-list">
-                <div class="runtime-row">
+            <article class="panel runtime-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">运行信息</p>
+                  <h3>路径与预览状态</h3>
+                </div>
+              </div>
+              <div class="runtime-stack large">
+                <div class="runtime-item">
                   <span>项目目录</span>
                   <strong id="settings-project-root">E:\study-quest-desktop</strong>
                 </div>
-                <div class="runtime-row">
+                <div class="runtime-item">
                   <span>本地存档</span>
                   <strong id="settings-data-root">-</strong>
                 </div>
-                <div class="runtime-row">
-                  <span>默认安装包输出</span>
+                <div class="runtime-item">
+                  <span>安装包输出目录</span>
                   <strong>E:\study-quest-desktop\release</strong>
                 </div>
               </div>
             </article>
 
-            <article class="panel-card runtime-card">
-              <p class="eyebrow">桌面安装包</p>
-              <h3>当前已经按 exe 安装包方向配置</h3>
-              <ul class="clean-list">
-                <li>目标平台：Windows x64</li>
-                <li>打包方式：NSIS 安装程序</li>
-                <li>支持自选安装目录</li>
-                <li>生成桌面与开始菜单快捷方式</li>
-              </ul>
+            <article class="panel workflow-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">标准流程</p>
+                  <h3>以后就按这条线推进</h3>
+                </div>
+              </div>
+              <ol class="workflow-list">
+                <li>先改预览版界面和交互，把你最在意的体验点跑顺。</li>
+                <li>每轮改动都提交到 GitHub，保证版本清晰、可追溯、可回退。</li>
+                <li>你确认预览满意后，再构建新的 Windows 安装包并做最终验证。</li>
+              </ol>
             </article>
           </div>
         </section>
       </main>
     </div>
+
+    <div id="create-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">新建学习项目</p>
+            <h3>先贴学习内容，其他都可以后补</h3>
+          </div>
+          <button class="icon-button" data-close-modal="true" type="button">×</button>
+        </div>
+
+        <form id="quest-form" class="stack-form">
+          <label class="field-block">
+            <span>学习主题（可选）</span>
+            <input id="topic-input" name="topic" placeholder="例如：掌握模型服务与部署" spellcheck="false" />
+          </label>
+
+          <label class="field-block">
+            <span>学习内容</span>
+            <textarea
+              id="material-input"
+              name="material"
+              rows="7"
+              placeholder="把课程提纲、论文摘要、项目说明、岗位知识点或者你自己写的学习描述贴进来。"
+              spellcheck="false"
+            ></textarea>
+          </label>
+
+          <p class="helper-text">
+            只填这一项也能开始。若没有手动命名，系统会自动命名为：
+            <strong id="derived-topic-label">未命名学习项目</strong>
+          </p>
+
+          <button id="toggle-advanced" class="ghost-button subtle-button" type="button">展开可选项</button>
+
+          <div id="advanced-fields" class="advanced-fields hidden">
+            <div class="two-column-grid">
+              <label class="field-block">
+                <span>当前水平（可选）</span>
+                <input id="level-input" name="level" placeholder="例如：会基础但不太会应用" spellcheck="false" />
+              </label>
+              <label class="field-block">
+                <span>学习目标（可选）</span>
+                <input id="goal-input" name="goal" placeholder="例如：能独立讲清并完成最小闭环" spellcheck="false" />
+              </label>
+            </div>
+
+            <div class="two-column-grid">
+              <label class="field-block">
+                <span>时间限制（可选）</span>
+                <input id="timebox-input" name="timebox" placeholder="例如：一周内吃透 / 三晚过完" spellcheck="false" />
+              </label>
+              <label class="field-block">
+                <span>主线关卡数（可选）</span>
+                <input id="count-input" name="rootQuestionCount" type="number" min="5" max="30" spellcheck="false" />
+              </label>
+            </div>
+
+            <label class="field-block">
+              <span>训练模式（可选）</span>
+              <select id="template-select" name="templateKey"></select>
+            </label>
+          </div>
+
+          <div class="form-actions split-actions">
+            <button class="ghost-button" data-close-modal="true" type="button">取消</button>
+            <button id="create-quest" class="primary-button" type="submit">生成主线关卡</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast-region" class="toast-region" aria-live="polite"></div>
 
     <script type="module" src="./renderer.js"></script>
   </body>

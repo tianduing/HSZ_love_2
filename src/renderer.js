@@ -1,171 +1,247 @@
-const templateCatalog = [
+const FALLBACK_TEMPLATES = [
   { key: "general", label: "通用学习教练" },
   { key: "intense", label: "费曼 + 苏格拉底 + 压力测试" },
-  { key: "algorithm", label: "算法题训练" },
+  { key: "algorithm", label: "算法刷题训练" },
   { key: "paper", label: "论文阅读训练" },
   { key: "project", label: "项目实战训练" }
 ];
 
-const viewMeta = {
-  dashboard: {
-    eyebrow: "任务总览",
-    title: "把学习任务拆成卡片式关卡",
-    subtitle: "先建任务，再进闯关房答题，最后去复习区随机抽问。"
+const VIEW_META = {
+  home: {
+    eyebrow: "学习中心",
+    title: "先给我学习内容，我来替你拆成主线关卡",
+    subtitle: "预览版先把体验做顺：卡片化首页、可选字段、主线闯关、记录沉淀和复习回炉。"
+  },
+  library: {
+    eyebrow: "我的学习",
+    title: "把所有项目放进一个更像产品的学习项目库",
+    subtitle: "这里不再是堆在一起的表单，而是项目卡、进度卡和摘要卡组成的可浏览主界面。"
   },
   learn: {
-    eyebrow: "闯关答题",
-    title: "一次只打一题，让思路真正落地",
-    subtitle: "当前问题、即时反馈和路线图都在这里，但不再跟别的模块挤在一屏。"
+    eyebrow: "闯关学习",
+    title: "三栏专注答题：左边主线图，中间当前关卡，右边教练反馈",
+    subtitle: "这页只做一件事：把当前问题讲明白，然后留下可回看的记录。"
   },
   review: {
-    eyebrow: "随机复习",
-    title: "从已完成节点里随机回抽",
-    subtitle: "复习区只做一件事：帮你检验内容有没有真正沉淀下来。"
+    eyebrow: "复习中心",
+    title: "随机抽题、当前项目回炉和薄弱节点复盘都放在这里",
+    subtitle: "这版先提供真实可用的几种复习方式，后续再继续加自动复习队列。"
   },
   settings: {
-    eyebrow: "接口设置",
-    title: "把模型接口、默认模式和安装信息放在独立页面",
-    subtitle: "配置完成后，后面创建任务和打包安装都会更顺。"
+    eyebrow: "设置",
+    title: "主题、接口参数和标准化流程单独收口",
+    subtitle: "先把预览版做好看、做顺，再继续往安装包和正式发布推进。"
   }
 };
 
-const dom = {
-  navButtons: [...document.querySelectorAll(".nav-button")],
-  viewPanes: {
-    dashboard: document.querySelector("#dashboard-view"),
-    learn: document.querySelector("#learn-view"),
-    review: document.querySelector("#review-view"),
-    settings: document.querySelector("#settings-view")
+const REVIEW_MODE_META = {
+  random: {
+    label: "随机抽题",
+    emptyMessage: "当前还没有可抽查节点。先完成几个问题，再回来随机抽题。"
   },
-  previewBanner: document.querySelector("#preview-banner"),
-  viewEyebrow: document.querySelector("#view-eyebrow"),
-  viewTitle: document.querySelector("#view-title"),
-  viewSubtitle: document.querySelector("#view-subtitle"),
-  apiStatusPill: document.querySelector("#api-status-pill"),
-  questCountPill: document.querySelector("#quest-count-pill"),
-  topbarProgress: document.querySelector("#topbar-progress"),
-  projectRootText: document.querySelector("#project-root-text"),
-  dataRootText: document.querySelector("#data-root-text"),
-  navActiveQuestTitle: document.querySelector("#nav-active-quest-title"),
-  navActiveQuestBrief: document.querySelector("#nav-active-quest-brief"),
-  jumpSettingsButton: document.querySelector("#jump-settings"),
-  questForm: document.querySelector("#quest-form"),
-  createQuestButton: document.querySelector("#create-quest"),
-  templateSelect: document.querySelector("#template-select"),
-  dashboardQuestCount: document.querySelector("#dashboard-quest-count"),
-  dashboardQuestList: document.querySelector("#dashboard-quest-list"),
-  dashboardActiveTitle: document.querySelector("#dashboard-active-title"),
-  dashboardActiveBrief: document.querySelector("#dashboard-active-brief"),
-  dashboardActiveStats: document.querySelector("#dashboard-active-stats"),
-  learnEmptyState: document.querySelector("#learn-empty-state"),
-  learnContent: document.querySelector("#learn-content"),
-  activeQuestTitle: document.querySelector("#active-quest-title"),
-  activeQuestBrief: document.querySelector("#active-quest-brief"),
-  rootProgress: document.querySelector("#root-progress"),
-  nodeProgress: document.querySelector("#node-progress"),
-  questionPanel: document.querySelector("#question-panel"),
-  questionEmpty: document.querySelector("#question-empty"),
-  currentQuestionTag: document.querySelector("#current-question-tag"),
-  currentQuestionPath: document.querySelector("#current-question-path"),
-  currentQuestionTitle: document.querySelector("#current-question-title"),
-  currentQuestionDifficulty: document.querySelector("#current-question-difficulty"),
-  currentQuestionGoal: document.querySelector("#current-question-goal"),
-  currentQuestionWhy: document.querySelector("#current-question-why"),
-  answerForm: document.querySelector("#answer-form"),
-  answerInput: document.querySelector("#answer-input"),
-  submitAnswer: document.querySelector("#submit-answer"),
-  feedbackVerdict: document.querySelector("#feedback-verdict"),
-  feedbackPanel: document.querySelector("#feedback-panel"),
-  completionDots: document.querySelector("#completion-dots"),
-  roadmapTree: document.querySelector("#roadmap-tree"),
-  timelineList: document.querySelector("#timeline-list"),
-  drawReviewButton: document.querySelector("#draw-review"),
-  reviewSummary: document.querySelector("#review-summary"),
-  reviewPanel: document.querySelector("#review-panel"),
-  reviewRecords: document.querySelector("#review-records"),
-  settingsForm: document.querySelector("#settings-form"),
-  settingsBaseUrl: document.querySelector("#settings-base-url"),
-  settingsModel: document.querySelector("#settings-model"),
-  settingsApiKey: document.querySelector("#settings-api-key"),
-  settingsTemplate: document.querySelector("#settings-template"),
-  settingsRootCount: document.querySelector("#settings-root-count"),
-  settingsApiHint: document.querySelector("#settings-api-hint"),
-  settingsProjectRoot: document.querySelector("#settings-project-root"),
-  settingsDataRoot: document.querySelector("#settings-data-root")
+  current: {
+    label: "当前项目",
+    emptyMessage: "当前项目还没有完成节点，先把主线往前推几题。"
+  },
+  weak: {
+    label: "薄弱节点",
+    emptyMessage: "目前还没有明显薄弱节点，说明最近几轮回答还算稳。"
+  },
+  recent: {
+    label: "最新完成",
+    emptyMessage: "还没有新完成的节点可以回炉。"
+  }
 };
 
-const appState = {
-  bootstrap: null,
-  quests: [],
-  activeQuestId: null,
-  activeQuest: null,
-  currentReview: null,
-  previewMode: !window.studyCoachApi,
-  currentView: "dashboard",
-  lastEvaluation: null
-};
+const THEME_PRESETS = [
+  {
+    key: "forest",
+    name: "护眼绿洲",
+    description: "奶油白 + 植物绿，适合白天长时间学习。"
+  },
+  {
+    key: "ocean",
+    name: "海盐蓝",
+    description: "更冷静的浅蓝玻璃感，适合理工和结构化思考。"
+  },
+  {
+    key: "graphite",
+    name: "石墨夜读",
+    description: "低刺激深色主题，适合晚上专注闯关。"
+  }
+];
+
+const UI_STORAGE_KEY = "study-quest-ui-v3";
+
+function cleanText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function deriveTopicFromMaterial(material, topic = "") {
+  const explicitTopic = cleanText(topic);
+  if (explicitTopic) {
+    return explicitTopic;
+  }
+
+  const normalizedMaterial = cleanText(material).replace(/\s+/g, " ");
+  if (!normalizedMaterial) {
+    return "未命名学习项目";
+  }
+
+  const firstLine = normalizedMaterial
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean) || normalizedMaterial;
+  const normalized = firstLine.replace(/^[#>*\-\d.\s:：]+/, "").trim();
+  const sentence = normalized.split(/[。！？!?；;，,|]/)[0].trim();
+  const candidate = sentence || normalized || normalizedMaterial;
+  return candidate.length > 28 ? `${candidate.slice(0, 28)}...` : candidate;
+}
+
+function loadUiState() {
+  try {
+    const raw = localStorage.getItem(UI_STORAGE_KEY);
+    if (!raw) {
+      return {
+        theme: "forest",
+        focusMode: false
+      };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      theme: ["forest", "ocean", "graphite"].includes(parsed.theme) ? parsed.theme : "forest",
+      focusMode: Boolean(parsed.focusMode)
+    };
+  } catch (_error) {
+    return {
+      theme: "forest",
+      focusMode: false
+    };
+  }
+}
+
+function saveUiState() {
+  localStorage.setItem(
+    UI_STORAGE_KEY,
+    JSON.stringify({
+      theme: appState.ui.theme,
+      focusMode: appState.ui.focusMode
+    })
+  );
+}
+
+function buildPreviewRoadmap(topic, rootQuestionCount, templateKey) {
+  const stems = {
+    general: [
+      `如果你要用自己的话讲清“${topic}”，它的核心对象、目标和边界分别是什么？`,
+      `“${topic}”的关键结构、关键步骤或关键机制，是怎样串起来形成完整闭环的？`,
+      `把“${topic}”放到真实场景里时，你会如何解释它为什么值得这样设计？`,
+      `围绕“${topic}”，最常见的误区、偷懒做法或理解偏差是什么？`,
+      `如果要验证自己已经真正掌握“${topic}”，你会输出什么结果来证明？`
+    ],
+    intense: [
+      `用自己的话解释“${topic}”到底是什么，并明确它不是什么。`,
+      `为什么“${topic}”成立？背后的因果链条或判断逻辑是什么？`,
+      `“${topic}”一旦进入复杂场景，最容易在哪些边界条件下失效？`,
+      `如果你提出一个关于“${topic}”的方案，我应该从哪些漏洞和反例上挑战它？`,
+      `关于“${topic}”，最危险的自我欺骗是什么？你如何现场纠正自己？`
+    ],
+    algorithm: [
+      `面对“${topic}”，你会如何先准确复述题意和边界，再决定解法方向？`,
+      `和“${topic}”相关的最直接暴力解法是什么？它慢在哪里？`,
+      `“${topic}”真正值得优化的瓶颈在哪里？你凭什么这样判断？`,
+      `要把“${topic}”从暴力解推进到更优解，关键思路或数据结构是什么？`,
+      `如果写成代码，“${topic}”最容易在哪些边界情况翻车？`
+    ],
+    paper: [
+      `这篇关于“${topic}”的材料究竟想解决什么问题，问题为什么重要？`,
+      `围绕“${topic}”，作者的方法、假设和推理链条是什么？`,
+      `材料中的实验或论证，是如何支撑“${topic}”结论的？`,
+      `如果你要复述“${topic}”，哪些局限性必须同步讲清楚？`,
+      `关于“${topic}”，你最想追问作者的一个问题是什么？`
+    ],
+    project: [
+      `如果把“${topic}”落成一个最小可交付项目，你的闭环会长什么样？`,
+      `围绕“${topic}”，关键链路、关键模块和依赖顺序分别是什么？`,
+      `“${topic}”落地时最值得做的技术取舍有哪些？代价分别是什么？`,
+      `如果“${topic}”真的出问题，最该先盯住哪些故障点和监控指标？`,
+      `项目做完后，你会用什么标准判断自己算不算真的掌握了“${topic}”？`
+    ]
+  };
+
+  const source = stems[templateKey] || stems.general;
+  return Array.from({ length: rootQuestionCount }).map((_, index) => ({
+    title: source[index % source.length],
+    goal:
+      index === 0
+        ? "先把核心定义和主干逻辑讲明白。"
+        : index === rootQuestionCount - 1
+          ? "把复盘、边界和自证能力也带出来。"
+          : "继续往结构理解、应用判断和场景取舍推进。",
+    whyItMatters:
+      index === 0
+        ? "第一关讲不清，后面的追问会一直漂。"
+        : "真正的掌握，必须能讲应用、辨边界、做判断。",
+    difficulty: clamp(2 + (index % 4), 1, 5)
+  }));
+}
 
 function createPreviewApi() {
-  const storageKey = "study-quest-preview-db-v2";
+  const storageKey = "study-quest-preview-db-v3";
 
-  const loadPreviewState = () => {
+  function loadPreviewState() {
     try {
       const raw = localStorage.getItem(storageKey);
       return raw
         ? JSON.parse(raw)
         : {
             settings: {
-              baseUrl: "https://api.openai.com/v1",
+              baseUrl: "https://codex.ximuai.com/v1",
               model: "gpt-5.4",
               defaultTemplateKey: "general",
-              defaultRootQuestionCount: 8
+              defaultRootQuestionCount: 10
             },
             quests: []
           };
     } catch (_error) {
       return {
         settings: {
-          baseUrl: "https://api.openai.com/v1",
+          baseUrl: "https://codex.ximuai.com/v1",
           model: "gpt-5.4",
           defaultTemplateKey: "general",
-          defaultRootQuestionCount: 8
+          defaultRootQuestionCount: 10
         },
         quests: []
       };
     }
-  };
+  }
 
-  const savePreviewState = (value) => {
-    localStorage.setItem(storageKey, JSON.stringify(value));
-  };
+  function savePreviewState(nextState) {
+    localStorage.setItem(storageKey, JSON.stringify(nextState));
+  }
 
-  const buildStats = (quest) => {
-    const roots = quest.nodes.filter((node) => !node.parentId);
-    return {
-      totalRoots: roots.length,
-      completedRoots: roots.filter((node) => node.status === "completed").length,
-      totalNodes: quest.nodes.length,
-      completedNodes: quest.nodes.filter((node) => node.status === "completed").length,
-      pendingNodes: quest.nodes.filter((node) => node.status === "pending" || node.status === "active").length
-    };
-  };
-
-  const summarizeQuest = (quest) => ({
-    id: quest.id,
-    title: quest.title,
-    topic: quest.topic,
-    templateKey: quest.templateKey,
-    missionBrief: quest.missionBrief,
-    createdAt: quest.createdAt,
-    updatedAt: quest.updatedAt,
-    finishedAt: quest.finishedAt,
-    currentNodeId: quest.currentNodeId,
-    stats: buildStats(quest)
-  });
-
-  const compareNodes = (left, right) => {
-    const leftParts = left.path.replace(/^Q/, "").split(".").map(Number);
-    const rightParts = right.path.replace(/^Q/, "").split(".").map(Number);
+  function compareNodes(left, right) {
+    const leftParts = String(left.path || "")
+      .replace(/^Q/, "")
+      .split(".")
+      .map(Number);
+    const rightParts = String(right.path || "")
+      .replace(/^Q/, "")
+      .split(".")
+      .map(Number);
     const size = Math.max(leftParts.length, rightParts.length);
     for (let index = 0; index < size; index += 1) {
       const diff = (leftParts[index] ?? -1) - (rightParts[index] ?? -1);
@@ -174,25 +250,63 @@ function createPreviewApi() {
       }
     }
     return 0;
-  };
+  }
 
-  const activateNext = (quest) => {
+  function buildStats(quest) {
+    const nodes = Array.isArray(quest.nodes) ? quest.nodes : [];
+    const roots = nodes.filter((node) => !node.parentId);
+    return {
+      totalRoots: roots.length,
+      completedRoots: roots.filter((node) => node.status === "completed").length,
+      totalNodes: nodes.length,
+      completedNodes: nodes.filter((node) => node.status === "completed").length,
+      pendingNodes: nodes.filter((node) => node.status === "pending" || node.status === "active").length
+    };
+  }
+
+  function summarizeQuest(quest) {
+    return {
+      id: quest.id,
+      title: quest.title,
+      topic: quest.topic,
+      templateKey: quest.templateKey,
+      missionBrief: quest.missionBrief,
+      createdAt: quest.createdAt,
+      updatedAt: quest.updatedAt,
+      finishedAt: quest.finishedAt,
+      currentNodeId: quest.currentNodeId,
+      stats: buildStats(quest)
+    };
+  }
+
+  function appendTimeline(quest, kind, summary) {
+    quest.timeline = Array.isArray(quest.timeline) ? quest.timeline : [];
+    quest.timeline.unshift({
+      id: crypto.randomUUID(),
+      kind,
+      summary,
+      createdAt: new Date().toISOString()
+    });
+    quest.timeline = quest.timeline.slice(0, 60);
+  }
+
+  function activateNextPending(quest) {
     quest.nodes.forEach((node) => {
       if (node.status === "active") {
         node.status = "pending";
       }
     });
-    const next = quest.nodes
+    const nextNode = [...quest.nodes]
       .filter((node) => node.status === "pending")
       .sort(compareNodes)[0];
-    if (next) {
-      next.status = "active";
-      quest.currentNodeId = next.id;
+    if (nextNode) {
+      nextNode.status = "active";
+      quest.currentNodeId = nextNode.id;
     } else {
       quest.currentNodeId = null;
       quest.finishedAt = new Date().toISOString();
     }
-  };
+  }
 
   return {
     async loadBootstrap() {
@@ -200,20 +314,22 @@ function createPreviewApi() {
       return {
         runtime: {
           dataRoot: "浏览器预览模式（使用 localStorage）",
-          templateOptions: templateCatalog
+          templateOptions: FALLBACK_TEMPLATES
         },
         settings: {
           ...state.settings,
           hasApiKey: false
         },
-        quests: state.quests.map(summarizeQuest)
+        quests: state.quests.map(summarizeQuest).sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
       };
     },
+
     async saveSettings(payload) {
       const state = loadPreviewState();
       state.settings = {
         ...state.settings,
-        ...payload
+        ...payload,
+        defaultRootQuestionCount: clamp(Number(payload.defaultRootQuestionCount || 10), 5, 30)
       };
       savePreviewState(state);
       return {
@@ -223,27 +339,21 @@ function createPreviewApi() {
         }
       };
     },
+
     async createQuest(payload) {
       const state = loadPreviewState();
       const now = new Date().toISOString();
-      const questionPatterns = [
-        "先用自己的话解释",
-        "比较它和相近概念",
-        "说明它为什么重要",
-        "举一个应用场景",
-        "分析常见误区",
-        "说明边界条件",
-        "设计一个验证方法",
-        "给出一个反例"
-      ];
-      const nodes = Array.from({ length: payload.rootQuestionCount }).map((_, index) => ({
+      const topic = deriveTopicFromMaterial(payload.material, payload.topic);
+      const rootQuestionCount = clamp(Number(payload.rootQuestionCount || state.settings.defaultRootQuestionCount || 10), 5, 30);
+      const roadmap = buildPreviewRoadmap(topic, rootQuestionCount, payload.templateKey);
+      const nodes = roadmap.map((item, index) => ({
         id: crypto.randomUUID(),
         path: `Q${index + 1}`,
         parentId: null,
-        title: `${questionPatterns[index % questionPatterns.length]}：${payload.topic}`,
-        goal: "逼自己把概念、应用和边界讲清楚。",
-        whyItMatters: "只要能清楚输出，就说明不是只停留在“看懂”。",
-        difficulty: Math.min(5, 2 + (index % 4)),
+        title: item.title,
+        goal: item.goal,
+        whyItMatters: item.whyItMatters,
+        difficulty: item.difficulty,
         status: index === 0 ? "active" : "pending",
         source: "roadmap",
         attempts: [],
@@ -253,18 +363,19 @@ function createPreviewApi() {
         updatedAt: now,
         completedAt: null
       }));
+
       const quest = {
         id: crypto.randomUUID(),
-        title: payload.topic,
-        topic: payload.topic,
-        material: payload.material,
-        level: payload.level,
-        goal: payload.goal,
-        timebox: payload.timebox,
+        title: topic,
+        topic,
+        material: cleanText(payload.material),
+        level: cleanText(payload.level),
+        goal: cleanText(payload.goal),
+        timebox: cleanText(payload.timebox),
         templateKey: payload.templateKey,
-        rootQuestionCount: payload.rootQuestionCount,
-        missionBrief: "这是浏览器预览模式生成的样例路线，用来演示分视图卡片交互。",
-        launchNote: "现在开始第一关。",
+        rootQuestionCount,
+        missionBrief: `围绕“${topic}”按定义、结构、应用、辨错和复盘来推进。`,
+        launchNote: "先讲清主干，再通过追问把理解逼深。",
         createdAt: now,
         updatedAt: now,
         finishedAt: null,
@@ -274,46 +385,74 @@ function createPreviewApi() {
           {
             id: crypto.randomUUID(),
             kind: "session-created",
-            summary: "预览模式已生成一条示例路线。",
+            summary: "已生成一条预览版主线关卡。",
             createdAt: now
           }
         ]
       };
+
       state.quests.unshift(quest);
       savePreviewState(state);
       return {
-        quest: { ...quest, stats: buildStats(quest) },
-        quests: state.quests.map(summarizeQuest)
+        quest: {
+          ...quest,
+          stats: buildStats(quest)
+        },
+        quests: state.quests.map(summarizeQuest).sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
       };
     },
+
     async getQuest(questId) {
       const state = loadPreviewState();
       const quest = state.quests.find((item) => item.id === questId);
-      return { ...quest, stats: buildStats(quest) };
+      if (!quest) {
+        throw new Error("没有找到对应的预览任务。");
+      }
+      return {
+        ...quest,
+        stats: buildStats(quest)
+      };
     },
+
     async answerQuestion(payload) {
       const state = loadPreviewState();
       const quest = state.quests.find((item) => item.id === payload.questId);
-      const node = quest.nodes.find((item) => item.id === payload.nodeId);
-      const answer = String(payload.answer || "").trim();
-      const answerLength = answer.length;
+      const node = quest?.nodes?.find((item) => item.id === payload.nodeId);
+      if (!quest || !node) {
+        throw new Error("当前问题不存在。");
+      }
+
+      const answer = cleanText(payload.answer);
       const now = new Date().toISOString();
-      const needsRetry = answerLength < 32;
-      const needsFollowUp = !needsRetry && !node.parentId && answerLength < 120 && !quest.nodes.some((item) => item.parentId === node.id);
+      const shortAnswer = answer.length < 40;
+      const goodEnough = answer.length >= 120;
+      const alreadyHasChild = quest.nodes.some((item) => item.parentId === node.id);
+      const verdict = shortAnswer
+        ? "retry_same_question"
+        : !goodEnough && !node.parentId && !alreadyHasChild
+          ? "follow_up_required"
+          : "complete_and_advance";
+
       const evaluation = {
-        verdict: needsRetry ? "retry_same_question" : needsFollowUp ? "follow_up_required" : "complete_and_advance",
-        score: Math.min(98, Math.max(38, answerLength)),
-        coachReply: needsRetry
-          ? "这次回答还偏短，像是知道一点，但还没把逻辑讲透。"
-          : needsFollowUp
-            ? "主干已经说到了，接下来补一问，把应用和边界也掰开。"
-            : "这一关已经基本过线，可以继续往下推进。",
-        hint: needsRetry ? "试着补上：为什么重要、怎么用、什么时候会失效。" : "",
+        verdict,
+        score: clamp(answer.length, 38, 96),
+        coachReply:
+          verdict === "retry_same_question"
+            ? "这次回答还像是抓到了轮廓，但还没把核心逻辑真正讲开。"
+            : verdict === "follow_up_required"
+              ? "主干已经说到了，下一步该把应用场景和判断依据也补齐。"
+              : "这一关已经基本过线，可以继续推进后面的主线。",
+        hint:
+          verdict === "retry_same_question"
+            ? "试着至少补上：它是什么、为什么成立、怎么用、什么时候会失效。"
+            : verdict === "follow_up_required"
+              ? "继续往真实场景、取舍和边界条件上讲。"
+              : "",
         feedback: {
-          strengths: needsRetry ? ["已经开始组织答案"] : ["已经抓住主干", "回答里有自己的结构"],
-          gaps: needsRetry ? ["展开不够", "判断依据不够具体"] : ["还可以更凝练"],
-          missing: needsRetry ? ["应用场景", "边界条件"] : needsFollowUp ? ["更具体的场景取舍"] : [],
-          improve: needsRetry ? "下一轮先说一句话本质，再补一个真实例子。" : "如果再补一个真实场景，这个答案会更稳。"
+          strengths: shortAnswer ? ["已经开始用自己的话输出"] : ["抓住了主干", "表达开始带有自己的结构"],
+          gaps: shortAnswer ? ["展开不够", "缺少判断依据"] : ["还可以更具体", "真实场景还不够扎实"],
+          missing: shortAnswer ? ["应用场景", "边界条件"] : verdict === "follow_up_required" ? ["更具体的取舍例子"] : [],
+          improve: shortAnswer ? "先用一句话给出本质，再补一个真实例子。" : "如果再补一个具体场景，这个答案会更稳。"
         }
       };
 
@@ -331,23 +470,30 @@ function createPreviewApi() {
         improve: evaluation.feedback.improve,
         createdAt: now
       });
+      node.updatedAt = now;
 
-      if (evaluation.verdict === "retry_same_question") {
+      if (verdict === "retry_same_question") {
         node.status = "active";
         quest.currentNodeId = node.id;
+        appendTimeline(quest, "answer-retry", `${node.path} 还需要继续展开。`);
       } else {
         node.status = "completed";
         node.completedAt = now;
-        if (evaluation.verdict === "follow_up_required") {
-          const childCount = quest.nodes.filter((item) => item.parentId === node.id).length;
-          const child = {
+        if (verdict === "follow_up_required") {
+          quest.nodes.forEach((item) => {
+            if (item.status === "active") {
+              item.status = "pending";
+            }
+          });
+          const childIndex = quest.nodes.filter((item) => item.parentId === node.id).length + 1;
+          const childNode = {
             id: crypto.randomUUID(),
-            path: `${node.path}.${childCount + 1}`,
+            path: `${node.path}.${childIndex}`,
             parentId: node.id,
-            title: `把 ${node.title} 放进真实场景里再解释一次`,
-            goal: "把概念解释推进到应用和边界判断。",
-            whyItMatters: "只有能处理场景变化，才算不是死记。",
-            difficulty: Math.min(5, (node.difficulty || 3) + 1),
+            title: `把“${node.title}”放进真实场景里再解释一次。`,
+            goal: "继续往应用、边界和取舍推进。",
+            whyItMatters: "真正的掌握不是会背，而是能在变化场景里解释清楚。",
+            difficulty: clamp((node.difficulty || 3) + 1, 1, 5),
             status: "active",
             source: "follow-up",
             attempts: [],
@@ -357,38 +503,34 @@ function createPreviewApi() {
             updatedAt: now,
             completedAt: null
           };
-          quest.nodes.forEach((item) => {
-            if (item.id !== child.id && item.status === "active") {
-              item.status = "pending";
-            }
-          });
-          quest.nodes.push(child);
-          quest.currentNodeId = child.id;
+          quest.nodes.push(childNode);
+          quest.currentNodeId = childNode.id;
           evaluation.followUpQuestion = {
-            title: child.title,
-            goal: child.goal,
-            reason: child.whyItMatters,
-            difficulty: child.difficulty
+            title: childNode.title,
+            goal: childNode.goal,
+            reason: childNode.whyItMatters,
+            difficulty: childNode.difficulty
           };
+          appendTimeline(quest, "follow-up-created", `${node.path} 过线，已解锁 ${childNode.path}。`);
         } else {
-          activateNext(quest);
+          appendTimeline(quest, "node-completed", `${node.path} 已点亮完成。`);
+          activateNextPending(quest);
         }
       }
 
       quest.updatedAt = now;
-      quest.timeline.unshift({
-        id: crypto.randomUUID(),
-        kind: "preview-answer",
-        summary: `已记录 ${node.path} 的一次回答。`,
-        createdAt: now
-      });
       savePreviewState(state);
+
       return {
         evaluation,
-        quest: { ...quest, stats: buildStats(quest) },
-        quests: state.quests.map(summarizeQuest)
+        quest: {
+          ...quest,
+          stats: buildStats(quest)
+        },
+        quests: state.quests.map(summarizeQuest).sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
       };
     },
+
     async drawReviewQuestion(scopeQuestId) {
       const state = loadPreviewState();
       const quests = scopeQuestId ? state.quests.filter((item) => item.id === scopeQuestId) : state.quests;
@@ -401,27 +543,38 @@ function createPreviewApi() {
             node
           }))
       );
-      return candidates[Math.floor(Math.random() * candidates.length)] || null;
+      if (!candidates.length) {
+        return null;
+      }
+      return candidates[Math.floor(Math.random() * candidates.length)];
     },
+
     async answerReviewQuestion(payload) {
       const state = loadPreviewState();
       const quest = state.quests.find((item) => item.id === payload.questId);
-      const node = quest.nodes.find((item) => item.id === payload.nodeId);
-      const answer = String(payload.answer || "").trim();
+      const node = quest?.nodes?.find((item) => item.id === payload.nodeId);
+      if (!quest || !node) {
+        throw new Error("没有找到当前复习节点。");
+      }
+      const answer = cleanText(payload.answer);
       const now = new Date().toISOString();
-      const score = Math.min(97, Math.max(35, answer.length));
+      const score = clamp(answer.length, 35, 95);
       const evaluation = {
-        verdict: score > 60 ? "review-locked-in" : "review-needs-refresh",
+        verdict: score >= 65 ? "review-locked-in" : "review-needs-refresh",
         score,
-        coachReply: score > 60 ? "这次复习回答比较稳，说明记忆已经开始固化。" : "这题还有点飘，最好回到原节点再复盘一次。",
-        hint: score > 60 ? "" : "优先补一句话本质，再补一个例子。",
+        coachReply:
+          score >= 65
+            ? "这次复习回答比较稳，说明你不是只停留在看懂。"
+            : "这题还有点发飘，建议回到主线里再复盘一次。",
+        hint: score >= 65 ? "" : "先讲一句话本质，再补一个真实场景。",
         feedback: {
-          strengths: score > 60 ? ["主干还在", "表达较完整"] : ["还记得一部分结构"],
-          gaps: score > 60 ? ["可以更凝练"] : ["细节容易掉"],
-          missing: score > 60 ? [] : ["应用例子"],
-          improve: "复习时先说一句话本质，再说一个应用场景。"
+          strengths: score >= 65 ? ["主干还在", "表达比第一次更顺"] : ["还记得部分结构"],
+          gaps: score >= 65 ? ["还可以更凝练"] : ["细节容易散", "场景判断不够稳"],
+          missing: score >= 65 ? [] : ["至少一个应用例子"],
+          improve: "复习时优先说本质，再补边界和取舍。"
         }
       };
+
       node.attempts.push({
         id: crypto.randomUUID(),
         mode: "review",
@@ -438,54 +591,310 @@ function createPreviewApi() {
       });
       node.reviewCount = (node.reviewCount || 0) + 1;
       node.lastReviewAt = now;
+      node.updatedAt = now;
       quest.updatedAt = now;
-      quest.timeline.unshift({
-        id: crypto.randomUUID(),
-        kind: "preview-review",
-        summary: `已完成 ${node.path} 的一次复习抽问。`,
-        createdAt: now
-      });
+      appendTimeline(quest, "review-answer", `${node.path} 已完成一次复习回顾。`);
       savePreviewState(state);
+
       return {
         evaluation,
-        quest: { ...quest, stats: buildStats(quest) },
-        quests: state.quests.map(summarizeQuest)
+        quest: {
+          ...quest,
+          stats: buildStats(quest)
+        },
+        quests: state.quests.map(summarizeQuest).sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
       };
     }
   };
 }
 
+const dom = {
+  body: document.body,
+  navButtons: [...document.querySelectorAll(".nav-button")],
+  openCreateButtons: [...document.querySelectorAll("[data-open-create]")],
+  viewJumpButtons: [...document.querySelectorAll("[data-view-jump]")],
+  closeModalButtons: [...document.querySelectorAll("[data-close-modal]")],
+  viewPanes: {
+    home: document.querySelector("#home-view"),
+    library: document.querySelector("#library-view"),
+    learn: document.querySelector("#learn-view"),
+    review: document.querySelector("#review-view"),
+    settings: document.querySelector("#settings-view")
+  },
+  previewBanner: document.querySelector("#preview-banner"),
+  viewEyebrow: document.querySelector("#view-eyebrow"),
+  viewTitle: document.querySelector("#view-title"),
+  viewSubtitle: document.querySelector("#view-subtitle"),
+  apiStatusPill: document.querySelector("#api-status-pill"),
+  questCountPill: document.querySelector("#quest-count-pill"),
+  projectSearch: document.querySelector("#project-search"),
+  sidebarStartReviewButton: document.querySelector("#sidebar-start-review"),
+  sidebarLibraryCount: document.querySelector("#sidebar-library-count"),
+  sidebarProjectList: document.querySelector("#sidebar-project-list"),
+  sidebarQuestTitle: document.querySelector("#sidebar-quest-title"),
+  sidebarQuestBrief: document.querySelector("#sidebar-quest-brief"),
+  sidebarProgressText: document.querySelector("#sidebar-progress-text"),
+  sidebarProgressBar: document.querySelector("#sidebar-progress-bar"),
+  projectRootText: document.querySelector("#project-root-text"),
+  dataRootText: document.querySelector("#data-root-text"),
+  goLibraryButton: document.querySelector("#go-library"),
+  startGlobalReviewButton: document.querySelector("#start-global-review"),
+  homeStatProjects: document.querySelector("#home-stat-projects"),
+  homeStatRoots: document.querySelector("#home-stat-roots"),
+  homeStatReviewable: document.querySelector("#home-stat-reviewable"),
+  homeStatUpdated: document.querySelector("#home-stat-updated"),
+  homeProjectList: document.querySelector("#home-project-list"),
+  homeReviewList: document.querySelector("#home-review-list"),
+  libraryProjectCount: document.querySelector("#library-project-count"),
+  libraryProjectList: document.querySelector("#library-project-list"),
+  librarySpotlight: document.querySelector("#library-spotlight"),
+  learnEmptyState: document.querySelector("#learn-empty-state"),
+  learnLayout: document.querySelector("#learn-layout"),
+  learnProjectTitle: document.querySelector("#learn-project-title"),
+  learnMetaChips: document.querySelector("#learn-meta-chips"),
+  learnRootProgressText: document.querySelector("#learn-root-progress-text"),
+  learnRootProgressBar: document.querySelector("#learn-root-progress-bar"),
+  learnNodeProgress: document.querySelector("#learn-node-progress"),
+  learnProjectBrief: document.querySelector("#learn-project-brief"),
+  learnStatGrid: document.querySelector("#learn-stat-grid"),
+  roadmapTree: document.querySelector("#roadmap-tree"),
+  toggleFocusModeButton: document.querySelector("#toggle-focus-mode"),
+  questionPanel: document.querySelector("#question-panel"),
+  questionEmpty: document.querySelector("#question-empty"),
+  currentQuestionTag: document.querySelector("#current-question-tag"),
+  currentQuestionPath: document.querySelector("#current-question-path"),
+  currentQuestionTitle: document.querySelector("#current-question-title"),
+  currentQuestionDifficulty: document.querySelector("#current-question-difficulty"),
+  currentQuestionGoal: document.querySelector("#current-question-goal"),
+  currentQuestionWhy: document.querySelector("#current-question-why"),
+  answerForm: document.querySelector("#answer-form"),
+  answerInput: document.querySelector("#answer-input"),
+  submitAnswer: document.querySelector("#submit-answer"),
+  feedbackVerdict: document.querySelector("#feedback-verdict"),
+  feedbackPanel: document.querySelector("#feedback-panel"),
+  timelineList: document.querySelector("#timeline-list"),
+  reviewModeButtons: [...document.querySelectorAll("[data-review-mode]")],
+  reviewModeTitle: document.querySelector("#review-mode-title"),
+  drawReviewButton: document.querySelector("#draw-review"),
+  reviewSummary: document.querySelector("#review-summary"),
+  reviewPanel: document.querySelector("#review-panel"),
+  reviewRecords: document.querySelector("#review-records"),
+  themeOptions: document.querySelector("#theme-options"),
+  settingsForm: document.querySelector("#settings-form"),
+  settingsBaseUrl: document.querySelector("#settings-base-url"),
+  settingsModel: document.querySelector("#settings-model"),
+  settingsApiKey: document.querySelector("#settings-api-key"),
+  settingsTemplate: document.querySelector("#settings-template"),
+  settingsRootCount: document.querySelector("#settings-root-count"),
+  settingsApiHint: document.querySelector("#settings-api-hint"),
+  settingsProjectRoot: document.querySelector("#settings-project-root"),
+  settingsDataRoot: document.querySelector("#settings-data-root"),
+  createModal: document.querySelector("#create-modal"),
+  questForm: document.querySelector("#quest-form"),
+  topicInput: document.querySelector("#topic-input"),
+  materialInput: document.querySelector("#material-input"),
+  levelInput: document.querySelector("#level-input"),
+  goalInput: document.querySelector("#goal-input"),
+  timeboxInput: document.querySelector("#timebox-input"),
+  countInput: document.querySelector("#count-input"),
+  templateSelect: document.querySelector("#template-select"),
+  createQuestButton: document.querySelector("#create-quest"),
+  derivedTopicLabel: document.querySelector("#derived-topic-label"),
+  toggleAdvancedButton: document.querySelector("#toggle-advanced"),
+  advancedFields: document.querySelector("#advanced-fields"),
+  toastRegion: document.querySelector("#toast-region")
+};
+
+const appState = {
+  bootstrap: null,
+  quests: [],
+  activeQuestId: null,
+  activeQuest: null,
+  questDetails: new Map(),
+  currentView: "home",
+  currentReview: null,
+  reviewMode: "random",
+  lastEvaluation: null,
+  previewMode: !window.studyCoachApi,
+  advancedCreateOpen: false,
+  ui: loadUiState()
+  ,
+  projectSearch: ""
+};
+
 const api = window.studyCoachApi || createPreviewApi();
 
-function fillTemplateOptions(selectElement, selectedValue) {
-  selectElement.innerHTML = "";
-  templateCatalog.forEach((template) => {
-    const option = document.createElement("option");
-    option.value = template.key;
-    option.textContent = template.label;
-    option.selected = template.key === selectedValue;
-    selectElement.append(option);
-  });
+function getTemplateOptions() {
+  return appState.bootstrap?.runtime?.templateOptions?.length
+    ? appState.bootstrap.runtime.templateOptions
+    : FALLBACK_TEMPLATES;
+}
+
+function getTemplateLabel(key) {
+  return getTemplateOptions().find((item) => item.key === key)?.label || "通用学习教练";
+}
+
+function sortQuestSummaries(quests) {
+  return [...quests].sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
+}
+
+function getVisibleQuestList() {
+  const keyword = cleanText(appState.projectSearch).toLowerCase();
+  if (!keyword) {
+    return appState.quests;
+  }
+  return appState.quests.filter((quest) => quest.title.toLowerCase().includes(keyword));
 }
 
 function formatDateTime(value) {
   if (!value) {
-    return "刚刚";
+    return "还没有";
   }
-  return new Date(value).toLocaleString("zh-CN", { hour12: false });
+  return new Date(value).toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+
+function getQuestProgressPercent(questLike) {
+  const total = Number(questLike?.stats?.totalRoots || 0);
+  const completed = Number(questLike?.stats?.completedRoots || 0);
+  if (!total) {
+    return 0;
+  }
+  return Math.round((completed / total) * 100);
+}
+
+function getNodeProgressPercent(questLike) {
+  const total = Number(questLike?.stats?.totalNodes || 0);
+  const completed = Number(questLike?.stats?.completedNodes || 0);
+  if (!total) {
+    return 0;
+  }
+  return Math.round((completed / total) * 100);
 }
 
 function getVerdictMeta(verdict) {
   if (verdict === "retry_same_question" || verdict === "review-needs-refresh") {
-    return { label: "继续打磨", className: "warning-chip" };
+    return { label: "继续打磨", tone: "warning" };
   }
   if (verdict === "follow_up_required") {
-    return { label: "已解锁子关卡", className: "success-chip" };
+    return { label: "解锁子问题", tone: "success" };
   }
   if (verdict === "complete_and_advance" || verdict === "review-locked-in") {
-    return { label: "已过关", className: "success-chip" };
+    return { label: "已过关", tone: "success" };
   }
-  return { label: "等待回答", className: "neutral-chip" };
+  return { label: "等待回答", tone: "neutral" };
+}
+
+function getQuestStatusMeta(summary) {
+  const completedRoots = Number(summary?.stats?.completedRoots || 0);
+  const totalRoots = Number(summary?.stats?.totalRoots || 0);
+  if (totalRoots && completedRoots === totalRoots) {
+    return { label: "已通关", tone: "success" };
+  }
+  if (completedRoots === 0) {
+    return { label: "刚开始", tone: "neutral" };
+  }
+  return { label: "进行中", tone: "warning" };
+}
+
+function buildInlineStatCard(label, value) {
+  return `<div class="inline-stat-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function getActiveNode(quest) {
+  if (!quest?.currentNodeId || !Array.isArray(quest.nodes)) {
+    return null;
+  }
+  return quest.nodes.find((node) => node.id === quest.currentNodeId) || null;
+}
+
+function sortNodes(nodes) {
+  return [...nodes].sort((left, right) => {
+    const leftParts = String(left.path || "")
+      .replace(/^Q/, "")
+      .split(".")
+      .map(Number);
+    const rightParts = String(right.path || "")
+      .replace(/^Q/, "")
+      .split(".")
+      .map(Number);
+    const size = Math.max(leftParts.length, rightParts.length);
+    for (let index = 0; index < size; index += 1) {
+      const diff = (leftParts[index] ?? -1) - (rightParts[index] ?? -1);
+      if (diff !== 0) {
+        return diff;
+      }
+    }
+    return 0;
+  });
+}
+
+function getLatestAttempt(node) {
+  if (!Array.isArray(node?.attempts) || !node.attempts.length) {
+    return null;
+  }
+  return [...node.attempts].sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+}
+
+function convertAttemptToEvaluation(attempt) {
+  if (!attempt) {
+    return null;
+  }
+  return {
+    verdict: attempt.verdict,
+    score: attempt.score,
+    coachReply: attempt.coachReply,
+    hint: attempt.hint,
+    feedback: {
+      strengths: Array.isArray(attempt.strengths) ? attempt.strengths : [],
+      gaps: Array.isArray(attempt.gaps) ? attempt.gaps : [],
+      missing: Array.isArray(attempt.missing) ? attempt.missing : [],
+      improve: attempt.improve || ""
+    }
+  };
+}
+
+function collectRecentAttempts(limit = 12) {
+  const questMap = new Map();
+  if (appState.activeQuest?.id) {
+    questMap.set(appState.activeQuest.id, appState.activeQuest);
+  }
+  appState.questDetails.forEach((value, key) => {
+    questMap.set(key, value);
+  });
+
+  return [...questMap.values()]
+    .flatMap((quest) =>
+      (quest.nodes || []).flatMap((node) =>
+        (node.attempts || []).map((attempt) => ({
+          questId: quest.id,
+          questTitle: quest.title,
+          nodePath: node.path,
+          nodeTitle: node.title,
+          mode: attempt.mode,
+          verdict: attempt.verdict,
+          score: attempt.score,
+          createdAt: attempt.createdAt
+        }))
+      )
+    )
+    .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))
+    .slice(0, limit);
+}
+
+function showToast(message, type = "info") {
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  dom.toastRegion.append(toast);
+  window.setTimeout(() => {
+    toast.remove();
+  }, 2600);
 }
 
 function playPositiveTone() {
@@ -508,15 +917,23 @@ function playPositiveTone() {
   oscillator.stop(context.currentTime + 0.2);
 }
 
-function getActiveNode(quest) {
-  if (!quest?.currentNodeId) {
-    return null;
-  }
-  return quest.nodes.find((node) => node.id === quest.currentNodeId) || null;
+function applyUiState() {
+  dom.body.dataset.theme = appState.ui.theme;
+  dom.body.classList.toggle("focus-mode", appState.ui.focusMode && appState.currentView === "learn");
+  dom.toggleFocusModeButton.textContent = appState.ui.focusMode ? "退出沉浸模式" : "沉浸模式";
 }
 
-function buildStatBadge(label, value) {
-  return `<div class="stat-badge"><span>${label}</span><strong>${value}</strong></div>`;
+function setTheme(themeKey) {
+  appState.ui.theme = themeKey;
+  saveUiState();
+  applyUiState();
+  renderThemeOptions();
+}
+
+function setFocusMode(enabled) {
+  appState.ui.focusMode = enabled;
+  saveUiState();
+  applyUiState();
 }
 
 function switchView(viewKey) {
@@ -527,287 +944,40 @@ function switchView(viewKey) {
   dom.navButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.view === viewKey);
   });
-  const meta = viewMeta[viewKey];
+  const meta = VIEW_META[viewKey];
   dom.viewEyebrow.textContent = meta.eyebrow;
   dom.viewTitle.textContent = meta.title;
   dom.viewSubtitle.textContent = meta.subtitle;
+  applyUiState();
 }
 
-function renderApiStatus() {
-  const hasApiKey = Boolean(appState.bootstrap?.settings?.hasApiKey);
-  dom.apiStatusPill.textContent = hasApiKey ? "接口已就绪" : "待配置接口";
-  dom.apiStatusPill.className = `pill-chip ${hasApiKey ? "success-chip" : "neutral-chip"}`;
-  dom.settingsApiHint.textContent = hasApiKey ? "已保存 key" : "待配置";
-  dom.settingsApiHint.className = `pill-chip ${hasApiKey ? "success-chip" : "neutral-chip"}`;
+function openCreateModal() {
+  dom.createModal.classList.remove("hidden");
+  dom.createModal.setAttribute("aria-hidden", "false");
+  updateDerivedTopicLabel();
+  window.setTimeout(() => dom.materialInput.focus(), 0);
 }
 
-function renderNavStatus() {
-  const quest = appState.activeQuest;
-  dom.questCountPill.textContent = `${appState.quests.length} 个任务`;
-  dom.dashboardQuestCount.textContent = String(appState.quests.length);
-
-  if (!quest) {
-    dom.navActiveQuestTitle.textContent = "还没有任务";
-    dom.navActiveQuestBrief.textContent = "先创建一条学习主线。";
-    dom.topbarProgress.textContent = "0 / 0";
-    return;
-  }
-
-  dom.navActiveQuestTitle.textContent = quest.title;
-  dom.navActiveQuestBrief.textContent = quest.missionBrief || quest.launchNote || "继续推进这一轮任务。";
-  dom.topbarProgress.textContent = `${quest.stats.completedRoots} / ${quest.stats.totalRoots}`;
+function closeCreateModal() {
+  dom.createModal.classList.add("hidden");
+  dom.createModal.setAttribute("aria-hidden", "true");
 }
 
-function renderQuestList() {
-  dom.dashboardQuestList.innerHTML = "";
-  if (!appState.quests.length) {
-    dom.dashboardQuestList.innerHTML = `<p class="muted">还没有任务，先生成你的第一组学习关卡。</p>`;
-    return;
-  }
+function setAdvancedCreateOpen(isOpen) {
+  appState.advancedCreateOpen = isOpen;
+  dom.advancedFields.classList.toggle("hidden", !isOpen);
+  dom.toggleAdvancedButton.textContent = isOpen ? "收起可选项" : "展开可选项";
+}
 
-  appState.quests.forEach((quest) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `quest-card ${quest.id === appState.activeQuestId ? "active" : ""}`;
-    button.innerHTML = `
-      <h3>${quest.title}</h3>
-      <p class="quest-meta">${quest.stats.completedRoots} / ${quest.stats.totalRoots} 主线已点亮</p>
-      <p class="quest-meta">${quest.stats.completedNodes} / ${quest.stats.totalNodes} 总节点已完成</p>
-      <p class="quest-meta">${formatDateTime(quest.updatedAt)}</p>
-    `;
-    button.addEventListener("click", async () => {
-      await selectQuest(quest.id);
-      switchView("learn");
-    });
-    dom.dashboardQuestList.append(button);
+function fillTemplateOptions(selectElement, selectedValue) {
+  selectElement.innerHTML = "";
+  getTemplateOptions().forEach((template) => {
+    const option = document.createElement("option");
+    option.value = template.key;
+    option.textContent = template.label;
+    option.selected = template.key === selectedValue;
+    selectElement.append(option);
   });
-}
-
-function renderDashboard() {
-  if (!appState.activeQuest) {
-    dom.dashboardActiveTitle.textContent = "还没有任务";
-    dom.dashboardActiveBrief.textContent = "创建第一条任务后，这里会显示主线摘要和节奏提醒。";
-    dom.dashboardActiveStats.innerHTML = [
-      buildStatBadge("主线进度", "0 / 0"),
-      buildStatBadge("总节点", "0 / 0"),
-      buildStatBadge("待复习", "0")
-    ].join("");
-    return;
-  }
-
-  const quest = appState.activeQuest;
-  const reviewable = quest.nodes.filter((node) => node.status === "completed").length;
-  dom.dashboardActiveTitle.textContent = quest.title;
-  dom.dashboardActiveBrief.textContent = quest.missionBrief || quest.launchNote || "继续推进这一轮任务。";
-  dom.dashboardActiveStats.innerHTML = [
-    buildStatBadge("主线进度", `${quest.stats.completedRoots} / ${quest.stats.totalRoots}`),
-    buildStatBadge("总节点", `${quest.stats.completedNodes} / ${quest.stats.totalNodes}`),
-    buildStatBadge("可复习节点", String(reviewable))
-  ].join("");
-}
-
-function renderLearnView() {
-  const quest = appState.activeQuest;
-  if (!quest) {
-    dom.learnEmptyState.classList.remove("hidden");
-    dom.learnContent.classList.add("hidden");
-    return;
-  }
-
-  dom.learnEmptyState.classList.add("hidden");
-  dom.learnContent.classList.remove("hidden");
-  dom.activeQuestTitle.textContent = quest.title;
-  dom.activeQuestBrief.textContent = quest.missionBrief || quest.launchNote || "继续推进这一轮任务。";
-  dom.rootProgress.textContent = `${quest.stats.completedRoots} / ${quest.stats.totalRoots} 主线`;
-  dom.nodeProgress.textContent = `${quest.stats.completedNodes} / ${quest.stats.totalNodes} 节点`;
-
-  const activeNode = getActiveNode(quest);
-  if (!activeNode) {
-    dom.questionPanel.classList.add("hidden");
-    dom.questionEmpty.classList.remove("hidden");
-  } else {
-    dom.questionPanel.classList.remove("hidden");
-    dom.questionEmpty.classList.add("hidden");
-    dom.currentQuestionTag.textContent = activeNode.source === "follow-up" ? "子关卡" : "主线关卡";
-    dom.currentQuestionTag.className = `pill-chip ${activeNode.source === "follow-up" ? "warning-chip" : "neutral-chip"}`;
-    dom.currentQuestionPath.textContent = activeNode.path;
-    dom.currentQuestionTitle.textContent = activeNode.title;
-    dom.currentQuestionDifficulty.textContent = `难度 ${activeNode.difficulty || 3}`;
-    dom.currentQuestionGoal.textContent = activeNode.goal || "这一关的目标是逼自己把逻辑说清楚。";
-    dom.currentQuestionWhy.textContent = activeNode.whyItMatters || "答题后会留下持久化记录，方便后续复盘。";
-  }
-
-  renderRoadmap();
-  renderTimeline();
-}
-
-function renderFeedback() {
-  const evaluation = appState.lastEvaluation;
-  if (!evaluation) {
-    dom.feedbackVerdict.textContent = "等待回答";
-    dom.feedbackVerdict.className = "pill-chip neutral-chip";
-    dom.feedbackPanel.innerHTML = `<p class="muted">每次回答之后，这里会沉淀你的纠错记录、提示和改进建议。</p>`;
-    return;
-  }
-
-  const meta = getVerdictMeta(evaluation.verdict);
-  dom.feedbackVerdict.textContent = meta.label;
-  dom.feedbackVerdict.className = `pill-chip ${meta.className}`;
-  const strengths = (evaluation.feedback?.strengths || []).map((item) => `<li>${item}</li>`).join("") || "<li>暂无</li>";
-  const gaps = (evaluation.feedback?.gaps || []).map((item) => `<li>${item}</li>`).join("") || "<li>暂无</li>";
-  const missing = (evaluation.feedback?.missing || []).map((item) => `<li>${item}</li>`).join("") || "<li>暂无</li>";
-
-  dom.feedbackPanel.innerHTML = `
-    <p class="feedback-note">${evaluation.coachReply || "这次回答已经记录。"}</p>
-    <div class="feedback-grid">
-      <section class="feedback-box">
-        <h4>你答对的地方</h4>
-        <ul>${strengths}</ul>
-      </section>
-      <section class="feedback-box">
-        <h4>还不够稳的地方</h4>
-        <ul>${gaps}</ul>
-      </section>
-      <section class="feedback-box">
-        <h4>缺掉的关键点</h4>
-        <ul>${missing}</ul>
-      </section>
-    </div>
-    <p class="feedback-note"><strong>更好的表达：</strong>${evaluation.feedback?.improve || "继续补具体例子和边界条件。"}</p>
-    ${evaluation.hint ? `<p class="feedback-note"><strong>下一步提示：</strong>${evaluation.hint}</p>` : ""}
-  `;
-}
-
-function renderRoadmap() {
-  const quest = appState.activeQuest;
-  dom.completionDots.innerHTML = "";
-  dom.roadmapTree.innerHTML = "";
-  if (!quest) {
-    dom.roadmapTree.innerHTML = `<p class="muted">路线图会在任务创建后出现。</p>`;
-    return;
-  }
-
-  const sortedNodes = [...quest.nodes].sort((left, right) => {
-    const leftParts = left.path.replace(/^Q/, "").split(".").map(Number);
-    const rightParts = right.path.replace(/^Q/, "").split(".").map(Number);
-    const size = Math.max(leftParts.length, rightParts.length);
-    for (let index = 0; index < size; index += 1) {
-      const diff = (leftParts[index] ?? -1) - (rightParts[index] ?? -1);
-      if (diff !== 0) {
-        return diff;
-      }
-    }
-    return 0;
-  });
-
-  sortedNodes.forEach((node) => {
-    const dot = document.createElement("span");
-    dot.className = `completion-dot ${node.status === "completed" ? "done" : ""}`;
-    dom.completionDots.append(dot);
-
-    const article = document.createElement("article");
-    article.className = `roadmap-item ${node.status} ${node.parentId ? "child" : "root"}`;
-    article.innerHTML = `
-      <div class="roadmap-head">
-        <div>
-          <p class="quest-meta">${node.path}</p>
-          <h4>${node.title}</h4>
-        </div>
-        <span class="status-mark ${node.status}"></span>
-      </div>
-      <p>${node.goal || "继续输出，让理解真正落地。"}</p>
-    `;
-    dom.roadmapTree.append(article);
-  });
-}
-
-function renderTimeline() {
-  dom.timelineList.innerHTML = "";
-  const timeline = appState.activeQuest?.timeline || [];
-  if (!timeline.length) {
-    dom.timelineList.innerHTML = `<p class="muted">开始答题后，这里会逐步积累你的战报。</p>`;
-    return;
-  }
-  timeline.slice(0, 16).forEach((entry) => {
-    const item = document.createElement("div");
-    item.className = "timeline-item";
-    item.innerHTML = `<strong>${entry.summary}</strong><p>${formatDateTime(entry.createdAt)}</p>`;
-    dom.timelineList.append(item);
-  });
-}
-
-function getRecentAttempts(quest) {
-  if (!quest) {
-    return [];
-  }
-  return quest.nodes
-    .flatMap((node) =>
-      (node.attempts || []).map((attempt) => ({
-        nodePath: node.path,
-        nodeTitle: node.title,
-        mode: attempt.mode,
-        verdict: attempt.verdict,
-        createdAt: attempt.createdAt
-      }))
-    )
-    .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))
-    .slice(0, 10);
-}
-
-function renderReviewView() {
-  const quest = appState.activeQuest;
-  if (!quest) {
-    dom.reviewSummary.innerHTML = [buildStatBadge("可复习节点", "0"), buildStatBadge("最近复习次数", "0")].join("");
-    dom.reviewPanel.innerHTML = `<p class="muted">先创建并完成几个节点，再来这里随机抽题。</p>`;
-    dom.reviewRecords.innerHTML = `<p class="muted">还没有记录。</p>`;
-    return;
-  }
-
-  const reviewableNodes = quest.nodes.filter((node) => node.status === "completed");
-  const recentReviewAttempts = getRecentAttempts(quest).filter((item) => item.mode === "review");
-  dom.reviewSummary.innerHTML = [
-    buildStatBadge("可复习节点", String(reviewableNodes.length)),
-    buildStatBadge("最近复习次数", String(recentReviewAttempts.length))
-  ].join("");
-
-  if (!appState.currentReview) {
-    dom.reviewPanel.innerHTML = `<p class="muted">点击“抽一题”，从已经完成的节点里随机回抽。</p>`;
-  } else {
-    const review = appState.currentReview;
-    dom.reviewPanel.innerHTML = `
-      <div class="stack-form">
-        <p class="quest-meta">${review.questTitle}</p>
-        <h3>${review.node.path} · ${review.node.title}</h3>
-        <p class="muted">${review.node.goal || "用自己的话重新讲清楚这一点。"}</p>
-        <label>
-          <span>复习回答</span>
-          <textarea id="review-answer-input" rows="6" placeholder="现在开始复述，不要看提示。"></textarea>
-        </label>
-        <button id="submit-review" class="primary-button" type="button">提交复习回答</button>
-      </div>
-    `;
-    document.querySelector("#submit-review")?.addEventListener("click", submitReviewAnswer);
-  }
-
-  const recentAttempts = getRecentAttempts(quest);
-  if (!recentAttempts.length) {
-    dom.reviewRecords.innerHTML = `<p class="muted">还没有答题记录。</p>`;
-    return;
-  }
-  dom.reviewRecords.innerHTML = recentAttempts
-    .map((attempt) => {
-      const meta = getVerdictMeta(attempt.verdict);
-      return `<div class="timeline-item"><strong>${attempt.nodePath} · ${attempt.nodeTitle}</strong><p>${attempt.mode === "review" ? "复习记录" : "闯关记录"} · ${meta.label} · ${formatDateTime(attempt.createdAt)}</p></div>`;
-    })
-    .join("");
-}
-
-function renderSettingsView() {
-  const runtimeRoot = appState.bootstrap?.runtime?.dataRoot || "本地";
-  dom.projectRootText.textContent = "E:\\study-quest-desktop";
-  dom.settingsProjectRoot.textContent = "E:\\study-quest-desktop";
-  dom.dataRootText.textContent = runtimeRoot;
-  dom.settingsDataRoot.textContent = runtimeRoot;
 }
 
 function syncFormsFromSettings() {
@@ -817,19 +987,59 @@ function syncFormsFromSettings() {
   }
   fillTemplateOptions(dom.templateSelect, settings.defaultTemplateKey || "general");
   fillTemplateOptions(dom.settingsTemplate, settings.defaultTemplateKey || "general");
-  dom.templateSelect.value = settings.defaultTemplateKey || "general";
-  dom.settingsTemplate.value = settings.defaultTemplateKey || "general";
   dom.settingsBaseUrl.value = settings.baseUrl || "";
   dom.settingsModel.value = settings.model || "";
   dom.settingsApiKey.value = "";
-  dom.settingsRootCount.value = settings.defaultRootQuestionCount || 8;
-  document.querySelector("#count-input").value = settings.defaultRootQuestionCount || 8;
+  dom.settingsTemplate.value = settings.defaultTemplateKey || "general";
+  dom.settingsRootCount.value = clamp(Number(settings.defaultRootQuestionCount || 10), 5, 30);
+  dom.countInput.value = clamp(Number(settings.defaultRootQuestionCount || 10), 5, 30);
+  updateDerivedTopicLabel();
+}
+
+function updateDerivedTopicLabel() {
+  dom.derivedTopicLabel.textContent = deriveTopicFromMaterial(dom.materialInput.value, dom.topicInput.value);
+}
+
+function hydrateQuestSummaries(quests) {
+  appState.quests = sortQuestSummaries(Array.isArray(quests) ? quests : []);
+}
+
+function rememberQuestDetail(quest) {
+  if (!quest?.id) {
+    return;
+  }
+  appState.questDetails.set(quest.id, quest);
+  if (appState.activeQuestId === quest.id) {
+    appState.activeQuest = quest;
+  }
+}
+
+async function ensureQuestDetail(questId, force = false) {
+  if (!force && appState.questDetails.has(questId)) {
+    return appState.questDetails.get(questId);
+  }
+  const quest = await api.getQuest(questId);
+  rememberQuestDetail(quest);
+  return quest;
+}
+
+async function prefetchQuestDetails(limit = 6) {
+  const subset = appState.quests.slice(0, limit);
+  for (const summary of subset) {
+    try {
+      await ensureQuestDetail(summary.id);
+    } catch (_error) {
+      // Ignore prefetch failures in preview flow.
+    }
+  }
+  renderReviewRecords();
 }
 
 async function selectQuest(questId) {
-  const quest = await api.getQuest(questId);
   appState.activeQuestId = questId;
-  appState.activeQuest = quest;
+  appState.lastEvaluation = null;
+  appState.currentReview = null;
+  appState.activeQuest = await ensureQuestDetail(questId);
   renderAll();
 }
 
@@ -837,13 +1047,581 @@ function renderPreviewBanner() {
   dom.previewBanner.classList.toggle("hidden", !appState.previewMode);
 }
 
+function renderHeaderAndSidebar() {
+  const settings = appState.bootstrap?.settings;
+  const hasApiKey = Boolean(settings?.hasApiKey);
+  dom.apiStatusPill.textContent = hasApiKey ? "接口已就绪" : "接口待配置";
+  dom.apiStatusPill.className = `status-pill ${hasApiKey ? "success" : "neutral"}`;
+  dom.settingsApiHint.textContent = hasApiKey ? "已保存 key" : "待配置";
+  dom.settingsApiHint.className = `status-pill ${hasApiKey ? "success" : "neutral"}`;
+  dom.questCountPill.textContent = `${appState.quests.length} 个项目`;
+
+  if (!appState.activeQuest) {
+    dom.sidebarQuestTitle.textContent = "还没有学习项目";
+    dom.sidebarQuestBrief.textContent = "先创建一个项目，后面的追问、记录和复习中心才会真正跑起来。";
+    dom.sidebarProgressText.textContent = "0 / 0";
+    dom.sidebarProgressBar.style.width = "0%";
+  } else {
+    const quest = appState.activeQuest;
+    dom.sidebarQuestTitle.textContent = quest.title;
+    dom.sidebarQuestBrief.textContent = quest.missionBrief || quest.launchNote || "继续把这条主线往前推。";
+    dom.sidebarProgressText.textContent = `${quest.stats.completedRoots} / ${quest.stats.totalRoots}`;
+    dom.sidebarProgressBar.style.width = `${getQuestProgressPercent(quest)}%`;
+  }
+
+  const visibleQuests = getVisibleQuestList();
+  dom.sidebarLibraryCount.textContent = String(visibleQuests.length);
+  if (!visibleQuests.length) {
+    dom.sidebarProjectList.innerHTML = `<div class="sidebar-empty">还没有匹配的项目</div>`;
+  } else {
+    dom.sidebarProjectList.innerHTML = visibleQuests
+      .slice(0, 8)
+      .map((quest) => {
+        const status = getQuestStatusMeta(quest);
+        return `
+          <button class="sidebar-project-item ${quest.id === appState.activeQuestId ? "active" : ""}" data-sidebar-quest="${escapeHtml(quest.id)}" type="button">
+            <div>
+              <strong>${escapeHtml(quest.title)}</strong>
+              <span>${quest.stats.completedRoots}/${quest.stats.totalRoots} 主线</span>
+            </div>
+            <em class="${status.tone}">${escapeHtml(status.label)}</em>
+          </button>
+        `;
+      })
+      .join("");
+    dom.sidebarProjectList.querySelectorAll("[data-sidebar-quest]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        await selectQuest(button.dataset.sidebarQuest);
+        switchView("learn");
+        renderAll();
+      });
+    });
+  }
+}
+
+function projectCardMarkup(summary, { active = false, compact = false } = {}) {
+  const status = getQuestStatusMeta(summary);
+  const progress = getQuestProgressPercent(summary);
+  const nodeProgress = getNodeProgressPercent(summary);
+  return `
+    <article class="project-card ${active ? "active" : ""}">
+      <div class="project-card-head">
+        <div>
+          <p class="eyebrow">${escapeHtml(getTemplateLabel(summary.templateKey))}</p>
+          <h4>${escapeHtml(summary.title)}</h4>
+        </div>
+        <span class="status-pill ${status.tone}">${escapeHtml(status.label)}</span>
+      </div>
+      <p class="muted">${escapeHtml(summary.missionBrief || "这条项目还没有摘要，可以先进入主线看看问题分布。")}</p>
+      <div class="progress-track">
+        <span style="width:${progress}%"></span>
+      </div>
+      <div class="project-meta-row">
+        <span class="project-meta">主线 ${summary.stats.completedRoots}/${summary.stats.totalRoots}</span>
+        <span class="project-meta">节点 ${summary.stats.completedNodes}/${summary.stats.totalNodes}</span>
+        <span class="project-meta">节点完成率 ${nodeProgress}%</span>
+      </div>
+      <div class="project-actions">
+        <button class="primary-button" data-continue-quest="${escapeHtml(summary.id)}" type="button">
+          ${compact ? "继续" : "继续学习"}
+        </button>
+        <button class="ghost-button" data-review-scope="${escapeHtml(summary.id)}" type="button">
+          ${compact ? "复习" : "去复习"}
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function wireProjectActions(container) {
+  container.querySelectorAll("[data-continue-quest]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      await selectQuest(button.dataset.continueQuest);
+      switchView("learn");
+      renderAll();
+    });
+  });
+
+  container.querySelectorAll("[data-review-scope]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      await selectQuest(button.dataset.reviewScope);
+      await startReviewMode("current", true);
+    });
+  });
+}
+
+function renderHomeView() {
+  const totalProjects = appState.quests.length;
+  const totalRoots = appState.quests.reduce((sum, quest) => sum + Number(quest.stats.totalRoots || 0), 0);
+  const completedRoots = appState.quests.reduce((sum, quest) => sum + Number(quest.stats.completedRoots || 0), 0);
+  const reviewable = appState.quests.reduce((sum, quest) => sum + Number(quest.stats.completedNodes || 0), 0);
+  const latestUpdated = appState.quests[0]?.updatedAt || null;
+
+  dom.homeStatProjects.textContent = String(totalProjects);
+  dom.homeStatRoots.textContent = `${completedRoots} / ${totalRoots}`;
+  dom.homeStatReviewable.textContent = String(reviewable);
+  dom.homeStatUpdated.textContent = formatDateTime(latestUpdated);
+
+  if (!appState.quests.length) {
+    dom.homeProjectList.innerHTML = `<div class="empty-inline"><p class="muted">还没有项目。先贴一段学习内容，我们再一起看主线关卡够不够像一个真正的学习教练。</p></div>`;
+  } else {
+    dom.homeProjectList.innerHTML = appState.quests.slice(0, 3).map((quest) => projectCardMarkup(quest, { active: quest.id === appState.activeQuestId, compact: true })).join("");
+    wireProjectActions(dom.homeProjectList);
+  }
+
+  const reviewSuggestions = appState.quests
+    .filter((quest) => Number(quest.stats.completedNodes || 0) > 0)
+    .sort((left, right) => Number(right.stats.completedNodes || 0) - Number(left.stats.completedNodes || 0))
+    .slice(0, 4);
+
+  if (!reviewSuggestions.length) {
+    dom.homeReviewList.innerHTML = `<div class="empty-inline"><p class="muted">目前还没有可复习节点。先完成几题，再来抽查会更有感觉。</p></div>`;
+  } else {
+    dom.homeReviewList.innerHTML = reviewSuggestions
+      .map((quest) => {
+        const status = getQuestStatusMeta(quest);
+        return `
+          <article class="project-card">
+            <div class="project-card-head">
+              <div>
+                <p class="eyebrow">优先抽查</p>
+                <h4>${escapeHtml(quest.title)}</h4>
+              </div>
+              <span class="status-pill ${status.tone}">${quest.stats.completedNodes} 个可抽查节点</span>
+            </div>
+            <p class="muted">${escapeHtml(quest.missionBrief || "适合拿来做一轮随机抽题。")}</p>
+            <div class="project-actions">
+              <button class="primary-button" data-review-scope="${escapeHtml(quest.id)}" type="button">现在复习</button>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+    wireProjectActions(dom.homeReviewList);
+  }
+}
+
+function renderLibraryView() {
+  const visibleQuests = getVisibleQuestList();
+  dom.libraryProjectCount.textContent = `${visibleQuests.length} 个项目`;
+
+  if (!visibleQuests.length) {
+    dom.libraryProjectList.innerHTML = `<div class="empty-inline"><p class="muted">项目库还是空的。先新建一个任务，我们再把首页和学习页跑起来。</p></div>`;
+  } else {
+    dom.libraryProjectList.innerHTML = visibleQuests.map((quest) => projectCardMarkup(quest, { active: quest.id === appState.activeQuestId })).join("");
+    wireProjectActions(dom.libraryProjectList);
+  }
+
+  if (!appState.activeQuest) {
+    dom.librarySpotlight.innerHTML = `<div class="empty-inline"><p class="muted">选择一个项目后，这里会显示更完整的主线摘要、进度和最近学习记录。</p></div>`;
+    return;
+  }
+
+  const quest = appState.activeQuest;
+  const latestTimeline = (quest.timeline || []).slice(0, 4);
+  const chips = [
+    quest.level ? `当前水平：${quest.level}` : null,
+    quest.goal ? `学习目标：${quest.goal}` : null,
+    quest.timebox ? `时间限制：${quest.timebox}` : null,
+    `训练模式：${getTemplateLabel(quest.templateKey)}`
+  ]
+    .filter(Boolean)
+    .map((item) => `<span class="meta-chip">${escapeHtml(item)}</span>`)
+    .join("");
+
+  dom.librarySpotlight.innerHTML = `
+    <div class="project-card active">
+      <div class="project-card-head">
+        <div>
+          <p class="eyebrow">当前项目</p>
+          <h4>${escapeHtml(quest.title)}</h4>
+        </div>
+        <span class="status-pill success">${quest.stats.completedRoots}/${quest.stats.totalRoots} 主线</span>
+      </div>
+      <p class="muted">${escapeHtml(quest.missionBrief || quest.launchNote || "继续把这条主线打透。")}</p>
+      <div class="meta-chip-row">${chips}</div>
+      <div class="inline-stat-grid">
+        ${buildInlineStatCard("总节点", `${quest.stats.completedNodes}/${quest.stats.totalNodes}`)}
+        ${buildInlineStatCard("可复习", String(quest.nodes.filter((node) => node.status === "completed").length))}
+        ${buildInlineStatCard("最近更新", formatDateTime(quest.updatedAt))}
+      </div>
+      <div class="project-actions">
+        <button class="primary-button" data-continue-quest="${escapeHtml(quest.id)}" type="button">进入闯关页</button>
+        <button class="ghost-button" data-review-scope="${escapeHtml(quest.id)}" type="button">当前项目复习</button>
+      </div>
+    </div>
+    <div class="panel" style="padding:0;border:0;box-shadow:none;background:transparent;">
+      <div class="section-head" style="margin-bottom:4px;">
+        <div>
+          <p class="eyebrow">最近记录</p>
+          <h3 style="margin-top:6px;">这条主线最近发生了什么</h3>
+        </div>
+      </div>
+      <div class="timeline-list">
+        ${
+          latestTimeline.length
+            ? latestTimeline
+                .map(
+                  (item) => `
+                    <div class="timeline-item">
+                      <strong>${escapeHtml(item.summary)}</strong>
+                      <p class="muted">${formatDateTime(item.createdAt)}</p>
+                    </div>
+                  `
+                )
+                .join("")
+            : `<div class="empty-inline"><p class="muted">还没有记录。</p></div>`
+        }
+      </div>
+    </div>
+  `;
+  wireProjectActions(dom.librarySpotlight);
+}
+
+function renderRoadmap(quest) {
+  dom.roadmapTree.innerHTML = "";
+  if (!quest) {
+    dom.roadmapTree.innerHTML = `<div class="empty-inline"><p class="muted">主线地图会在你创建项目后出现在这里。</p></div>`;
+    return;
+  }
+
+  sortNodes(quest.nodes || []).forEach((node) => {
+    const article = document.createElement("article");
+    article.className = `roadmap-item ${node.status} ${node.parentId ? "child" : "root"}`;
+    article.innerHTML = `
+      <div class="roadmap-item-head">
+        <div>
+          <p class="eyebrow">${escapeHtml(node.path)}</p>
+          <h4>${escapeHtml(node.title)}</h4>
+        </div>
+        <span class="status-dot ${escapeHtml(node.status)}"></span>
+      </div>
+      <p class="muted">${escapeHtml(node.goal || "继续输出，让理解真正落地。")}</p>
+    `;
+    dom.roadmapTree.append(article);
+  });
+}
+
+function getQuestFeedbackSource(quest) {
+  if (appState.lastEvaluation) {
+    return appState.lastEvaluation;
+  }
+  if (!quest) {
+    return null;
+  }
+  const latestAttempt = (quest.nodes || [])
+    .flatMap((node) => node.attempts || [])
+    .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+  return convertAttemptToEvaluation(latestAttempt);
+}
+
+function renderFeedback(quest) {
+  const evaluation = getQuestFeedbackSource(quest);
+  if (!evaluation) {
+    dom.feedbackVerdict.textContent = "等待回答";
+    dom.feedbackVerdict.className = "status-pill neutral";
+    dom.feedbackPanel.innerHTML = `
+      <div class="empty-inline">
+        <p class="muted">每次回答之后，这里都会留下具体反馈：哪里答对了、哪里还不稳、下一步该怎么补。</p>
+      </div>
+    `;
+    return;
+  }
+
+  const meta = getVerdictMeta(evaluation.verdict);
+  dom.feedbackVerdict.textContent = meta.label;
+  dom.feedbackVerdict.className = `status-pill ${meta.tone}`;
+
+  const strengths = (evaluation.feedback?.strengths || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无</li>";
+  const gaps = (evaluation.feedback?.gaps || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无</li>";
+  const missing = (evaluation.feedback?.missing || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无</li>";
+
+  dom.feedbackPanel.innerHTML = `
+    <p class="feedback-note">${escapeHtml(evaluation.coachReply || "这次回答已经留下记录。")}</p>
+    <div class="feedback-grid">
+      <section class="feedback-box">
+        <h4>答得稳的地方</h4>
+        <ul>${strengths}</ul>
+      </section>
+      <section class="feedback-box">
+        <h4>还差一口气的地方</h4>
+        <ul>${gaps}</ul>
+      </section>
+      <section class="feedback-box">
+        <h4>还缺的关键点</h4>
+        <ul>${missing}</ul>
+      </section>
+    </div>
+    <p class="feedback-note"><strong>更好的表达：</strong>${escapeHtml(evaluation.feedback?.improve || "继续补真实场景和判断依据。")}</p>
+    ${evaluation.hint ? `<p class="feedback-note"><strong>下一步提示：</strong>${escapeHtml(evaluation.hint)}</p>` : ""}
+  `;
+}
+
+function renderTimeline(quest) {
+  const timeline = quest?.timeline || [];
+  if (!timeline.length) {
+    dom.timelineList.innerHTML = `<div class="empty-inline"><p class="muted">开始答题以后，这里会逐步积累你的学习时间线。</p></div>`;
+    return;
+  }
+
+  dom.timelineList.innerHTML = timeline
+    .slice(0, 12)
+    .map(
+      (item) => `
+        <div class="timeline-item">
+          <strong>${escapeHtml(item.summary)}</strong>
+          <p class="muted">${formatDateTime(item.createdAt)}</p>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function renderLearnView() {
+  if (!appState.activeQuest) {
+    dom.learnEmptyState.classList.remove("hidden");
+    dom.learnLayout.classList.add("hidden");
+    return;
+  }
+
+  dom.learnEmptyState.classList.add("hidden");
+  dom.learnLayout.classList.remove("hidden");
+
+  const quest = appState.activeQuest;
+  const activeNode = getActiveNode(quest);
+  const reviewableCount = (quest.nodes || []).filter((node) => node.status === "completed").length;
+
+  dom.learnProjectTitle.textContent = quest.title;
+  dom.learnProjectBrief.textContent = quest.missionBrief || quest.launchNote || "继续把这条主线往前推进。";
+  dom.learnNodeProgress.textContent = `${quest.stats.completedNodes}/${quest.stats.totalNodes} 节点`;
+  dom.learnRootProgressText.textContent = `${quest.stats.completedRoots} / ${quest.stats.totalRoots}`;
+  dom.learnRootProgressBar.style.width = `${getQuestProgressPercent(quest)}%`;
+  dom.learnStatGrid.innerHTML = [
+    buildInlineStatCard("主线完成", `${quest.stats.completedRoots}/${quest.stats.totalRoots}`),
+    buildInlineStatCard("总节点", `${quest.stats.completedNodes}/${quest.stats.totalNodes}`),
+    buildInlineStatCard("可复习", String(reviewableCount))
+  ].join("");
+
+  const metaChips = [
+    quest.level ? `当前水平：${quest.level}` : null,
+    quest.goal ? `学习目标：${quest.goal}` : null,
+    quest.timebox ? `时间限制：${quest.timebox}` : null,
+    `训练模式：${getTemplateLabel(quest.templateKey)}`
+  ]
+    .filter(Boolean)
+    .map((item) => `<span class="meta-chip">${escapeHtml(item)}</span>`)
+    .join("");
+  dom.learnMetaChips.innerHTML = metaChips;
+
+  renderRoadmap(quest);
+  renderFeedback(quest);
+  renderTimeline(quest);
+
+  if (!activeNode) {
+    dom.questionPanel.classList.add("hidden");
+    dom.questionEmpty.classList.remove("hidden");
+    return;
+  }
+
+  dom.questionPanel.classList.remove("hidden");
+  dom.questionEmpty.classList.add("hidden");
+  dom.currentQuestionTag.textContent = activeNode.source === "follow-up" ? "子问题" : "主线关卡";
+  dom.currentQuestionTag.className = `status-pill ${activeNode.source === "follow-up" ? "warning" : "neutral"}`;
+  dom.currentQuestionPath.textContent = activeNode.path;
+  dom.currentQuestionTitle.textContent = activeNode.title;
+  dom.currentQuestionDifficulty.textContent = `难度 ${activeNode.difficulty || 3}`;
+  dom.currentQuestionGoal.textContent = activeNode.goal || "继续往主干、应用和边界上输出。";
+  dom.currentQuestionWhy.textContent = activeNode.whyItMatters || "只要你能用自己的话说出来，理解才真正开始沉淀。";
+}
+
+function renderReviewModeButtons() {
+  dom.reviewModeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.reviewMode === appState.reviewMode);
+  });
+  dom.reviewModeTitle.textContent = REVIEW_MODE_META[appState.reviewMode].label;
+}
+
+async function buildReviewCandidates(mode) {
+  const summaries =
+    mode === "current" && appState.activeQuestId
+      ? appState.quests.filter((quest) => quest.id === appState.activeQuestId)
+      : appState.quests;
+
+  const details = [];
+  for (const summary of summaries) {
+    details.push(await ensureQuestDetail(summary.id));
+  }
+
+  let candidates = details.flatMap((quest) =>
+    (quest.nodes || [])
+      .filter((node) => node.status === "completed")
+      .map((node) => ({
+        questId: quest.id,
+        questTitle: quest.title,
+        node
+      }))
+  );
+
+  if (mode === "weak") {
+    candidates = candidates.filter((candidate) => {
+      const latestAttempt = getLatestAttempt(candidate.node);
+      return latestAttempt && (
+        ["retry_same_question", "follow_up_required", "review-needs-refresh"].includes(latestAttempt.verdict) ||
+        Number(latestAttempt.score || 100) < 80
+      );
+    });
+  }
+
+  if (mode === "recent") {
+    candidates = candidates.sort((left, right) => new Date(right.node.completedAt || 0) - new Date(left.node.completedAt || 0));
+  }
+
+  return candidates;
+}
+
+function pickReviewCandidate(mode, candidates) {
+  if (!candidates.length) {
+    return null;
+  }
+  if (mode === "recent") {
+    return candidates[0];
+  }
+  const index = Math.floor(Math.random() * candidates.length);
+  return candidates[index];
+}
+
+async function startReviewMode(mode, autoDraw = false) {
+  appState.reviewMode = mode;
+  appState.currentReview = null;
+  switchView("review");
+  renderAll();
+
+  if (!autoDraw) {
+    return;
+  }
+
+  const candidates = await buildReviewCandidates(mode);
+  const picked = pickReviewCandidate(mode, candidates);
+  if (!picked) {
+    showToast(REVIEW_MODE_META[mode].emptyMessage, "warning");
+    renderAll();
+    return;
+  }
+  appState.currentReview = {
+    ...picked,
+    mode
+  };
+  renderAll();
+}
+
+function renderReviewRecords() {
+  const attempts = collectRecentAttempts(12);
+  if (!attempts.length) {
+    dom.reviewRecords.innerHTML = `<div class="empty-inline"><p class="muted">还没有答题或复习记录。先完成第一轮主线，再回来这里看回放。</p></div>`;
+    return;
+  }
+
+  dom.reviewRecords.innerHTML = attempts
+    .map((attempt) => {
+      const verdict = getVerdictMeta(attempt.verdict);
+      return `
+        <div class="timeline-item">
+          <strong>${escapeHtml(attempt.questTitle)} · ${escapeHtml(attempt.nodePath)} · ${escapeHtml(attempt.nodeTitle)}</strong>
+          <p class="muted">${attempt.mode === "review" ? "复习记录" : "答题记录"} · ${escapeHtml(verdict.label)} · ${formatDateTime(attempt.createdAt)}</p>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderReviewView() {
+  renderReviewModeButtons();
+  const reviewableCount = appState.quests.reduce((sum, quest) => sum + Number(quest.stats.completedNodes || 0), 0);
+  const currentScopeLabel =
+    appState.reviewMode === "current"
+      ? appState.activeQuest?.title || "当前项目未选中"
+      : REVIEW_MODE_META[appState.reviewMode].label;
+  const recentReviews = collectRecentAttempts(20).filter((item) => item.mode === "review").length;
+
+  dom.reviewSummary.innerHTML = [
+    buildInlineStatCard("可抽查节点", String(reviewableCount)),
+    buildInlineStatCard("当前模式", currentScopeLabel),
+    buildInlineStatCard("最近复习次数", String(recentReviews))
+  ].join("");
+
+  if (!appState.currentReview) {
+    dom.reviewPanel.innerHTML = `
+      <div class="empty-inline">
+        <p class="muted">${escapeHtml(REVIEW_MODE_META[appState.reviewMode].emptyMessage)}</p>
+      </div>
+    `;
+  } else {
+    const review = appState.currentReview;
+    dom.reviewPanel.innerHTML = `
+      <div class="project-card active">
+        <div class="project-card-head">
+          <div>
+            <p class="eyebrow">${escapeHtml(review.questTitle)}</p>
+            <h4>${escapeHtml(review.node.path)} · ${escapeHtml(review.node.title)}</h4>
+          </div>
+          <span class="status-pill warning">${escapeHtml(REVIEW_MODE_META[review.mode].label)}</span>
+        </div>
+        <p class="muted">${escapeHtml(review.node.goal || "试着不看提示，重新把这题讲完整。")}</p>
+        <label class="field-block">
+          <span>复习回答</span>
+          <textarea id="review-answer-input" rows="7" placeholder="现在开始复述，尽量不要偷看原答案。" spellcheck="false"></textarea>
+        </label>
+        <div class="form-actions">
+          <button id="submit-review" class="primary-button" type="button">提交复习回答</button>
+        </div>
+      </div>
+    `;
+    const submitReviewButton = document.querySelector("#submit-review");
+    submitReviewButton?.addEventListener("click", submitReviewAnswer);
+  }
+
+  renderReviewRecords();
+}
+
+function renderThemeOptions() {
+  dom.themeOptions.innerHTML = THEME_PRESETS.map((theme) => {
+    const isActive = theme.key === appState.ui.theme;
+    return `
+      <button class="theme-card ${isActive ? "active" : ""}" data-theme-key="${escapeHtml(theme.key)}" type="button">
+        <div class="theme-swatch">
+          <span class="theme-${escapeHtml(theme.key)}-a"></span>
+          <span class="theme-${escapeHtml(theme.key)}-b"></span>
+          <span class="theme-${escapeHtml(theme.key)}-c"></span>
+          <span class="theme-${escapeHtml(theme.key)}-d"></span>
+        </div>
+        <strong>${escapeHtml(theme.name)}</strong>
+        <span class="muted">${escapeHtml(theme.description)}</span>
+      </button>
+    `;
+  }).join("");
+
+  dom.themeOptions.querySelectorAll("[data-theme-key]").forEach((button) => {
+    button.addEventListener("click", () => {
+      setTheme(button.dataset.themeKey);
+      showToast(`已切换到 ${button.querySelector("strong")?.textContent || "新主题"}`);
+    });
+  });
+}
+
+function renderSettingsView() {
+  const runtimeRoot = appState.bootstrap?.runtime?.dataRoot || "-";
+  dom.projectRootText.textContent = "E:\\study-quest-desktop";
+  dom.dataRootText.textContent = runtimeRoot;
+  dom.settingsProjectRoot.textContent = "E:\\study-quest-desktop";
+  dom.settingsDataRoot.textContent = runtimeRoot;
+  renderThemeOptions();
+}
+
 function renderAll() {
-  renderApiStatus();
-  renderNavStatus();
-  renderQuestList();
-  renderDashboard();
+  renderHeaderAndSidebar();
+  renderHomeView();
+  renderLibraryView();
   renderLearnView();
-  renderFeedback();
   renderReviewView();
   renderSettingsView();
   switchView(appState.currentView);
@@ -851,57 +1629,59 @@ function renderAll() {
 
 async function bootstrap() {
   appState.bootstrap = await api.loadBootstrap();
-  appState.quests = appState.bootstrap.quests || [];
+  hydrateQuestSummaries(appState.bootstrap.quests || []);
   syncFormsFromSettings();
   renderPreviewBanner();
+  renderAll();
+
   if (appState.quests.length) {
     await selectQuest(appState.quests[0].id);
-  } else {
-    renderAll();
   }
+
+  void prefetchQuestDetails();
 }
 
 async function handleCreateQuest(event) {
   event.preventDefault();
   const payload = {
-    topic: document.querySelector("#topic-input").value.trim(),
-    material: document.querySelector("#material-input").value.trim(),
-    level: document.querySelector("#level-input").value.trim(),
-    goal: document.querySelector("#goal-input").value.trim(),
-    timebox: document.querySelector("#timebox-input").value.trim(),
-    rootQuestionCount: Number(document.querySelector("#count-input").value),
-    templateKey: dom.templateSelect.value
+    topic: cleanText(dom.topicInput.value),
+    material: cleanText(dom.materialInput.value),
+    level: cleanText(dom.levelInput.value),
+    goal: cleanText(dom.goalInput.value),
+    timebox: cleanText(dom.timeboxInput.value),
+    rootQuestionCount: clamp(Number(dom.countInput.value || appState.bootstrap?.settings?.defaultRootQuestionCount || 10), 5, 30),
+    templateKey: dom.templateSelect.value || appState.bootstrap?.settings?.defaultTemplateKey || "general"
   };
 
+  if (!payload.material) {
+    showToast("学习内容不能为空。先贴材料，我们再替你自动生成项目标题和主线。", "warning");
+    dom.materialInput.focus();
+    return;
+  }
+
   const originalText = dom.createQuestButton.textContent;
-  dom.createQuestButton.textContent = "正在生成卡组...";
+  dom.createQuestButton.textContent = "正在生成主线关卡...";
   dom.createQuestButton.disabled = true;
 
   try {
     const response = await api.createQuest(payload);
-    appState.quests = response.quests;
+    hydrateQuestSummaries(response.quests);
+    rememberQuestDetail(response.quest);
     appState.activeQuestId = response.quest.id;
     appState.activeQuest = response.quest;
-    appState.currentReview = null;
     appState.lastEvaluation = null;
+    appState.currentReview = null;
     dom.questForm.reset();
     syncFormsFromSettings();
+    setAdvancedCreateOpen(false);
+    closeCreateModal();
     switchView("learn");
     renderAll();
+    showToast(`已创建项目：${response.quest.title}`);
   } catch (error) {
-    appState.lastEvaluation = {
-      verdict: "retry_same_question",
-      coachReply: error.message || "生成任务失败。",
-      hint: "先检查接口配置，再试一次。",
-      feedback: {
-        strengths: [],
-        gaps: ["任务还没生成成功"],
-        missing: ["可用的接口配置"],
-        improve: "确认 Base URL、模型名和 API Key 是否正确。"
-      }
-    };
     switchView("settings");
     renderAll();
+    showToast(error.message || "生成项目失败，请先检查接口设置。", "warning");
   } finally {
     dom.createQuestButton.textContent = originalText;
     dom.createQuestButton.disabled = false;
@@ -910,25 +1690,29 @@ async function handleCreateQuest(event) {
 
 async function handleAnswerQuestion(event) {
   event.preventDefault();
-  const quest = appState.activeQuest;
-  const activeNode = getActiveNode(quest);
-  const answer = dom.answerInput.value.trim();
-  if (!quest || !activeNode || !answer) {
+  const answer = cleanText(dom.answerInput.value);
+  const activeNode = getActiveNode(appState.activeQuest);
+  if (!appState.activeQuest || !activeNode) {
+    return;
+  }
+  if (!answer) {
+    showToast("先写下你的回答，再提交这一关。", "warning");
+    dom.answerInput.focus();
     return;
   }
 
   const originalText = dom.submitAnswer.textContent;
-  dom.submitAnswer.textContent = "教练判定中...";
+  dom.submitAnswer.textContent = "教练正在判定...";
   dom.submitAnswer.disabled = true;
 
   try {
     const response = await api.answerQuestion({
-      questId: quest.id,
+      questId: appState.activeQuest.id,
       nodeId: activeNode.id,
       answer
     });
-    appState.quests = response.quests;
-    appState.activeQuest = response.quest;
+    hydrateQuestSummaries(response.quests);
+    rememberQuestDetail(response.quest);
     appState.lastEvaluation = response.evaluation;
     appState.currentReview = null;
     dom.answerInput.value = "";
@@ -937,18 +1721,7 @@ async function handleAnswerQuestion(event) {
       playPositiveTone();
     }
   } catch (error) {
-    appState.lastEvaluation = {
-      verdict: "retry_same_question",
-      coachReply: error.message || "提交回答失败。",
-      hint: "先检查接口设置，或稍后再试。",
-      feedback: {
-        strengths: [],
-        gaps: ["本次记录没有成功写入"],
-        missing: ["稳定的接口响应"],
-        improve: "确认网络和接口设置后再提交一次。"
-      }
-    };
-    renderAll();
+    showToast(error.message || "提交回答失败，请稍后再试。", "warning");
   } finally {
     dom.submitAnswer.textContent = originalText;
     dom.submitAnswer.disabled = false;
@@ -956,27 +1729,37 @@ async function handleAnswerQuestion(event) {
 }
 
 async function drawReviewQuestion() {
-  appState.currentReview = await api.drawReviewQuestion(appState.activeQuestId);
-  switchView("review");
+  const candidates = await buildReviewCandidates(appState.reviewMode);
+  const picked = pickReviewCandidate(appState.reviewMode, candidates);
+  if (!picked) {
+    appState.currentReview = null;
+    renderAll();
+    showToast(REVIEW_MODE_META[appState.reviewMode].emptyMessage, "warning");
+    return;
+  }
+  appState.currentReview = {
+    ...picked,
+    mode: appState.reviewMode
+  };
   renderAll();
 }
 
 async function submitReviewAnswer() {
   const textarea = document.querySelector("#review-answer-input");
-  const answer = String(textarea?.value || "").trim();
+  const answer = cleanText(textarea?.value);
   if (!answer || !appState.currentReview) {
+    showToast("先写下这次复习回答。", "warning");
+    textarea?.focus();
     return;
   }
-  const current = appState.currentReview;
+
   const response = await api.answerReviewQuestion({
-    questId: current.questId,
-    nodeId: current.node.id,
+    questId: appState.currentReview.questId,
+    nodeId: appState.currentReview.node.id,
     answer
   });
-  appState.quests = response.quests;
-  if (appState.activeQuestId === response.quest.id) {
-    appState.activeQuest = response.quest;
-  }
+  hydrateQuestSummaries(response.quests);
+  rememberQuestDetail(response.quest);
   appState.lastEvaluation = response.evaluation;
   appState.currentReview = null;
   renderAll();
@@ -988,25 +1771,178 @@ async function submitReviewAnswer() {
 async function saveSettings(event) {
   event.preventDefault();
   const response = await api.saveSettings({
-    baseUrl: dom.settingsBaseUrl.value.trim(),
-    model: dom.settingsModel.value.trim(),
-    apiKey: dom.settingsApiKey.value.trim(),
+    baseUrl: cleanText(dom.settingsBaseUrl.value),
+    model: cleanText(dom.settingsModel.value),
+    apiKey: cleanText(dom.settingsApiKey.value),
     defaultTemplateKey: dom.settingsTemplate.value,
-    defaultRootQuestionCount: Number(dom.settingsRootCount.value)
+    defaultRootQuestionCount: clamp(Number(dom.settingsRootCount.value || 10), 5, 30)
   });
   appState.bootstrap.settings = response.settings;
   syncFormsFromSettings();
   renderAll();
+  showToast("设置已保存。");
+}
+
+function handleGlobalShortcuts(event) {
+  const isModifier = event.ctrlKey || event.metaKey;
+  if (event.key === "Escape") {
+    if (!dom.createModal.classList.contains("hidden")) {
+      closeCreateModal();
+      return;
+    }
+    if (appState.ui.focusMode) {
+      setFocusMode(false);
+    }
+    return;
+  }
+
+  if (!isModifier) {
+    return;
+  }
+
+  const key = event.key.toLowerCase();
+  if (key === "n") {
+    event.preventDefault();
+    openCreateModal();
+  } else if (key === "r") {
+    event.preventDefault();
+    void startReviewMode(appState.activeQuestId ? "current" : "random", true);
+  } else if (key === "i" && appState.currentView === "learn") {
+    event.preventDefault();
+    setFocusMode(!appState.ui.focusMode);
+  }
 }
 
 dom.navButtons.forEach((button) => {
-  button.addEventListener("click", () => switchView(button.dataset.view));
+  button.addEventListener("click", () => {
+    switchView(button.dataset.view);
+    renderAll();
+  });
 });
 
-dom.jumpSettingsButton.addEventListener("click", () => switchView("settings"));
+dom.openCreateButtons.forEach((button) => {
+  button.addEventListener("click", openCreateModal);
+});
+
+dom.viewJumpButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    switchView(button.dataset.viewJump);
+    renderAll();
+  });
+});
+
+dom.closeModalButtons.forEach((button) => {
+  button.addEventListener("click", closeCreateModal);
+});
+
+dom.goLibraryButton.addEventListener("click", () => {
+  switchView("library");
+  renderAll();
+});
+
+dom.startGlobalReviewButton.addEventListener("click", () => {
+  void startReviewMode("random", true);
+});
+
+dom.sidebarStartReviewButton.addEventListener("click", () => {
+  void startReviewMode("random", true);
+});
+
+dom.reviewModeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    void startReviewMode(button.dataset.reviewMode, false);
+  });
+});
+
+dom.toggleFocusModeButton.addEventListener("click", () => {
+  setFocusMode(!appState.ui.focusMode);
+});
+
+dom.toggleAdvancedButton.addEventListener("click", () => {
+  setAdvancedCreateOpen(!appState.advancedCreateOpen);
+});
+
+dom.topicInput.addEventListener("input", updateDerivedTopicLabel);
+dom.materialInput.addEventListener("input", updateDerivedTopicLabel);
+dom.projectSearch.addEventListener("input", () => {
+  appState.projectSearch = dom.projectSearch.value;
+  renderAll();
+});
 dom.questForm.addEventListener("submit", handleCreateQuest);
 dom.answerForm.addEventListener("submit", handleAnswerQuestion);
-dom.drawReviewButton.addEventListener("click", drawReviewQuestion);
+dom.drawReviewButton.addEventListener("click", () => {
+  void drawReviewQuestion();
+});
 dom.settingsForm.addEventListener("submit", saveSettings);
 
+dom.answerInput.addEventListener("keydown", (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+    event.preventDefault();
+    dom.answerForm.requestSubmit();
+  }
+});
+
+window.addEventListener("keydown", handleGlobalShortcuts);
+
+window.__studyQuestDebug = {
+  async createQuestFromDebug(payload = {}) {
+    const response = await api.createQuest({
+      topic: cleanText(payload.topic),
+      material: cleanText(payload.material),
+      level: cleanText(payload.level),
+      goal: cleanText(payload.goal),
+      timebox: cleanText(payload.timebox),
+      rootQuestionCount: clamp(
+        Number(payload.rootQuestionCount || appState.bootstrap?.settings?.defaultRootQuestionCount || 10),
+        5,
+        30
+      ),
+      templateKey: payload.templateKey || appState.bootstrap?.settings?.defaultTemplateKey || "general"
+    });
+    hydrateQuestSummaries(response.quests);
+    rememberQuestDetail(response.quest);
+    appState.activeQuestId = response.quest.id;
+    appState.activeQuest = response.quest;
+    appState.lastEvaluation = null;
+    appState.currentReview = null;
+    switchView("learn");
+    renderAll();
+    return response.quest;
+  },
+
+  async answerActiveNodeFromDebug(answer) {
+    const activeNode = getActiveNode(appState.activeQuest);
+    if (!appState.activeQuest || !activeNode) {
+      return null;
+    }
+    const response = await api.answerQuestion({
+      questId: appState.activeQuest.id,
+      nodeId: activeNode.id,
+      answer: cleanText(answer)
+    });
+    hydrateQuestSummaries(response.quests);
+    rememberQuestDetail(response.quest);
+    appState.lastEvaluation = response.evaluation;
+    renderAll();
+    return response.evaluation;
+  },
+
+  async drawReviewFromDebug(mode = "random") {
+    await startReviewMode(mode, true);
+    return appState.currentReview;
+  },
+
+  getState() {
+    return {
+      currentView: appState.currentView,
+      reviewMode: appState.reviewMode,
+      activeQuestId: appState.activeQuestId,
+      activeQuestTitle: appState.activeQuest?.title || null,
+      currentQuestion: getActiveNode(appState.activeQuest)?.title || null,
+      totalProjects: appState.quests.length
+    };
+  }
+};
+
+applyUiState();
 bootstrap();

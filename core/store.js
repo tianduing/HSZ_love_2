@@ -4,13 +4,38 @@ const crypto = require("node:crypto");
 
 const DB_FILE_NAME = "study-quest-db.json";
 
+function cleanText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function deriveTopicFromInput(input) {
+  const explicitTopic = cleanText(input?.topic);
+  if (explicitTopic) {
+    return explicitTopic;
+  }
+
+  const material = cleanText(input?.material).replace(/\s+/g, " ");
+  if (!material) {
+    return "未命名学习项目";
+  }
+
+  const firstLine = material
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean) || material;
+  const normalized = firstLine.replace(/^[#>*\-\d.\s:：]+/, "").trim();
+  const sentence = normalized.split(/[。！？!?；;，,|]/)[0].trim();
+  const candidate = sentence || normalized || material;
+  return candidate.length > 28 ? `${candidate.slice(0, 28)}...` : candidate;
+}
+
 function getDefaultSettings() {
   return {
     provider: "OpenAI",
     baseUrl: "https://api.openai.com/v1",
     model: "gpt-5.4",
     defaultTemplateKey: "general",
-    defaultRootQuestionCount: 8,
+    defaultRootQuestionCount: 10,
     preferredDataRoot: ""
   };
 }
@@ -117,14 +142,15 @@ function createQuestRecord(input, plan) {
   const now = new Date().toISOString();
   const roadmap = Array.isArray(plan.roadmap) ? plan.roadmap : [];
   const nodes = roadmap.map((item, index) => createRootNode(item, index, index === 0));
+  const topic = deriveTopicFromInput(input);
   return {
     id: crypto.randomUUID(),
-    title: plan.sessionTitle || input.topic.trim(),
-    topic: input.topic.trim(),
-    material: input.material.trim(),
-    level: input.level.trim(),
-    goal: input.goal.trim(),
-    timebox: input.timebox.trim(),
+    title: cleanText(plan.sessionTitle) || topic,
+    topic,
+    material: cleanText(input.material),
+    level: cleanText(input.level),
+    goal: cleanText(input.goal),
+    timebox: cleanText(input.timebox),
     templateKey: input.templateKey,
     rootQuestionCount: roadmap.length,
     missionBrief: plan.missionBrief || "",
@@ -394,6 +420,7 @@ function serializeQuestDetail(quest) {
 
 module.exports = {
   createQuestRecord,
+  deriveTopicFromInput,
   findNodeOrThrow,
   findQuestOrThrow,
   loadState,

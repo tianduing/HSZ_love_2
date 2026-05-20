@@ -29,6 +29,31 @@ const TEMPLATE_GUIDES = {
   }
 };
 
+function cleanText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function deriveTopicFromInput(input) {
+  const explicitTopic = cleanText(input?.topic);
+  if (explicitTopic) {
+    return explicitTopic;
+  }
+
+  const material = cleanText(input?.material).replace(/\s+/g, " ");
+  if (!material) {
+    return "未命名学习项目";
+  }
+
+  const firstLine = material
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean) || material;
+  const normalized = firstLine.replace(/^[#>*\-\d.\s:：]+/, "").trim();
+  const sentence = normalized.split(/[。！？!?；;，,|]/)[0].trim();
+  const candidate = sentence || normalized || material;
+  return candidate.length > 28 ? `${candidate.slice(0, 28)}...` : candidate;
+}
+
 function normalizeBaseUrl(baseUrl) {
   const trimmed = String(baseUrl || "").trim().replace(/\/+$/, "");
   if (!trimmed) {
@@ -38,7 +63,7 @@ function normalizeBaseUrl(baseUrl) {
 }
 
 function buildFallbackRoadmap(input) {
-  const topic = input.topic.trim();
+  const topic = deriveTopicFromInput(input);
   const baseSets = {
     general: [
       `就“${topic}”来说，它的核心对象、核心目标和基本边界分别是什么？`,
@@ -240,6 +265,10 @@ function formatQuestContext(quest) {
 }
 
 async function generateQuestPlan(settings, input) {
+  const topic = deriveTopicFromInput(input);
+  const level = cleanText(input.level) || "未填写";
+  const goal = cleanText(input.goal) || "希望通过主动提问掌握核心内容";
+  const timebox = cleanText(input.timebox) || "未填写";
   const template = TEMPLATE_GUIDES[input.templateKey] || TEMPLATE_GUIDES.general;
   const systemPrompt = [
     "你是一个严谨、真实、带闯关感的学习教练规划器。",
@@ -272,11 +301,11 @@ async function generateQuestPlan(settings, input) {
   ].join("\n");
 
   const userPrompt = [
-    `学习主题：${input.topic}`,
-    `学习材料：${input.material}`,
-    `当前水平：${input.level}`,
-    `目标：${input.goal}`,
-    `时间限制：${input.timebox}`,
+    `学习主题：${topic}`,
+    `学习材料：${cleanText(input.material)}`,
+    `当前水平：${level}`,
+    `目标：${goal}`,
+    `时间限制：${timebox}`,
     `主问题数量：${input.rootQuestionCount}`,
     "请生成一个层层推进、有明确目标感的主问题路线图。"
   ].join("\n");
@@ -284,8 +313,8 @@ async function generateQuestPlan(settings, input) {
   const result = await callResponsesApi(settings, systemPrompt, userPrompt);
   if (shouldUseFallbackRoadmap(input, result.roadmap)) {
     return {
-      sessionTitle: `${input.topic} 闯关路线`,
-      missionBrief: `围绕“${input.topic}”按主干理解、结构串联、场景应用和复盘辨错来推进。`,
+      sessionTitle: `${topic} 闯关路线`,
+      missionBrief: `围绕“${topic}”按主干理解、结构串联、场景应用和复盘辨错来推进。`,
       launchNote: "先讲清主干，再通过追问把理解逼深。",
       roadmap: buildFallbackRoadmap(input)
     };
