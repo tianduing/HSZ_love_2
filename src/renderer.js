@@ -10,27 +10,27 @@ const VIEW_META = {
   home: {
     eyebrow: "学习工作台",
     title: "学习工作台",
-    subtitle: "从项目、主线和复习队列继续往前。"
+    subtitle: "项目、主线、复习队列"
   },
   library: {
     eyebrow: "项目库",
     title: "项目库",
-    subtitle: "左侧看列表，右侧看检视信息。"
+    subtitle: "列表、进度、活动记录"
   },
   learn: {
     eyebrow: "闯关学习",
     title: "闯关学习",
-    subtitle: "左侧路线，中间答题，右侧反馈与记录。"
+    subtitle: "路线、答题、反馈"
   },
   review: {
     eyebrow: "复习中心",
     title: "复习中心",
-    subtitle: "随时抽题，优先回看不稳的节点。"
+    subtitle: "随机抽题、错题回看"
   },
   settings: {
     eyebrow: "设置",
     title: "设置",
-    subtitle: "主题、接口和发布流程。"
+    subtitle: "主题、接口、数据"
   }
 };
 
@@ -313,7 +313,7 @@ function createPreviewApi() {
       const state = loadPreviewState();
       return {
         runtime: {
-          dataRoot: "浏览器预览模式（使用 localStorage）",
+          dataRoot: "浏览器本地数据",
           templateOptions: FALLBACK_TEMPLATES
         },
         settings: {
@@ -385,7 +385,7 @@ function createPreviewApi() {
           {
             id: crypto.randomUUID(),
             kind: "session-created",
-            summary: "已生成一条预览版主线关卡。",
+            summary: "已生成主线关卡。",
             createdAt: now
           }
         ]
@@ -1045,7 +1045,7 @@ async function selectQuest(questId) {
 }
 
 function renderPreviewBanner() {
-  dom.previewBanner.classList.toggle("hidden", !appState.previewMode);
+  dom.previewBanner.classList.add("hidden");
 }
 
 function renderHeaderAndSidebar() {
@@ -1059,13 +1059,13 @@ function renderHeaderAndSidebar() {
 
   if (!appState.activeQuest) {
     dom.sidebarQuestTitle.textContent = "还没有学习项目";
-    dom.sidebarQuestBrief.textContent = "先创建一个项目，后面的追问、记录和复习中心才会真正跑起来。";
+    dom.sidebarQuestBrief.textContent = "暂无当前项目";
     dom.sidebarProgressText.textContent = "0 / 0";
     dom.sidebarProgressBar.style.width = "0%";
   } else {
     const quest = appState.activeQuest;
     dom.sidebarQuestTitle.textContent = quest.title;
-    dom.sidebarQuestBrief.textContent = quest.missionBrief || quest.launchNote || "继续把这条主线往前推。";
+    dom.sidebarQuestBrief.textContent = quest.missionBrief || quest.launchNote || "暂无摘要";
     dom.sidebarProgressText.textContent = `${quest.stats.completedRoots} / ${quest.stats.totalRoots}`;
     dom.sidebarProgressBar.style.width = `${getQuestProgressPercent(quest)}%`;
   }
@@ -1113,7 +1113,7 @@ function projectCardMarkup(summary, { active = false, compact = false } = {}) {
         </div>
         <span class="status-pill ${status.tone}">${escapeHtml(status.label)}</span>
       </div>
-      <p class="muted">${escapeHtml(summary.missionBrief || "这条项目还没有摘要，可以先进入主线看看问题分布。")}</p>
+      <p class="muted">${escapeHtml(summary.missionBrief || "暂无摘要")}</p>
       <div class="progress-track">
         <span style="width:${progress}%"></span>
       </div>
@@ -1147,7 +1147,7 @@ function projectRowMarkup(summary, { active = false } = {}) {
           </div>
           <span class="status-pill ${status.tone}">${escapeHtml(status.label)}</span>
         </div>
-        <p class="muted">${escapeHtml(summary.missionBrief || "这条主线还没有摘要，可以先进入路线图看问题分布。")}</p>
+        <p class="muted">${escapeHtml(summary.missionBrief || "暂无摘要")}</p>
         <div class="progress-track project-row-progress">
           <span style="width:${progress}%"></span>
         </div>
@@ -1203,7 +1203,8 @@ function renderHomeView() {
   dom.homeStatUpdated.textContent = formatDateTime(latestUpdated);
 
   if (!appState.quests.length) {
-    dom.homeProjectList.innerHTML = `<div class="empty-inline"><p class="muted">还没有项目。先贴一段学习内容，我们再一起看主线关卡够不够像一个真正的学习教练。</p></div>`;
+    dom.homeProjectList.innerHTML = `<div class="empty-inline compact-empty"><strong>暂无项目</strong><button class="ghost-button" data-open-create type="button">新建项目</button></div>`;
+    dom.homeProjectList.querySelectorAll("[data-open-create]").forEach((button) => button.addEventListener("click", openCreateModal));
   } else {
     dom.homeProjectList.innerHTML = appState.quests
       .slice(0, 6)
@@ -1214,10 +1215,12 @@ function renderHomeView() {
 
   if (!focusQuestSummary) {
     dom.homeFocusCard.innerHTML = `
-      <div class="empty-inline">
-        <p class="muted">这里会固定显示你当前正在看的项目摘要、主线进度和下一步动作。先新建一个项目，工作台就会真正活起来。</p>
+      <div class="empty-inline compact-empty">
+        <strong>未选择项目</strong>
+        <button class="ghost-button" data-open-create type="button">新建项目</button>
       </div>
     `;
+    dom.homeFocusCard.querySelectorAll("[data-open-create]").forEach((button) => button.addEventListener("click", openCreateModal));
   } else {
     const latestTimeline = (focusQuestSummary.timeline || []).slice(0, 3);
     const activeQuestNode = getActiveNode(focusQuestSummary);
@@ -1240,7 +1243,7 @@ function renderHomeView() {
           </div>
           <span class="status-pill success">${focusQuestSummary.stats.completedRoots}/${focusQuestSummary.stats.totalRoots} 主线</span>
         </div>
-        <p class="muted">${escapeHtml(focusQuestSummary.missionBrief || focusQuestSummary.launchNote || "继续把这条主线往前推。")}</p>
+        <p class="muted">${escapeHtml(focusQuestSummary.missionBrief || focusQuestSummary.launchNote || "暂无摘要")}</p>
         <div class="meta-chip-row">${metaChips}</div>
         <div class="inline-stat-grid">
           ${buildInlineStatCard("总节点", `${focusQuestSummary.stats.completedNodes}/${focusQuestSummary.stats.totalNodes}`)}
@@ -1256,7 +1259,7 @@ function renderHomeView() {
         <div class="section-head">
           <div>
             <p class="eyebrow">最近记录</p>
-            <h3>这条主线最近发生了什么</h3>
+            <h3>最近活动</h3>
           </div>
         </div>
         <div class="timeline-list">
@@ -1272,7 +1275,7 @@ function renderHomeView() {
                     `
                   )
                   .join("")
-              : `<div class="empty-inline"><p class="muted">还没有记录。</p></div>`
+              : `<div class="empty-inline compact-empty"><strong>暂无记录</strong></div>`
           }
         </div>
       </div>
@@ -1286,7 +1289,7 @@ function renderHomeView() {
     .slice(0, 4);
 
   if (!reviewSuggestions.length) {
-    dom.homeReviewList.innerHTML = `<div class="empty-inline"><p class="muted">目前还没有可复习节点。先完成几题，再来抽查会更有感觉。</p></div>`;
+    dom.homeReviewList.innerHTML = `<div class="empty-inline compact-empty"><strong>暂无复习节点</strong></div>`;
   } else {
     dom.homeReviewList.innerHTML = reviewSuggestions
       .map((quest) => {
@@ -1314,14 +1317,15 @@ function renderLibraryView() {
   dom.libraryProjectCount.textContent = `${visibleQuests.length} 个项目`;
 
   if (!visibleQuests.length) {
-    dom.libraryProjectList.innerHTML = `<div class="empty-inline"><p class="muted">项目库还是空的。先新建一个任务，我们再把首页和学习页跑起来。</p></div>`;
+    dom.libraryProjectList.innerHTML = `<div class="empty-inline compact-empty"><strong>暂无项目</strong><button class="ghost-button" data-open-create type="button">新建项目</button></div>`;
+    dom.libraryProjectList.querySelectorAll("[data-open-create]").forEach((button) => button.addEventListener("click", openCreateModal));
   } else {
     dom.libraryProjectList.innerHTML = visibleQuests.map((quest) => projectRowMarkup(quest, { active: quest.id === appState.activeQuestId })).join("");
     wireProjectActions(dom.libraryProjectList);
   }
 
   if (!appState.activeQuest) {
-    dom.librarySpotlight.innerHTML = `<div class="empty-inline"><p class="muted">选择一个项目后，这里会显示更完整的主线摘要、进度和最近学习记录。</p></div>`;
+    dom.librarySpotlight.innerHTML = `<div class="empty-inline compact-empty"><strong>未选择项目</strong></div>`;
     return;
   }
 
@@ -1346,7 +1350,7 @@ function renderLibraryView() {
         </div>
         <span class="status-pill success">${quest.stats.completedRoots}/${quest.stats.totalRoots} 主线</span>
       </div>
-      <p class="muted">${escapeHtml(quest.missionBrief || quest.launchNote || "继续把这条主线打透。")}</p>
+      <p class="muted">${escapeHtml(quest.missionBrief || quest.launchNote || "暂无摘要")}</p>
       <div class="meta-chip-row">${chips}</div>
       <div class="inline-stat-grid">
         ${buildInlineStatCard("总节点", `${quest.stats.completedNodes}/${quest.stats.totalNodes}`)}
@@ -1362,7 +1366,7 @@ function renderLibraryView() {
       <div class="section-head">
         <div>
           <p class="eyebrow">最近记录</p>
-          <h3>这条主线最近发生了什么</h3>
+          <h3>最近活动</h3>
         </div>
       </div>
       <div class="timeline-list">
@@ -1378,7 +1382,7 @@ function renderLibraryView() {
                   `
                 )
                 .join("")
-            : `<div class="empty-inline"><p class="muted">还没有记录。</p></div>`
+            : `<div class="empty-inline compact-empty"><strong>暂无记录</strong></div>`
         }
       </div>
     </div>
@@ -1404,7 +1408,7 @@ function renderRoadmap(quest) {
         </div>
         <span class="status-dot ${escapeHtml(node.status)}"></span>
       </div>
-      <p class="muted">${escapeHtml(node.goal || "继续输出，让理解真正落地。")}</p>
+      <p class="muted">${escapeHtml(node.goal || "暂无目标")}</p>
     `;
     dom.roadmapTree.append(article);
   });
@@ -1468,7 +1472,7 @@ function renderFeedback(quest) {
 function renderTimeline(quest) {
   const timeline = quest?.timeline || [];
   if (!timeline.length) {
-    dom.timelineList.innerHTML = `<div class="empty-inline"><p class="muted">开始答题以后，这里会逐步积累你的学习时间线。</p></div>`;
+    dom.timelineList.innerHTML = `<div class="empty-inline compact-empty"><strong>暂无记录</strong></div>`;
     return;
   }
 
@@ -1500,7 +1504,7 @@ function renderLearnView() {
   const reviewableCount = (quest.nodes || []).filter((node) => node.status === "completed").length;
 
   dom.learnProjectTitle.textContent = quest.title;
-  dom.learnProjectBrief.textContent = quest.missionBrief || quest.launchNote || "继续把这条主线往前推进。";
+  dom.learnProjectBrief.textContent = quest.missionBrief || quest.launchNote || "暂无摘要";
   dom.learnNodeProgress.textContent = `${quest.stats.completedNodes}/${quest.stats.totalNodes} 节点`;
   dom.learnRootProgressText.textContent = `${quest.stats.completedRoots} / ${quest.stats.totalRoots}`;
   dom.learnRootProgressBar.style.width = `${getQuestProgressPercent(quest)}%`;
@@ -1539,7 +1543,7 @@ function renderLearnView() {
   dom.currentQuestionTitle.textContent = activeNode.title;
   dom.currentQuestionDifficulty.textContent = `难度 ${activeNode.difficulty || 3}`;
   dom.currentQuestionGoal.textContent = activeNode.goal || "继续往主干、应用和边界上输出。";
-  dom.currentQuestionWhy.textContent = activeNode.whyItMatters || "只要你能用自己的话说出来，理解才真正开始沉淀。";
+  dom.currentQuestionWhy.textContent = activeNode.whyItMatters || "暂无提示";
 }
 
 function renderReviewModeButtons() {

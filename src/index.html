@@ -10,12 +10,13 @@
     <div class="app-shell">
       <aside class="sidebar">
         <section class="panel brand-panel">
-          <p class="eyebrow">Study Quest</p>
-          <div class="brand-row">
-            <h1>智学闯关</h1>
-            <span class="brand-caption">学习工作台</span>
+          <div class="brand-lockup">
+            <span class="app-mark">SQ</span>
+            <div>
+              <p class="eyebrow">Study Quest</p>
+              <h1>智学闯关</h1>
+            </div>
           </div>
-          <p class="muted">更轻、更静、更像桌面工作台，但核心不是记录，而是被追问到真正会。</p>
         </section>
 
         <section class="panel sidebar-tools">
@@ -24,8 +25,8 @@
             <input id="project-search" placeholder="搜索学习项目..." spellcheck="false" />
           </label>
           <div class="sidebar-quick-actions">
-            <button class="ghost-button sidebar-action" data-open-create type="button">+ 新建项目</button>
-            <button class="ghost-button sidebar-action" id="sidebar-start-review" type="button">↺ 开始复习</button>
+            <button class="ghost-button sidebar-action" data-open-create type="button">+ 新建</button>
+            <button class="ghost-button sidebar-action" id="sidebar-start-review" type="button">↺ 复习</button>
           </div>
         </section>
 
@@ -72,7 +73,7 @@
             <span id="api-status-pill" class="status-pill neutral">接口待配置</span>
           </div>
           <p id="sidebar-quest-brief" class="muted">
-            先创建一个项目，后面的主线关卡、复习抽题和追问记录才会跑起来。
+            暂无当前项目
           </p>
 
           <div class="mini-progress-card">
@@ -100,32 +101,30 @@
 
       <main class="main-shell">
         <header class="panel topbar">
-          <div>
-            <p id="view-eyebrow" class="eyebrow">学习中心</p>
-            <h2 id="view-title">先给我学习内容，我来替你拆成主线关卡</h2>
-            <p id="view-subtitle" class="muted">
-              预览版优先把流程和体验做对：输入内容、生成主线、逐题追问、留下记录，再去做复习回炉。
-            </p>
+            <div>
+              <p id="view-eyebrow" class="eyebrow">学习中心</p>
+            <h2 id="view-title">学习工作台</h2>
+            <p id="view-subtitle" class="muted">项目、主线、复习队列</p>
           </div>
           <div class="topbar-actions">
             <span id="quest-count-pill" class="status-pill">0 个项目</span>
-            <button id="open-create-modal" class="primary-button" type="button">新建学习项目</button>
+            <button id="open-create-modal" class="primary-button" type="button">新建项目</button>
           </div>
         </header>
 
         <p id="preview-banner" class="preview-banner hidden">
-          当前是浏览器预览模式：可以完整体验界面、任务创建和答题流程，但不会真正调用桌面端的本地接口。
+          预览模式
         </p>
 
         <section id="home-view" class="view-pane">
           <article class="panel desk-toolbar">
             <div class="desk-toolbar-copy">
-              <p class="eyebrow">快速开始</p>
-              <h3>只填学习内容也能开始</h3>
-              <p class="muted">把材料贴进来，系统会自动命名、生成主线问题，其它字段都可以后补。</p>
+              <p class="eyebrow">快速入口</p>
+              <h3>新建学习项目</h3>
+              <p class="muted">材料输入为必填，其余保持可选。</p>
             </div>
             <div class="desk-toolbar-actions">
-              <button class="primary-button" data-open-create type="button">新建学习项目</button>
+              <button class="primary-button" data-open-create type="button">新建项目</button>
               <button id="go-library" class="ghost-button" type="button">打开项目库</button>
               <button id="start-global-review" class="ghost-button" type="button">开始复习</button>
             </div>
@@ -135,22 +134,22 @@
             <article class="panel metric-card">
               <span>学习项目</span>
               <strong id="home-stat-projects">0</strong>
-              <p class="muted">当前一共保存了多少条学习主线</p>
+              <p class="muted">已保存项目</p>
             </article>
             <article class="panel metric-card">
               <span>主线完成</span>
               <strong id="home-stat-roots">0 / 0</strong>
-              <p class="muted">已经点亮的主问题数量</p>
+              <p class="muted">主问题进度</p>
             </article>
             <article class="panel metric-card">
               <span>可抽查节点</span>
               <strong id="home-stat-reviewable">0</strong>
-              <p class="muted">已经答过、可以立即拿来复习的节点</p>
+              <p class="muted">复习池</p>
             </article>
             <article class="panel metric-card">
               <span>最近更新</span>
               <strong id="home-stat-updated">还没有</strong>
-              <p class="muted">最后一次保存学习记录的时间</p>
+              <p class="muted">活动时间</p>
             </article>
           </div>
 
@@ -201,7 +200,7 @@
                 <span id="library-project-count" class="status-pill neutral">0 个项目</span>
               </div>
               <p class="muted section-tip">
-                这里保留所有主线任务。你可以继续学习、切换到复习中心，或者先把项目当作预览版路线图来审一遍。
+                所有学习项目都会保存在这里。
               </p>
               <div id="library-project-list" class="project-row-list"></div>
             </article>
@@ -220,8 +219,8 @@
 
         <section id="learn-view" class="view-pane hidden">
           <div id="learn-empty-state" class="panel empty-panel">
-            <h3>还没有进入闯关学习</h3>
-            <p class="muted">先创建一个学习项目，或者从“我的学习”里选一条已有主线继续。</p>
+            <h3>暂无学习项目</h3>
+            <p class="muted">新建项目或从项目库选择一条主线。</p>
             <button class="primary-button" data-open-create type="button">现在开始</button>
           </div>
 
@@ -383,12 +382,9 @@
               <div class="section-head">
                 <div>
                   <p class="eyebrow">外观主题</p>
-                  <h3>先把界面做得更像一个能长期用的桌面应用</h3>
+                  <h3>主题</h3>
                 </div>
               </div>
-              <p class="muted section-tip">
-                这一版先提供 3 套护眼主题。后续如果你满意，再继续加背景图库、自定义背景和更多动画细节。
-              </p>
               <div id="theme-options" class="theme-grid"></div>
             </article>
 
@@ -439,7 +435,7 @@
               <div class="section-head">
                 <div>
                   <p class="eyebrow">运行信息</p>
-                  <h3>路径与预览状态</h3>
+                  <h3>路径</h3>
                 </div>
               </div>
               <div class="runtime-stack large">
@@ -462,13 +458,13 @@
               <div class="section-head">
                 <div>
                   <p class="eyebrow">标准流程</p>
-                  <h3>以后就按这条线推进</h3>
+                  <h3>发布</h3>
                 </div>
               </div>
               <ol class="workflow-list">
-                <li>先改预览版界面和交互，把你最在意的体验点跑顺。</li>
-                <li>每轮改动都提交到 GitHub，保证版本清晰、可追溯、可回退。</li>
-                <li>你确认预览满意后，再构建新的 Windows 安装包并做最终验证。</li>
+                <li>预览确认</li>
+                <li>提交 GitHub</li>
+                <li>构建 Windows 安装包</li>
               </ol>
             </article>
           </div>
@@ -482,7 +478,7 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">新建学习项目</p>
-            <h3>先贴学习内容，其他都可以后补</h3>
+            <h3>新建项目</h3>
           </div>
           <button class="icon-button" data-close-modal="true" type="button">×</button>
         </div>
@@ -505,7 +501,7 @@
           </label>
 
           <p class="helper-text">
-            只填这一项也能开始。若没有手动命名，系统会自动命名为：
+            自动命名：
             <strong id="derived-topic-label">未命名学习项目</strong>
           </p>
 
