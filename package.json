@@ -1,7 +1,7 @@
 {
   "name": "study-quest-desktop",
   "version": "0.2.3",
-  "description": "Gamified Windows desktop study coach with quest cards and review flows.",
+  "description": "AI study companion desktop app with editable learning paths, PDF parsing, review flows, and lightweight quest progression.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -24,7 +24,7 @@
   },
   "build": {
     "appId": "com.tianduing.studyquest",
-    "productName": "Study Quest 学练闯关",
+    "productName": "仅予你的晴天-学习小助手",
     "asar": true,
     "directories": {
       "output": "release"
@@ -45,17 +45,18 @@
           ]
         }
       ],
-      "artifactName": "Study-Quest-Setup-${version}.${ext}"
+      "artifactName": "仅予你的晴天-学习小助手-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Study Quest 学练闯关"
+      "shortcutName": "仅予你的晴天-学习小助手"
     }
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.2.0"
+    "@fortawesome/fontawesome-free": "^7.2.0",
+    "pdfjs-dist": "^5.7.284"
   }
 }

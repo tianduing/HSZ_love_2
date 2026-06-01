@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>智学闯关 · 次世代 AI 学习教练</title>
+    <title>仅予你的晴天-学习小助手 · AI 学习陪伴桌面端</title>
     <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -23,8 +23,8 @@
               <i class="fa-solid fa-brain"></i>
             </div>
             <div class="brand-copy">
-              <p class="eyebrow">Study Quest</p>
-              <h1>智学闯关</h1>
+              <p class="eyebrow">仅予你的晴天</p>
+              <h1>仅予你的晴天-学习小助手</h1>
               <p class="muted">把学习内容变成一张可闯关、可复习、可追踪的问题地图。</p>
             </div>
           </div>
@@ -67,13 +67,21 @@
             <i class="fa-solid fa-calendar-check"></i>
             <span class="nav-label">复习中心</span>
           </button>
+          <button class="nav-button nav-item" data-view="leisure" type="button">
+            <i class="fa-solid fa-feather-pointed"></i>
+            <span class="nav-label">休闲区</span>
+          </button>
+          <button class="nav-button nav-item" data-view="stats" type="button">
+            <i class="fa-solid fa-chart-column"></i>
+            <span class="nav-label">学习统计</span>
+          </button>
           <button class="nav-button nav-item" data-view="settings" type="button">
             <i class="fa-solid fa-sliders"></i>
             <span class="nav-label">设置</span>
           </button>
         </nav>
 
-        <section class="sidebar-section glass-subpanel">
+        <section id="sidebar-library-section" class="sidebar-section glass-subpanel">
           <div class="section-head compact-head">
             <div>
               <p class="eyebrow">项目列表</p>
@@ -212,31 +220,33 @@
               <div id="home-project-list" class="project-collection"></div>
             </article>
 
-            <article class="quiz-panel glass-panel home-focus-panel">
-              <div class="quiz-header">
-                <span class="tag">
-                  <i class="fa-solid fa-bullseye"></i>
-                  当前项目
-                </span>
-                <button id="go-library" class="icon-btn compact-icon-btn" type="button" title="打开项目库">
-                  <i class="fa-solid fa-arrow-right"></i>
-                </button>
-              </div>
-              <div id="home-focus-card" class="focus-stack"></div>
-            </article>
-
-            <aside class="coach-rail">
-              <article class="glass-panel rail-card">
-                <div class="section-head">
-                  <div>
-                    <p class="eyebrow">复习队列</p>
-                    <h3>优先回看</h3>
-                  </div>
-                  <button id="start-global-review" class="mini-action" type="button">开始复习</button>
+            <div class="workspace-stack home-main-stack">
+              <article class="quiz-panel glass-panel home-focus-panel">
+                <div class="quiz-header">
+                  <span class="tag">
+                    <i class="fa-solid fa-bullseye"></i>
+                    当前项目
+                  </span>
+                  <button id="go-library" class="icon-btn compact-icon-btn" type="button" title="打开项目库">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </button>
                 </div>
-                <div id="home-review-list" class="queue-list"></div>
+                <div id="home-focus-card" class="focus-stack"></div>
               </article>
-            </aside>
+
+              <aside class="coach-rail">
+                <article class="glass-panel rail-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">复习队列</p>
+                      <h3>优先回看</h3>
+                    </div>
+                    <button id="start-global-review" class="mini-action" type="button">开始复习</button>
+                  </div>
+                  <div id="home-review-list" class="queue-list"></div>
+                </article>
+              </aside>
+            </div>
           </section>
         </section>
 
@@ -249,6 +259,22 @@
                   <h3>全部学习项目</h3>
                 </div>
                 <span id="library-project-count" class="badge subtle-badge">0 个项目</span>
+              </div>
+              <div class="library-filter-bar">
+                <label class="field-block compact-field">
+                  <span>状态</span>
+                  <select id="library-status-filter">
+                    <option value="active">活跃项目</option>
+                    <option value="all">全部项目</option>
+                    <option value="archived">已归档</option>
+                  </select>
+                </label>
+                <label class="field-block compact-field">
+                  <span>分类</span>
+                  <select id="library-category-filter">
+                    <option value="">全部分类</option>
+                  </select>
+                </label>
               </div>
               <div id="library-project-list" class="project-collection"></div>
             </article>
@@ -285,7 +311,10 @@
                   <p class="path-title">学习路径</p>
                   <h3 id="learn-project-title">当前项目</h3>
                 </div>
-                <button id="toggle-focus-mode" class="mini-action" type="button">沉浸模式</button>
+                <div class="inline-action-group">
+                  <button id="manage-active-quest" class="ghost-button compact-ghost" type="button">管理项目</button>
+                  <button id="toggle-focus-mode" class="mini-action" type="button">沉浸模式</button>
+                </div>
               </div>
 
               <p id="learn-project-brief" class="section-copy">系统会在这里显示项目摘要。</p>
@@ -316,89 +345,104 @@
                   <p class="eyebrow">问题地图</p>
                   <h3>主线与子问题</h3>
                 </div>
+                <button id="add-root-node" class="mini-action" type="button">新增主线题</button>
               </div>
               <div id="roadmap-tree" class="roadmap-tree"></div>
             </article>
 
-            <article class="quiz-panel glass-panel">
-              <div class="quiz-header">
-                <div class="quiz-header-copy">
-                  <span id="current-question-tag" class="status-pill neutral">主线关卡</span>
-                  <p id="current-question-path" class="eyebrow">Q1</p>
-                </div>
-                <div id="current-question-difficulty" class="difficulty-badge">难度 3</div>
-              </div>
-
-              <div id="question-empty" class="empty-inline question-empty">
-                <strong>当前没有待回答问题</strong>
-                <p class="muted">把这条主线推完后，新的子问题会在这里继续出现。</p>
-              </div>
-
-              <div id="question-panel" class="question-panel hidden">
-                <h3 id="current-question-title" class="question-text">问题标题</h3>
-
-                <div class="question-support-grid">
-                  <article class="support-card">
-                    <p class="eyebrow">这一关要讲清什么</p>
-                    <p id="current-question-goal" class="support-copy">目标说明</p>
-                  </article>
-                  <article class="support-card">
-                    <p class="eyebrow">为什么重要</p>
-                    <p id="current-question-why" class="support-copy">意义说明</p>
-                  </article>
+            <div class="workspace-stack learn-main-stack">
+              <article class="quiz-panel glass-panel">
+                <div class="quiz-header">
+                  <div class="quiz-header-copy">
+                    <span id="current-question-tag" class="status-pill neutral">主线关卡</span>
+                    <p id="current-question-path" class="eyebrow">Q1</p>
+                  </div>
+                  <div id="current-question-difficulty" class="difficulty-badge">难度 3</div>
                 </div>
 
-                <form id="answer-form" class="answer-form">
-                  <div class="editor-wrapper">
-                    <div class="editor-toolbar">
-                      <span><i class="fa-solid fa-keyboard"></i> 支持长回答</span>
-                      <span><i class="fa-solid fa-list-ul"></i> 用分点更清楚</span>
-                      <span><i class="fa-solid fa-bolt"></i> Ctrl / Cmd + Enter 提交</span>
-                    </div>
-                    <textarea
-                      id="answer-input"
-                      class="quiz-input"
-                      rows="12"
-                      placeholder="现在开始复述你的理解。尽量讲定义、原理、场景和边界，不用刻意写得像考试答案。"
-                      spellcheck="false"
-                    ></textarea>
+                <div id="question-empty" class="empty-inline question-empty">
+                  <strong>当前没有待回答问题</strong>
+                  <p class="muted">把这条主线推完后，系统只会在必要时解锁少量追问。</p>
+                </div>
+
+                <div id="question-panel" class="question-panel hidden">
+                  <h3 id="current-question-title" class="question-text">问题标题</h3>
+
+                  <div class="question-support-grid">
+                    <article class="support-card">
+                      <p class="eyebrow">这一关要讲清什么</p>
+                      <p id="current-question-goal" class="support-copy">目标说明</p>
+                    </article>
+                    <article class="support-card">
+                      <p class="eyebrow">为什么重要</p>
+                      <p id="current-question-why" class="support-copy">意义说明</p>
+                    </article>
                   </div>
 
-                  <div class="action-bar">
-                    <p class="muted form-tip">每次提交后都会保留记录，并根据回答继续追问或放行。</p>
-                    <button id="submit-answer" class="primary-button" type="submit">
-                      <i class="fa-solid fa-paper-plane"></i>
-                      <span>提交答案</span>
+                  <div class="question-history-actions">
+                    <button id="open-question-history" class="ghost-button" type="button">
+                      <i class="fa-solid fa-clock-rotate-left"></i>
+                      <span>问题过往回答</span>
                     </button>
                   </div>
-                </form>
-              </div>
-            </article>
 
-            <aside class="coach-rail">
-              <article class="glass-panel rail-card">
-                <div class="section-head">
-                  <div>
-                    <p class="eyebrow">即时反馈</p>
-                    <h3>AI 教练回放</h3>
-                  </div>
-                  <span id="feedback-verdict" class="status-pill neutral">等待回答</span>
+                  <form id="answer-form" class="answer-form">
+                    <div class="editor-wrapper">
+                      <div class="editor-toolbar">
+                        <span><i class="fa-solid fa-keyboard"></i> 支持长回答</span>
+                        <span><i class="fa-solid fa-list-ul"></i> 用分点更清楚</span>
+                        <span><i class="fa-solid fa-bolt"></i> Ctrl / Cmd + Enter 提交</span>
+                      </div>
+                      <textarea
+                        id="answer-input"
+                        class="quiz-input"
+                        rows="12"
+                        placeholder="现在开始复述你的理解。尽量讲定义、原理、场景和边界，不用刻意写得像考试答案。"
+                        spellcheck="false"
+                      ></textarea>
+                    </div>
+
+                    <div class="action-bar">
+                      <p class="muted form-tip">每次提交后都会保留记录，并根据回答按难度适度追问或放行。</p>
+                      <button id="submit-answer" class="primary-button" type="submit">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>提交答案</span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div id="feedback-panel" class="feedback-panel"></div>
               </article>
 
-              <article class="glass-panel rail-card">
-                <div class="section-head">
-                  <div>
-                    <p class="eyebrow">时间线</p>
-                    <h3>最近记录</h3>
+              <aside class="coach-rail">
+                <article class="glass-panel rail-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">即时反馈</p>
+                      <h3>AI 教练回放</h3>
+                    </div>
+                    <span id="feedback-verdict" class="status-pill neutral">等待回答</span>
                   </div>
-                </div>
-                <div id="timeline-list" class="timeline-list"></div>
-              </article>
-            </aside>
+                  <div id="feedback-panel" class="feedback-panel"></div>
+                </article>
+
+                <article id="learn-timeline-card" class="glass-panel rail-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">时间线</p>
+                      <h3>最近记录</h3>
+                    </div>
+                  </div>
+                  <div id="timeline-list" class="timeline-list"></div>
+                </article>
+              </aside>
+            </div>
           </section>
         </section>
+
+        <button id="focus-exit-button" class="focus-exit-button hidden" type="button" title="退出沉浸模式">
+          <i class="fa-solid fa-xmark"></i>
+          <span>退出沉浸</span>
+        </button>
 
         <section id="review-view" class="view-pane hidden">
           <section class="review-topbar glass-panel">
@@ -463,6 +507,115 @@
                   </div>
                 </div>
                 <div id="review-records" class="timeline-list"></div>
+              </article>
+            </aside>
+          </section>
+        </section>
+
+        <section id="leisure-view" class="view-pane hidden">
+          <section class="workspace leisure-workspace">
+            <article class="path-panel glass-panel leisure-main-panel">
+              <div class="path-title-row">
+                <div>
+                  <p class="path-title">文学小游戏</p>
+                  <h3>休闲区：诗词与成语</h3>
+                </div>
+                <span class="badge subtle-badge">放松一下，也顺手补点文学素养</span>
+              </div>
+              <div id="leisure-game-switcher" class="leisure-game-switcher"></div>
+              <div id="leisure-question-shell" class="leisure-question-shell"></div>
+              <div id="leisure-summary-grid" class="inline-stat-grid leisure-summary-grid"></div>
+            </article>
+
+            <aside id="leisure-side-panel" class="coach-rail leisure-side-panel"></aside>
+          </section>
+        </section>
+
+        <section id="stats-view" class="view-pane hidden">
+          <section class="dashboard stats-dashboard">
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="stats-total-days" class="stat-value">0</div>
+                <div class="stat-label">学习天数</div>
+              </div>
+              <div class="stat-icon accent-green">
+                <i class="fa-solid fa-calendar-days"></i>
+              </div>
+            </article>
+
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="stats-total-answers" class="stat-value">0</div>
+                <div class="stat-label">累计回答</div>
+              </div>
+              <div class="stat-icon accent-blue">
+                <i class="fa-solid fa-reply-all"></i>
+              </div>
+            </article>
+
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="stats-total-hours" class="stat-value small-value">0 h</div>
+                <div class="stat-label">累计学习时长</div>
+              </div>
+              <div class="stat-icon accent-gold">
+                <i class="fa-solid fa-hourglass-half"></i>
+              </div>
+            </article>
+
+            <article class="stat-card glass-panel">
+              <div class="stat-info">
+                <div id="stats-current-streak" class="stat-value">0</div>
+                <div class="stat-label">当前连续学习</div>
+              </div>
+              <div class="stat-icon">
+                <i class="fa-solid fa-fire"></i>
+              </div>
+            </article>
+          </section>
+
+          <section class="workspace stats-workspace">
+            <article class="path-panel glass-panel">
+              <div class="path-title-row">
+                <div>
+                  <p class="path-title">学习热力图</p>
+                  <h3>最近 12 周</h3>
+                </div>
+                <span id="stats-heatmap-range" class="badge subtle-badge">暂无数据</span>
+              </div>
+              <div id="stats-calendar" class="stats-calendar"></div>
+              <div class="stats-legend">
+                <span class="muted">学习较少</span>
+                <div class="stats-legend-swatches">
+                  <span class="stats-level level-0"></span>
+                  <span class="stats-level level-1"></span>
+                  <span class="stats-level level-2"></span>
+                  <span class="stats-level level-3"></span>
+                  <span class="stats-level level-4"></span>
+                </div>
+                <span class="muted">学习较多</span>
+              </div>
+            </article>
+
+            <aside class="coach-rail">
+              <article class="glass-panel rail-card">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">今日 / 选中日期</p>
+                    <h3>学习详情</h3>
+                  </div>
+                </div>
+                <div id="stats-day-highlight" class="focus-stack"></div>
+              </article>
+
+              <article class="glass-panel rail-card">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">最近活跃</p>
+                    <h3>学习日列表</h3>
+                  </div>
+                </div>
+                <div id="stats-recent-days" class="timeline-list"></div>
               </article>
             </aside>
           </section>
@@ -583,6 +736,27 @@
                     <span>默认主线题数</span>
                     <input id="settings-root-count" type="number" min="5" max="30" />
                   </label>
+
+                  <div class="field-block full-span">
+                    <span>子问题策略</span>
+                    <div class="setting-toggle-group" role="radiogroup" aria-label="子问题策略">
+                      <label class="setting-toggle-option">
+                        <input id="settings-follow-up-on" type="radio" name="settings-follow-up-mode" value="enabled" />
+                        <span class="setting-toggle-copy">
+                          <strong>支持生成子问题</strong>
+                          <small>答题过线后，系统可按需解锁少量追问，把理解继续压实。</small>
+                        </span>
+                      </label>
+
+                      <label class="setting-toggle-option">
+                        <input id="settings-follow-up-off" type="radio" name="settings-follow-up-mode" value="disabled" />
+                        <span class="setting-toggle-copy">
+                          <strong>只保留主线推进</strong>
+                          <small>答题通过后直接进入下一道主线，不再插入子问题，推进感会更连贯。</small>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="form-actions">
@@ -614,6 +788,7 @@
         </div>
 
         <form id="quest-form" class="modal-form">
+          <input id="pdf-file-input" class="hidden" type="file" accept="application/pdf,.pdf" />
           <div class="derived-topic">
             <span class="eyebrow">自动识别标题</span>
             <strong id="derived-topic-label">未命名学习项目</strong>
@@ -636,6 +811,28 @@
           </div>
 
           <div id="advanced-fields" class="advanced-fields hidden">
+            <div class="pdf-import-panel">
+              <div class="section-head compact-head">
+                <div>
+                  <p class="eyebrow">PDF 材料</p>
+                  <h3>导入讲义 / 论文 / 书籍片段</h3>
+                </div>
+              </div>
+              <div class="background-actions top-actions">
+                <button id="import-pdf-button" class="ghost-button" type="button">
+                  <i class="fa-solid fa-file-pdf"></i>
+                  <span>导入 PDF</span>
+                </button>
+                <button id="clear-pdf-button" class="ghost-button" type="button">
+                  <i class="fa-solid fa-trash-can"></i>
+                  <span>清除 PDF</span>
+                </button>
+              </div>
+              <div id="pdf-import-summary" class="pdf-import-summary empty-inline compact-empty">
+                <strong>还没有导入 PDF</strong>
+                <p class="muted">导入后会自动提取文本，并把压缩后的内容带入建题材料。</p>
+              </div>
+            </div>
             <div class="field-grid">
               <label class="field-block">
                 <span>学习主题</span>
@@ -658,6 +855,16 @@
               </label>
 
               <label class="field-block">
+                <span>项目分类</span>
+                <input id="category-input" type="text" placeholder="例如：算法 / 论文 / 后端 / 英语" spellcheck="false" />
+              </label>
+
+              <label class="field-block">
+                <span>标签</span>
+                <input id="tags-input" type="text" placeholder="用逗号分隔，例如：面试, 操作系统, TCP" spellcheck="false" />
+              </label>
+
+              <label class="field-block">
                 <span>主线题数</span>
                 <input id="count-input" type="number" min="5" max="30" value="10" />
               </label>
@@ -677,6 +884,36 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <div id="detail-modal" class="modal-shell hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-close-detail></div>
+
+      <div class="modal-card glass-panel detail-modal-card" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+        <div class="modal-head">
+          <div>
+            <p id="detail-modal-eyebrow" class="eyebrow">详情</p>
+            <h3 id="detail-modal-title">详情查看</h3>
+            <p id="detail-modal-subtitle" class="muted">这里会显示完整记录。</p>
+          </div>
+          <button class="icon-btn" data-close-detail type="button" title="关闭">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="detail-modal-body" class="detail-modal-body"></div>
+      </div>
+    </div>
+
+    <div id="celebration-layer" class="celebration-layer hidden" aria-hidden="true">
+      <div class="celebration-particles" id="celebration-particles"></div>
+      <div class="celebration-card glass-panel" role="status" aria-live="polite">
+        <button id="celebration-close" class="icon-btn celebration-close" type="button" title="关闭提示">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div id="celebration-emoji" class="celebration-emoji">🎉</div>
+        <h3 id="celebration-title">这一题通过了</h3>
+        <p id="celebration-subtitle" class="muted">继续保持，我们去下一步。</p>
       </div>
     </div>
 
