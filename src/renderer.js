@@ -8,9 +8,9 @@
 
 const VIEW_META = {
   home: {
-    eyebrow: "学习工作台",
-    title: "学习工作台",
-    subtitle: "项目、主线、复习和统计都汇总在这里"
+    eyebrow: "今日学习",
+    title: "你好，今天想学点什么？",
+    subtitle: "循序渐进，学有所得，给未来的自己多留一些清晰与底气。"
   },
   library: {
     eyebrow: "项目库",
@@ -30,7 +30,7 @@ const VIEW_META = {
   leisure: {
     eyebrow: "休闲区",
     title: "休闲区",
-    subtitle: "用诗词和成语小练习换个脑回路，也顺手补一点文学素养"
+    subtitle: "用高中篇目名句和成语接龙换个脑回路，也顺手把文学素养往上提一提"
   },
   stats: {
     eyebrow: "学习统计",
@@ -49,17 +49,17 @@ const LEISURE_GAME_META = {
     label: "诗词补全",
     shortLabel: "诗词",
     icon: "fa-feather-pointed",
-    promptLabel: "补全诗句",
+    promptLabel: "补全名句",
     tipTitle: "诗词小窍门",
-    tip: "先抓意象和语气，再看节奏与对仗。很多名句一旦记住画面，后半句会顺很多。"
+    tip: "范围以高中常见篇目和高频名句为主。先抓上下文语气，再盯句法和关键词，别把它当成机械背空。"
   },
   idiom: {
-    label: "成语释义",
-    shortLabel: "成语",
-    icon: "fa-book-open-reader",
-    promptLabel: "选择正确释义",
-    tipTitle: "成语小窍门",
-    tip: "先判断感情色彩，再判断使用场景。很多成语不是字面意思，关键在语境。"
+    label: "成语接龙",
+    shortLabel: "接龙",
+    icon: "fa-link",
+    promptLabel: "选出能接上的成语",
+    tipTitle: "成语接龙小窍门",
+    tip: "先看前一个成语的最后一个字，再找能以同字开头的成语。接上只是第一步，顺手把它的意思也记住，才算真正赚到。"
   }
 };
 
@@ -67,168 +67,216 @@ const LEISURE_QUESTION_BANK = {
   poetry: [
     {
       id: "poetry-1",
-      prompt: "春眠不觉晓，____。",
-      answer: "处处闻啼鸟",
-      options: ["处处闻啼鸟", "江清月近人", "山月照弹琴", "白云生处深"],
-      source: "孟浩然《春晓》",
-      note: "这两句从春晨的听觉入手，先写睡醒不觉天明，再写处处鸟鸣。"
+      prompt: "故木受绳则直，金就砺则利，君子博学而日参省乎己，____。",
+      answer: "则知明而行无过矣",
+      options: ["则知明而行无过矣", "则思明而德自成矣", "则积善而神明自得", "则善假于物而无穷也"],
+      source: "《劝学》",
+      note: "这一句收束前文，意思是广博学习并且每日反省，才能见识明达、行为少过失。"
     },
     {
       id: "poetry-2",
-      prompt: "海内存知己，____。",
-      answer: "天涯若比邻",
-      options: ["天涯若比邻", "山山黄叶飞", "千里共婵娟", "风雪夜归人"],
-      source: "王勃《送杜少府之任蜀州》",
-      note: "它写的是知己之间精神相近，即使远隔天涯也像近邻一样。"
+      prompt: "寄蜉蝣于天地，____。",
+      answer: "渺沧海之一粟",
+      options: ["渺沧海之一粟", "羡长江之无穷", "托遗响于悲风", "抱明月而长终"],
+      source: "苏轼《赤壁赋》",
+      note: "这句把人的短暂与天地江海的辽阔并置出来，是《赤壁赋》里非常经典的一层感慨。"
     },
     {
       id: "poetry-3",
-      prompt: "欲穷千里目，____。",
-      answer: "更上一层楼",
-      options: ["更上一层楼", "独钓寒江雪", "草色入帘青", "相看两不厌"],
-      source: "王之涣《登鹳雀楼》",
-      note: "这句常被拿来比喻想看得更远，就要站得更高。"
+      prompt: "同是天涯沦落人，____。",
+      answer: "相逢何必曾相识",
+      options: ["相逢何必曾相识", "此时无声胜有声", "却坐促弦弦转急", "老大嫁作商人妇"],
+      source: "白居易《琵琶行》",
+      note: "这句之所以动人，不只因为熟，而是它把共同处境带来的理解说得很直很深。"
     },
     {
       id: "poetry-4",
-      prompt: "采菊东篱下，____。",
-      answer: "悠然见南山",
-      options: ["悠然见南山", "明月来相照", "莲动下渔舟", "白水绕东城"],
-      source: "陶渊明《饮酒·其五》",
-      note: "关键味道在“悠然”，它写的是不刻意而自然显现的闲适心境。"
+      prompt: "纵一苇之所如，____。",
+      answer: "凌万顷之茫然",
+      options: ["凌万顷之茫然", "哀吾生之须臾", "挟飞仙以遨游", "渺渺兮予怀"],
+      source: "苏轼《赤壁赋》",
+      note: "这一句写的是乘舟任意漂行时那种辽阔又空明的感觉，画面非常开。"
     },
     {
       id: "poetry-5",
-      prompt: "会当凌绝顶，____。",
-      answer: "一览众山小",
-      options: ["一览众山小", "星河欲转千帆舞", "轻舟已过万重山", "独怆然而涕下"],
-      source: "杜甫《望岳》",
-      note: "前句写志向，后句写胸襟，是非常典型的昂扬气象。"
+      prompt: "无边落木萧萧下，____。",
+      answer: "不尽长江滚滚来",
+      options: ["不尽长江滚滚来", "万里悲秋常作客", "百年多病独登台", "潦倒新停浊酒杯"],
+      source: "杜甫《登高》",
+      note: "这两句的气象特别大，一边是落木，一边是长江，苍凉感几乎一下就立住了。"
     },
     {
       id: "poetry-6",
-      prompt: "山重水复疑无路，____。",
-      answer: "柳暗花明又一村",
-      options: ["柳暗花明又一村", "芳草萋萋鹦鹉洲", "桃花流水鳜鱼肥", "秋水共长天一色"],
-      source: "陆游《游山西村》",
-      note: "这句今天常被借来写困境后的转机。"
+      prompt: "舞幽壑之潜蛟，____。",
+      answer: "泣孤舟之嫠妇",
+      options: ["泣孤舟之嫠妇", "托遗响于悲风", "正襟危坐而问客", "望美人兮天一方"],
+      source: "苏轼《赤壁赋》",
+      note: "这一句是用夸张想象写箫声之哀婉，潜蛟起舞、嫠妇垂泣，声情一下就出来了。"
     },
     {
       id: "poetry-7",
-      prompt: "人生自古谁无死，____。",
-      answer: "留取丹心照汗青",
-      options: ["留取丹心照汗青", "不教胡马度阴山", "何人不起故园情", "对影成三人"],
-      source: "文天祥《过零丁洋》",
-      note: "“丹心”指赤诚之心，“汗青”借指史册，整句很有历史气节。"
+      prompt: "固知一死生为虚诞，____。",
+      answer: "齐彭殇为妄作",
+      options: ["齐彭殇为妄作", "向之所欣俯仰之间", "终期于尽不能喻之于怀", "后之视今亦犹今之视昔"],
+      source: "王羲之《兰亭集序》",
+      note: "这句是在批评把生死等同、把长寿短命齐观的空泛说法，语气很清醒。"
     },
     {
       id: "poetry-8",
-      prompt: "落霞与孤鹜齐飞，____。",
-      answer: "秋水共长天一色",
-      options: ["秋水共长天一色", "青山郭外斜", "只是近黄昏", "夜深篱落一灯明"],
-      source: "王勃《滕王阁序》",
-      note: "这一联画面感极强，颜色、空间和动态都很完整。"
+      prompt: "外无期功强近之亲，内无应门五尺之僮，____，形影相吊。",
+      answer: "茕茕孑立",
+      options: ["茕茕孑立", "零丁孤苦", "夙遭闵凶", "门衰祚薄"],
+      source: "李密《陈情表》",
+      note: "这句写得极孤：外无近亲，内无僮仆，只能自己和自己的影子相对。"
+    },
+    {
+      id: "poetry-9",
+      prompt: "师者，所以传道受业解惑也。____，孰能无惑？",
+      answer: "人非生而知之者",
+      options: ["人非生而知之者", "是故弟子不必不如师", "其为惑也终不解矣", "小学而大遗吾未见其明也"],
+      source: "韩愈《师说》",
+      note: "这句是《师说》立论的重要一环：正因为人不是生来就懂，才需要老师。"
+    },
+    {
+      id: "poetry-10",
+      prompt: "扪参历井仰胁息，____。",
+      answer: "以手抚膺坐长叹",
+      options: ["以手抚膺坐长叹", "问君西游何时还", "侧身西望长咨嗟", "猿猱欲度愁攀援"],
+      source: "李白《蜀道难》",
+      note: "这一句把登蜀道时的惊险和压迫感写得很具体，几乎能看到人仰头喘息的样子。"
+    },
+    {
+      id: "poetry-11",
+      prompt: "总角之宴，言笑晏晏。____，不思其反。",
+      answer: "信誓旦旦",
+      options: ["信誓旦旦", "静言思之", "桑之未落", "亦已焉哉"],
+      source: "《诗经·卫风·氓》",
+      note: "这里回忆少年时的相处与誓言，再对照后文，就更能看出情感的转折。"
+    },
+    {
+      id: "poetry-12",
+      prompt: "且夫天地之间，物各有主，____，虽一毫而莫取。",
+      answer: "苟非吾之所有",
+      options: ["苟非吾之所有", "耳得之而为声", "而吾与子之所共适", "则物与我皆无尽也"],
+      source: "苏轼《赤壁赋》",
+      note: "这句后面接的是苏轼很有分寸感的一层价值判断：不属于自己的，就不去强取。"
     }
   ],
   idiom: [
     {
       id: "idiom-1",
-      prompt: "画龙点睛",
-      answer: "在关键处用简洁有力的话点明重点，使内容更传神。",
+      prompt: "请从下面四个成语里，选出能接在“一鸣惊人”后面的一个。",
+      answer: "人杰地灵",
       options: [
-        "在关键处用简洁有力的话点明重点，使内容更传神。",
-        "形容做事没有主见，总跟着别人走。",
-        "比喻把复杂问题故意说得很模糊。",
-        "形容场面很热闹，到处都很拥挤。"
+        "人杰地灵",
+        "惊天动地",
+        "一往无前",
+        "妙笔生花"
       ],
-      source: "常用成语",
-      note: "它经常出现在写作、发言、设计收尾里，强调最后一笔很关键。"
+      source: "成语接龙",
+      note: "“一鸣惊人”的末字是“人”，所以能接“人杰地灵”；后者常用来形容杰出人物生于灵秀之地。"
     },
     {
       id: "idiom-2",
-      prompt: "不负众望",
-      answer: "没有辜负大家的期待。",
-      options: ["没有辜负大家的期待。", "不愿意接受别人的帮助。", "很多人对此都非常失望。", "对别人提出过高要求。"],
-      source: "常用成语",
-      note: "它和“不孚众望”意思相反，后者才是“让人失望”。"
+      prompt: "请从下面四个成语里，选出能接在“胸有成竹”后面的一个。",
+      answer: "竹报平安",
+      options: ["竹报平安", "成双成对", "笔走龙蛇", "安步当车"],
+      source: "成语接龙",
+      note: "这里看最后一个字“竹”，能接“竹报平安”；这个成语常用来寄托平安顺遂的祝福。"
     },
     {
       id: "idiom-3",
-      prompt: "炉火纯青",
-      answer: "比喻技艺或学问达到了纯熟完美的境界。",
+      prompt: "请从下面四个成语里，选出能接在“平步青云”后面的一个。",
+      answer: "云开见日",
       options: [
-        "比喻技艺或学问达到了纯熟完美的境界。",
-        "形容现场气氛非常热烈。",
-        "比喻做事过于急躁，没有耐心。",
-        "指说话时情绪十分激动。"
+        "云开见日",
+        "青黄不接",
+        "乘风破浪",
+        "日新月异"
       ],
-      source: "常用成语",
-      note: "它强调的是“成熟到几乎没有痕迹”的功力。"
+      source: "成语接龙",
+      note: "“平步青云”的末字是“云”，所以要找“云”开头；“云开见日”有拨云见日、局面转亮的意味。"
     },
     {
       id: "idiom-4",
-      prompt: "望洋兴叹",
-      answer: "因力量不足或条件有限而感到无可奈何。",
+      prompt: "请从下面四个成语里，选出能接在“画蛇添足”后面的一个。",
+      answer: "足智多谋",
       options: [
-        "因力量不足或条件有限而感到无可奈何。",
-        "看到海洋就想起远方的朋友。",
-        "面对新鲜事物而感到惊喜。",
-        "比喻心情开阔，十分舒畅。"
+        "足智多谋",
+        "锦上添花",
+        "谋定后动",
+        "井井有条"
       ],
-      source: "常用成语",
-      note: "重点不在“看海”，而在“自觉有限，所以叹服”。"
+      source: "成语接龙",
+      note: "最后一个字是“足”，所以能接“足智多谋”；后者多形容很有智谋、会判断局势。"
     },
     {
       id: "idiom-5",
-      prompt: "走马观花",
-      answer: "比喻粗略地观察，只是大概看看而不深入。",
+      prompt: "请从下面四个成语里，选出能接在“水落石出”后面的一个。",
+      answer: "出类拔萃",
       options: [
-        "比喻粗略地观察，只是大概看看而不深入。",
-        "形容路程很远，来回奔波辛苦。",
-        "比喻一个人动作很快，效率很高。",
-        "形容环境优美，让人流连忘返。"
+        "出类拔萃",
+        "石破天惊",
+        "卓尔不群",
+        "后来居上"
       ],
-      source: "常用成语",
-      note: "它常拿来提醒自己别只停留在“看过”，而没有真正理解。"
+      source: "成语接龙",
+      note: "“水落石出”的末字是“出”，所以接“出类拔萃”；它指才能或表现特别突出。"
     },
     {
       id: "idiom-6",
-      prompt: "一鼓作气",
-      answer: "趁劲头最足的时候一下子把事情做到底。",
+      prompt: "请从下面四个成语里，选出能接在“名列前茅”后面的一个。",
+      answer: "茅塞顿开",
       options: [
-        "趁劲头最足的时候一下子把事情做到底。",
-        "比喻做事时反复犹豫，拿不定主意。",
-        "形容说话时声音越来越大。",
-        "比喻在很多人帮助下共同完成任务。"
+        "茅塞顿开",
+        "后来居上",
+        "名副其实",
+        "开门见山"
       ],
-      source: "常用成语",
-      note: "它最适合用来形容需要连续推进、不能频繁泄气的任务。"
+      source: "成语接龙",
+      note: "这里抓的是最后一个字“茅”；“茅塞顿开”比喻一下子想通了，豁然开朗。"
     },
     {
       id: "idiom-7",
-      prompt: "水落石出",
-      answer: "比喻事情经过澄清之后，真相终于显露出来。",
+      prompt: "请从下面四个成语里，选出能接在“自强不息”后面的一个。",
+      answer: "息事宁人",
       options: [
-        "比喻事情经过澄清之后，真相终于显露出来。",
-        "形容环境突然变得很安静。",
-        "比喻感情快速冷淡下去。",
-        "形容文章写得特别朴素。"
+        "息事宁人",
+        "强词夺理",
+        "生生不息",
+        "人云亦云"
       ],
-      source: "常用成语",
-      note: "它有一种“表面退去之后，本质露出来”的感觉。"
+      source: "成语接龙",
+      note: "“自强不息”的末字是“息”，所以接“息事宁人”；这个成语强调平息纠纷，让事情缓和下来。"
     },
     {
       id: "idiom-8",
-      prompt: "触类旁通",
-      answer: "掌握某一类事物的规律后，能类推出相关内容。",
+      prompt: "请从下面四个成语里，选出能接在“海阔天空”后面的一个。",
+      answer: "空谷足音",
       options: [
-        "掌握某一类事物的规律后，能类推出相关内容。",
-        "指依靠运气连续碰巧做对几件事。",
-        "比喻把不同领域完全混在一起。",
-        "形容表达方式非常委婉含蓄。"
+        "空谷足音",
+        "天高云淡",
+        "海纳百川",
+        "音容笑貌"
       ],
-      source: "常用成语",
-      note: "这正是学习迁移能力的一个很好的概括。"
+      source: "成语接龙",
+      note: "最后一个字是“空”，所以能接“空谷足音”；它原本比喻难得的音信或来客。"
+    },
+    {
+      id: "idiom-9",
+      prompt: "请从下面四个成语里，选出能接在“熟能生巧”后面的一个。",
+      answer: "巧夺天工",
+      options: ["巧夺天工", "心灵手巧", "工于心计", "胸有成竹"],
+      source: "成语接龙",
+      note: "“熟能生巧”的末字是“巧”，所以可接“巧夺天工”；它常形容技艺精妙得像天然生成。"
+    },
+    {
+      id: "idiom-10",
+      prompt: "请从下面四个成语里，选出能接在“口若悬河”后面的一个。",
+      answer: "河清海晏",
+      options: ["河清海晏", "谈笑风生", "晏然自若", "海阔天空"],
+      source: "成语接龙",
+      note: "这里抓的是最后一个字“河”；“河清海晏”多用来比喻天下太平、局面安定。"
     }
   ]
 };
@@ -270,9 +318,33 @@ const THEME_PRESETS = [
   }
 ];
 
+const UI_SURFACE_TOKENS = {
+  forest: {
+    glassBg: [255, 252, 246, 0.88],
+    glassSubBg: [252, 248, 241, 0.78],
+    surfaceBg: [255, 250, 243, 0.82],
+    surfaceStrong: [255, 252, 247, 0.96],
+    surfaceMuted: [248, 243, 234, 0.78]
+  },
+  ocean: {
+    glassBg: [252, 250, 246, 0.86],
+    glassSubBg: [248, 247, 243, 0.78],
+    surfaceBg: [252, 250, 246, 0.78],
+    surfaceStrong: [255, 252, 247, 0.95],
+    surfaceMuted: [245, 243, 239, 0.8]
+  },
+  graphite: {
+    glassBg: [29, 26, 24, 0.92],
+    glassSubBg: [25, 22, 21, 0.84],
+    surfaceBg: [255, 255, 255, 0.05],
+    surfaceStrong: [255, 255, 255, 0.08],
+    surfaceMuted: [255, 255, 255, 0.04]
+  }
+};
+
 const UI_STORAGE_KEY = "study-quest-ui-v4";
 const PREVIEW_STORAGE_KEY = "study-quest-preview-db-v4";
-const LEISURE_STORAGE_KEY = "study-quest-leisure-v1";
+const LEISURE_STORAGE_KEY = "study-quest-leisure-v2";
 const DEFAULT_BASE_URL = "https://codex.ximuai.com";
 const LEGACY_BASE_URL = "https://api.openai.com/v1";
 
@@ -290,6 +362,7 @@ function createDefaultUiState() {
   return {
     theme: "forest",
     focusMode: false,
+    panelOpacity: 100,
     background: createDefaultBackgroundState()
   };
 }
@@ -300,6 +373,16 @@ function cleanText(value) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function normalizePanelOpacity(value, fallback = 100) {
+  return clamp(Number(value ?? fallback) || fallback, 20, 100);
+}
+
+function scaleUiAlpha(token, ratio) {
+  const [red, green, blue, alpha] = token;
+  const nextAlpha = Math.max(0.02, Math.min(1, alpha * ratio));
+  return `rgba(${red}, ${green}, ${blue}, ${nextAlpha.toFixed(3)})`;
 }
 
 function inferLearnerTier(levelText) {
@@ -478,6 +561,7 @@ function loadUiState() {
     return {
       theme: ["forest", "ocean", "graphite"].includes(parsed.theme) ? parsed.theme : "forest",
       focusMode: Boolean(parsed.focusMode),
+      panelOpacity: normalizePanelOpacity(parsed.panelOpacity, defaults.panelOpacity),
       background: {
         image: typeof background.image === "string" ? background.image : "",
         assetPath: typeof background.assetPath === "string" ? background.assetPath : "",
@@ -495,6 +579,7 @@ function saveUiState() {
   const cachedUiState = {
     theme: appState.ui.theme,
     focusMode: appState.ui.focusMode,
+    panelOpacity: normalizePanelOpacity(appState.ui.panelOpacity, 100),
     background: {
       ...appState.ui.background,
       image: appState.previewMode ? appState.ui.background.image : "",
@@ -512,6 +597,7 @@ function saveUiState() {
     void window.studyCoachApi.saveUiPrefs({
       theme: appState.ui.theme,
       focusMode: appState.ui.focusMode,
+      panelOpacity: normalizePanelOpacity(appState.ui.panelOpacity, 100),
       background: appState.ui.background
     }).catch(() => {});
   }
@@ -1501,6 +1587,9 @@ const dom = {
   homeProjectList: document.querySelector("#home-project-list"),
   homeFocusCard: document.querySelector("#home-focus-card"),
   homeReviewList: document.querySelector("#home-review-list"),
+  homeSideSummary: document.querySelector("#home-side-summary"),
+  homeStreakPill: document.querySelector("#home-streak-pill"),
+  homeQuoteText: document.querySelector("#home-quote-text"),
   libraryProjectCount: document.querySelector("#library-project-count"),
   libraryStatusFilter: document.querySelector("#library-status-filter"),
   libraryCategoryFilter: document.querySelector("#library-category-filter"),
@@ -1528,12 +1617,15 @@ const dom = {
   currentQuestionDifficulty: document.querySelector("#current-question-difficulty"),
   currentQuestionGoal: document.querySelector("#current-question-goal"),
   currentQuestionWhy: document.querySelector("#current-question-why"),
+  currentQuestionEvidence: document.querySelector("#current-question-evidence"),
   openQuestionHistoryButton: document.querySelector("#open-question-history"),
   answerForm: document.querySelector("#answer-form"),
   answerInput: document.querySelector("#answer-input"),
   submitAnswer: document.querySelector("#submit-answer"),
   feedbackVerdict: document.querySelector("#feedback-verdict"),
   feedbackPanel: document.querySelector("#feedback-panel"),
+  learnWeaknessCard: document.querySelector("#learn-weakness-card"),
+  learnWeaknessPanel: document.querySelector("#learn-weakness-panel"),
   learnTimelineCard: document.querySelector("#learn-timeline-card"),
   timelineList: document.querySelector("#timeline-list"),
   reviewModeButtons: [...document.querySelectorAll("[data-review-mode]")],
@@ -1571,6 +1663,8 @@ const dom = {
   clearBackgroundButton: document.querySelector("#clear-background"),
   backgroundPreview: document.querySelector("#background-preview"),
   backgroundPreviewCaption: document.querySelector("#background-preview-caption"),
+  panelOpacity: document.querySelector("#panel-opacity"),
+  panelOpacityValue: document.querySelector("#panel-opacity-value"),
   backgroundOpacity: document.querySelector("#background-opacity"),
   backgroundOpacityValue: document.querySelector("#background-opacity-value"),
   backgroundPositionX: document.querySelector("#background-position-x"),
@@ -1807,6 +1901,148 @@ function formatAttemptMode(mode) {
   return mode === "review" ? "复习回答" : "主线回答";
 }
 
+function formatCitationHeadline(citation) {
+  return `${citation.documentName || "未命名材料"} · ${citation.label || "材料片段"}`;
+}
+
+function buildCitationPillMarkup(citation) {
+  return `<span class="meta-chip">${escapeHtml(formatCitationHeadline(citation))}</span>`;
+}
+
+function buildCitationListMarkup(citations = [], emptyText = "当前没有绑定材料出处。") {
+  if (!citations.length) {
+    return `<div class="empty-inline compact-empty"><strong>暂无出处</strong><p class="muted">${escapeHtml(emptyText)}</p></div>`;
+  }
+  return `
+    <div class="citation-list">
+      ${citations.map((citation) => `
+        <article class="citation-card">
+          <div class="citation-card-head">
+            <strong>${escapeHtml(citation.documentName || "未命名材料")}</strong>
+            <span class="status-pill neutral">${escapeHtml(citation.label || "材料片段")}</span>
+          </div>
+          <p class="muted">${escapeHtml(citation.preview || "该片段暂无预览文本。")}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+const WEAKNESS_BUCKETS = [
+  {
+    key: "concept",
+    label: "主干理解",
+    pattern: /(主干|概念|定义|本质|因果|没讲透|不稳定)/
+  },
+  {
+    key: "application",
+    label: "应用落地",
+    pattern: /(场景|应用|例子|怎么用|真实项目|落地|具体)/
+  },
+  {
+    key: "boundary",
+    label: "边界条件",
+    pattern: /(边界|条件|失效|反例|取舍|风险|故障)/
+  },
+  {
+    key: "expression",
+    label: "表达完整度",
+    pattern: /(展开不足|不完整|不够稳|复述|表达|颗粒度|细节容易散)/
+  }
+];
+
+function getWeaknessDiagnosisForNode(node) {
+  const attempts = getSortedAttempts(node);
+  if (!attempts.length) {
+    return null;
+  }
+
+  const latestAttempt = attempts.at(-1) || null;
+  let score = 0;
+  const bucketCounts = new Map();
+
+  attempts.forEach((attempt) => {
+    if (attempt.verdict === "retry_same_question") {
+      score += 18;
+    }
+    if (attempt.verdict === "follow_up_required") {
+      score += 12;
+    }
+    if (attempt.verdict === "review-needs-refresh") {
+      score += 14;
+    }
+    if (Number.isFinite(Number(attempt.score)) && Number(attempt.score) < 80) {
+      score += 80 - Number(attempt.score);
+    }
+
+    const combinedFeedback = [
+      attempt.coachReply,
+      attempt.hint,
+      attempt.improve,
+      ...(attempt.gaps || []),
+      ...(attempt.missing || [])
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    WEAKNESS_BUCKETS.forEach((bucket) => {
+      if (bucket.pattern.test(combinedFeedback)) {
+        bucketCounts.set(bucket.key, (bucketCounts.get(bucket.key) || 0) + 1);
+      }
+    });
+  });
+
+  if (node.status !== "completed") {
+    score += 8;
+  }
+
+  const buckets = WEAKNESS_BUCKETS
+    .map((bucket) => ({
+      key: bucket.key,
+      label: bucket.label,
+      count: bucketCounts.get(bucket.key) || 0
+    }))
+    .filter((bucket) => bucket.count > 0)
+    .sort((left, right) => right.count - left.count)
+    .slice(0, 3);
+
+  return {
+    node,
+    latestAttempt,
+    score,
+    buckets
+  };
+}
+
+function buildQuestWeaknessDiagnosis(quest) {
+  const diagnosedNodes = (quest?.nodes || [])
+    .map(getWeaknessDiagnosisForNode)
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+      return new Date(right.latestAttempt?.createdAt || 0) - new Date(left.latestAttempt?.createdAt || 0);
+    });
+
+  const bucketMap = new Map();
+  diagnosedNodes.forEach((item) => {
+    item.buckets.forEach((bucket) => {
+      bucketMap.set(bucket.label, (bucketMap.get(bucket.label) || 0) + bucket.count);
+    });
+  });
+
+  const summaryBuckets = [...bucketMap.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([label, count]) => ({ label, count }));
+
+  return {
+    topNodes: diagnosedNodes.slice(0, 3),
+    summaryBuckets
+  };
+}
+
 function buildAttemptDetailMarkup(attempt) {
   const verdict = getVerdictMeta(attempt.verdict);
   const scoreTone = getScoreTone(attempt.score);
@@ -1837,6 +2073,11 @@ function buildAttemptDetailMarkup(attempt) {
           <p>${escapeHtml(attempt.coachReply || "暂无教练解释")}</p>
           ${attempt.hint ? `<p><strong>下一步建议：</strong>${escapeHtml(attempt.hint)}</p>` : ""}
           ${attempt.improve ? `<p><strong>更稳的表达：</strong>${escapeHtml(attempt.improve)}</p>` : ""}
+          ${attempt.evidenceNote ? `<p><strong>建议回看：</strong>${escapeHtml(attempt.evidenceNote)}</p>` : ""}
+        </section>
+        <section class="attempt-block">
+          <p class="eyebrow">材料出处</p>
+          ${buildCitationListMarkup(attempt.citations || [], "这次反馈还没有绑定到具体页码。")}
         </section>
         <div class="feedback-grid">
           <section class="feedback-box">
@@ -2256,6 +2497,8 @@ function convertAttemptToEvaluation(attempt) {
     score: attempt.score,
     coachReply: attempt.coachReply,
     hint: attempt.hint,
+    citations: Array.isArray(attempt.citations) ? attempt.citations : [],
+    evidenceNote: attempt.evidenceNote || "",
     feedback: {
       strengths: Array.isArray(attempt.strengths) ? attempt.strengths : [],
       gaps: Array.isArray(attempt.gaps) ? attempt.gaps : [],
@@ -2435,7 +2678,20 @@ function applyUiState() {
   dom.body.dataset.currentView = appState.currentView;
   dom.body.classList.toggle("focus-mode", appState.ui.focusMode && appState.currentView === "learn");
   const background = appState.ui.background || createDefaultBackgroundState();
+  const panelOpacity = normalizePanelOpacity(appState.ui.panelOpacity, 100);
+  const panelOpacityRatio = panelOpacity / 100;
+  const surfaceTokens = UI_SURFACE_TOKENS[appState.ui.theme] || UI_SURFACE_TOKENS.forest;
   dom.body.classList.toggle("has-custom-background", Boolean(background.image));
+  dom.body.style.setProperty("--ui-panel-opacity", String((panelOpacity / 100).toFixed(3)));
+  dom.body.style.setProperty("--ui-panel-strong-opacity", String((0.96 * panelOpacity / 100).toFixed(3)));
+  dom.body.style.setProperty("--ui-panel-mid-opacity", String((0.88 * panelOpacity / 100).toFixed(3)));
+  dom.body.style.setProperty("--ui-panel-soft-opacity", String((0.76 * panelOpacity / 100).toFixed(3)));
+  dom.body.style.setProperty("--ui-panel-faint-opacity", String((0.62 * panelOpacity / 100).toFixed(3)));
+  dom.body.style.setProperty("--glass-bg", scaleUiAlpha(surfaceTokens.glassBg, panelOpacityRatio));
+  dom.body.style.setProperty("--glass-sub-bg", scaleUiAlpha(surfaceTokens.glassSubBg, panelOpacityRatio));
+  dom.body.style.setProperty("--surface-bg", scaleUiAlpha(surfaceTokens.surfaceBg, panelOpacityRatio));
+  dom.body.style.setProperty("--surface-strong", scaleUiAlpha(surfaceTokens.surfaceStrong, panelOpacityRatio));
+  dom.body.style.setProperty("--surface-muted", scaleUiAlpha(surfaceTokens.surfaceMuted, panelOpacityRatio));
   dom.body.style.setProperty("--custom-bg-image", background.image ? `url("${background.image}")` : "none");
   dom.body.style.setProperty("--custom-bg-opacity", String(clamp(Number(background.opacity || 0), 0, 100) / 100));
   dom.body.style.setProperty("--custom-bg-position-x", `${clamp(Number(background.positionX || 50), 0, 100)}%`);
@@ -2469,6 +2725,13 @@ function setFocusMode(enabled) {
   appState.ui.focusMode = enabled;
   saveUiState();
   applyUiState();
+}
+
+function setPanelOpacity(value) {
+  appState.ui.panelOpacity = normalizePanelOpacity(value, 100);
+  saveUiState();
+  applyUiState();
+  renderBackgroundControls();
 }
 
 function updateBackgroundSetting(key, value) {
@@ -2971,6 +3234,15 @@ async function openRoadmapNodeModal(questId, nodeId) {
         </div>
       </div>
     </section>
+    <section class="detail-section">
+      <div class="detail-section-header">
+        <div>
+          <p class="eyebrow">材料出处</p>
+          <h4>这道题关联到的原始片段</h4>
+        </div>
+      </div>
+      ${buildCitationListMarkup(node.citations || [], "当前题目还没有绑定到具体页码。")}
+    </section>
   `;
   openDetailModal({
     type: "roadmap-node",
@@ -3447,66 +3719,203 @@ function renderHomeView() {
   const reviewable = activeQuests.reduce((sum, quest) => sum + Number(quest.stats.completedNodes || 0), 0);
   const latestUpdated = activeQuests[0]?.updatedAt || null;
   const focusQuestSummary = appState.activeQuest || appState.questDetails.get(activeQuests[0]?.id) || activeQuests[0] || null;
+  const statsTotals = appState.stats?.totals || {
+    studyDays: 0,
+    totalAnswers: 0,
+    totalHours: 0,
+    completedCount: 0,
+    currentStreak: 0
+  };
+  const overallProgress = totalRoots ? Math.round((completedRoots / totalRoots) * 100) : 0;
 
   dom.homeStatProjects.textContent = String(totalProjects);
   dom.homeStatRoots.textContent = `${completedRoots} / ${totalRoots}`;
   dom.homeStatReviewable.textContent = String(reviewable);
   dom.homeStatUpdated.textContent = formatDateTime(latestUpdated);
 
-  if (!activeQuests.length) {
-    dom.homeProjectList.innerHTML = `<div class="empty-inline compact-empty"><strong>暂无项目</strong><button class="ghost-button" data-open-create type="button">新建项目</button></div>`;
-    dom.homeProjectList.querySelectorAll("[data-open-create]").forEach((button) => button.addEventListener("click", openCreateModal));
-  } else {
-    dom.homeProjectList.innerHTML = activeQuests
-      .slice(0, 6)
-      .map((quest) => projectRowMarkup(quest, { active: quest.id === appState.activeQuestId }))
-      .join("");
-    wireProjectActions(dom.homeProjectList);
-  }
-
   if (!focusQuestSummary) {
-    dom.homeFocusCard.innerHTML = `
-      <div class="empty-inline compact-empty">
-        <strong>未选择项目</strong>
-        <button class="ghost-button" data-open-create type="button">新建项目</button>
+    dom.homeProjectList.innerHTML = `
+      <div class="home-route-empty">
+        <strong>还没有学习路线</strong>
+        <p class="muted">先写下一个想学的主题，系统会把它展开成可推进的主线问题。</p>
+        <div class="home-route-children">
+          <span>1 写下主题或目标</span>
+          <span>2 贴入材料，或导入 PDF</span>
+          <span>3 从第一道主线题开始推进</span>
+        </div>
       </div>
+    `;
+    dom.homeProjectList.querySelectorAll("[data-open-create]").forEach((button) => button.addEventListener("click", openCreateModal));
+    dom.homeFocusCard.innerHTML = `
+      <section class="focus-empty-hero">
+        <div class="focus-empty-copy">
+          <p class="eyebrow">开始第一条主线</p>
+          <h3>把一个知识点，变成一张能闯关、能复习、能回看的学习地图。</h3>
+          <p class="muted">支持项目管理、路线编辑、PDF 解析和后续的文档学习。先开一个项目，首页就会开始变得很有内容。</p>
+          <div class="project-actions">
+            <button class="primary-button" data-open-create type="button">新建项目</button>
+          </div>
+        </div>
+        <div class="focus-empty-grid">
+          ${buildInlineStatCard("路线主线", "自动生成")}
+          ${buildInlineStatCard("材料导入", "支持 PDF")}
+          ${buildInlineStatCard("学习节奏", "可复习 / 可追踪")}
+        </div>
+      </section>
     `;
     dom.homeFocusCard.querySelectorAll("[data-open-create]").forEach((button) => button.addEventListener("click", openCreateModal));
   } else {
     const activeQuestNode = getActiveNode(focusQuestSummary);
+    const status = getQuestStatusMeta(focusQuestSummary);
+    const questProgress = getQuestProgressPercent(focusQuestSummary);
+    const routeNodes = Array.isArray(focusQuestSummary.nodes) ? sortNodes(focusQuestSummary.nodes) : [];
+    const routeChildrenByParent = new Map();
+    routeNodes.forEach((node) => {
+      const parentKey = node.parentId || "__root__";
+      if (!routeChildrenByParent.has(parentKey)) {
+        routeChildrenByParent.set(parentKey, []);
+      }
+      routeChildrenByParent.get(parentKey).push(node);
+    });
+    const rootNodes = routeChildrenByParent.get("__root__") || [];
+    const topRouteNodes = rootNodes.slice(0, 7);
+    const todaysPlan = [
+      {
+        label: activeQuestNode ? `完成当前关卡：${activeQuestNode.path}` : "进入主线并完成 1 道题",
+        done: Boolean(activeQuestNode?.status === "completed")
+      },
+      {
+        label: reviewable > 0 ? `回看 ${Math.min(reviewable, 3)} 个已完成节点` : "先完成 1 个节点，再回来复习",
+        done: reviewable >= 3
+      },
+      {
+        label: focusQuestSummary.timebox ? `预留 ${focusQuestSummary.timebox} 的专注时间` : "给自己留出 30 分钟连续学习",
+        done: false
+      }
+    ];
     const metaChips = [
       focusQuestSummary.level ? `当前水平：${focusQuestSummary.level}` : null,
       focusQuestSummary.goal ? `学习目标：${focusQuestSummary.goal}` : null,
-      focusQuestSummary.timebox ? `时间限制：${focusQuestSummary.timebox}` : null,
       `训练模式：${getTemplateLabel(focusQuestSummary.templateKey)}`
     ]
       .filter(Boolean)
       .map((item) => `<span class="meta-chip">${escapeHtml(item)}</span>`)
       .join("");
 
+    if (!topRouteNodes.length) {
+      dom.homeProjectList.innerHTML = `<div class="empty-inline compact-empty"><strong>这条路线还没展开</strong><p class="muted">新建项目后，主线问题会按顺序出现在这里。</p></div>`;
+    } else {
+      dom.homeProjectList.innerHTML = topRouteNodes
+        .map((node) => {
+          const childPreview = (routeChildrenByParent.get(node.id) || [])
+            .slice(0, 3)
+            .map((child) => `<span>${escapeHtml(child.path)} ${escapeHtml(child.title)}</span>`)
+            .join("");
+          const isActive = activeQuestNode?.id === node.id || activeQuestNode?.parentId === node.id;
+          return `
+            <button class="home-route-item ${isActive ? "active" : ""}" data-continue-quest="${escapeHtml(focusQuestSummary.id)}" type="button">
+              <span class="home-route-index">${escapeHtml(node.path)}</span>
+              <span class="home-route-copy">
+                <strong>${escapeHtml(node.title)}</strong>
+                <em>${node.status === "completed" ? "已通过" : (node.status === "active" ? "进行中" : "待开始")}</em>
+                ${childPreview ? `<span class="home-route-children">${childPreview}</span>` : ""}
+              </span>
+            </button>
+          `;
+        })
+        .join("");
+      wireProjectActions(dom.homeProjectList);
+    }
+
     dom.homeFocusCard.innerHTML = `
-      <div class="project-card active focus-card">
-        <div class="project-card-head">
-          <div>
-            <p class="eyebrow">当前项目</p>
-            <h4>${escapeHtml(focusQuestSummary.title)}</h4>
+      <section class="focus-hero-card">
+        <div class="focus-hero-main">
+          <div class="focus-cover">
+            <span class="focus-cover-tag">${escapeHtml(focusQuestSummary.category || getTemplateLabel(focusQuestSummary.templateKey))}</span>
+            <strong>${escapeHtml(truncateText(focusQuestSummary.title, 22))}</strong>
+            <em>${escapeHtml(activeQuestNode?.path || "准备开始")}</em>
           </div>
-          <span class="status-pill success">${focusQuestSummary.stats.completedRoots}/${focusQuestSummary.stats.totalRoots} 主线</span>
+          <div class="focus-hero-copy">
+            <div class="project-card-head">
+              <div>
+                <p class="eyebrow">当前学习</p>
+                <h4>${escapeHtml(focusQuestSummary.title)}</h4>
+              </div>
+              <span class="status-pill ${status.tone}">${escapeHtml(status.label)}</span>
+            </div>
+            <p class="muted">${escapeHtml(focusQuestSummary.missionBrief || focusQuestSummary.launchNote || "暂无摘要")}</p>
+            <div class="focus-progress-row">
+              <span>主线进度 ${focusQuestSummary.stats.completedRoots}/${focusQuestSummary.stats.totalRoots}</span>
+              <strong>${questProgress}%</strong>
+            </div>
+            <div class="progress-track">
+              <span style="width:${questProgress}%"></span>
+            </div>
+            <div class="meta-chip-row">${metaChips}</div>
+            <div class="project-actions">
+              <button class="primary-button" data-continue-quest="${escapeHtml(focusQuestSummary.id)}" type="button">继续闯关</button>
+              <button class="ghost-button" data-manage-quest="${escapeHtml(focusQuestSummary.id)}" type="button">项目详情</button>
+            </div>
+          </div>
         </div>
-        <p class="muted">${escapeHtml(focusQuestSummary.missionBrief || focusQuestSummary.launchNote || "暂无摘要")}</p>
-        <div class="meta-chip-row">${metaChips}</div>
-        <div class="inline-stat-grid">
-          ${buildInlineStatCard("总节点", `${focusQuestSummary.stats.completedNodes}/${focusQuestSummary.stats.totalNodes}`)}
-          ${buildInlineStatCard("可复习", String(focusQuestSummary.stats.completedNodes || 0))}
-          ${buildInlineStatCard("当前关卡", activeQuestNode?.path || "待进入")}
+        <div class="focus-plan-card">
+          <div class="focus-plan-head">
+            <div>
+              <p class="eyebrow">今日计划</p>
+              <h4>把这一条线往前推一点</h4>
+            </div>
+            <button class="mini-action" data-continue-quest="${escapeHtml(focusQuestSummary.id)}" type="button">调整计划</button>
+          </div>
+          <div class="focus-plan-list">
+            ${todaysPlan
+              .map(
+                (item) => `
+                  <div class="focus-plan-item ${item.done ? "done" : ""}">
+                    <span class="focus-plan-marker"><i class="fa-solid ${item.done ? "fa-check" : "fa-circle"}"></i></span>
+                    <span>${escapeHtml(item.label)}</span>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+          <div class="focus-plan-quote">
+            学而不思则罔，思而不学则殆。
+          </div>
         </div>
-        <div class="project-actions">
-          <button class="primary-button" data-continue-quest="${escapeHtml(focusQuestSummary.id)}" type="button">进入闯关页</button>
-          <button class="ghost-button" data-review-scope="${escapeHtml(focusQuestSummary.id)}" type="button">复习这一条</button>
-        </div>
-      </div>
+      </section>
     `;
     wireProjectActions(dom.homeFocusCard);
+  }
+
+  if (dom.homeSideSummary) {
+    dom.homeSideSummary.innerHTML = `
+      <div class="summary-ring" style="--summary-progress:${overallProgress}%;">
+        <div class="summary-ring-core">
+          <strong>${overallProgress}%</strong>
+          <span>主线完成</span>
+        </div>
+      </div>
+      <div class="home-summary-list">
+        <div class="home-summary-row"><span>累计答题</span><strong>${escapeHtml(String(statsTotals.totalAnswers || 0))} 次</strong></div>
+        <div class="home-summary-row"><span>专注时长</span><strong>${escapeHtml(String(statsTotals.totalHours || 0))} h</strong></div>
+        <div class="home-summary-row"><span>完成节点</span><strong>${escapeHtml(String(statsTotals.completedCount || 0))} 个</strong></div>
+      </div>
+    `;
+  }
+  if (dom.homeStreakPill) {
+    const streak = Number(statsTotals.currentStreak || 0);
+    dom.homeStreakPill.textContent = streak > 0 ? `已坚持 ${streak} 天` : "从今天开始";
+    dom.homeStreakPill.className = `status-pill ${streak >= 3 ? "success" : "neutral"}`;
+  }
+  if (dom.homeQuoteText) {
+    const homeQuote = !totalProjects
+      ? "从你决定认真对待它的那一刻，学习就已经开始发生。"
+      : overallProgress >= 65
+        ? "你已经不只是开始了，你正在把这件事慢慢做成。"
+        : Number(statsTotals.currentStreak || 0) >= 3
+          ? "把节奏稳住，比偶尔冲刺更难得。"
+          : "每一次向前的一点点，都是在为未来的自己留光。";
+    dom.homeQuoteText.textContent = homeQuote;
   }
 
   const reviewSuggestions = activeQuests
@@ -3839,6 +4248,65 @@ function getLatestAttemptNode(quest) {
     .sort((left, right) => new Date(right.latestAttempt.createdAt) - new Date(left.latestAttempt.createdAt))[0]?.node || null;
 }
 
+function renderQuestionEvidence(node) {
+  const citations = Array.isArray(node?.citations) ? node.citations : [];
+  if (!dom.currentQuestionEvidence) {
+    return;
+  }
+  if (!citations.length) {
+    dom.currentQuestionEvidence.innerHTML = `
+      <div class="empty-inline compact-empty">
+        <strong>当前题目还没有绑定出处</strong>
+        <p class="muted">没有导入 PDF 时，这一关会按普通学习模式推进；导入材料后会自动关联页码片段。</p>
+      </div>
+    `;
+    return;
+  }
+  dom.currentQuestionEvidence.innerHTML = `
+    <div class="section-head compact-head">
+      <div>
+        <p class="eyebrow">材料依据</p>
+        <h3>建议先回看这些位置</h3>
+      </div>
+    </div>
+    ${node.evidenceNote ? `<p class="muted question-evidence-note">${escapeHtml(node.evidenceNote)}</p>` : ""}
+    ${buildCitationListMarkup(citations, "当前题目暂时没有材料出处。")}
+  `;
+}
+
+function renderWeaknessPanel(quest) {
+  if (!dom.learnWeaknessPanel || !dom.learnWeaknessCard) {
+    return;
+  }
+  const diagnosis = buildQuestWeaknessDiagnosis(quest);
+  const hasContent = diagnosis.topNodes.length > 0;
+  dom.learnWeaknessCard.classList.toggle("hidden", !hasContent);
+  if (!hasContent) {
+    dom.learnWeaknessPanel.innerHTML = `
+      <div class="empty-inline compact-empty">
+        <strong>目前还没有明显薄弱点</strong>
+        <p class="muted">先完成几道题，这里会根据低分、追问和复习失误自动收敛出最该补的部分。</p>
+      </div>
+    `;
+    return;
+  }
+
+  const summary = diagnosis.summaryBuckets.length
+    ? `<div class="meta-chip-row">${diagnosis.summaryBuckets.map((bucket) => `<span class="meta-chip">${escapeHtml(bucket.label)} x${escapeHtml(String(bucket.count))}</span>`).join("")}</div>`
+    : "";
+
+  dom.learnWeaknessPanel.innerHTML = `
+    ${summary}
+    ${diagnosis.topNodes.map((item) => `
+      <div class="timeline-item weakness-item">
+        <strong>${escapeHtml(item.node.path)} · ${escapeHtml(item.node.title)}</strong>
+        <p class="muted">${escapeHtml(item.latestAttempt?.score == null ? "--" : `${item.latestAttempt.score} 分`)} · ${escapeHtml(getVerdictMeta(item.latestAttempt?.verdict).label)}</p>
+        <p class="muted">${item.buckets.length ? escapeHtml(item.buckets.map((bucket) => bucket.label).join(" / ")) : "最近几轮里反复需要补充细节"}</p>
+      </div>
+    `).join("")}
+  `;
+}
+
 function renderFeedback(quest) {
   const focusNode = getLatestAttemptNode(quest);
   if (!focusNode) {
@@ -3872,6 +4340,8 @@ function renderFeedback(quest) {
     </div>
     <p class="feedback-note">${escapeHtml(latestAttempt.coachReply || "已保存最近一次反馈。")}</p>
     ${latestAttempt.hint ? `<p class="feedback-note"><strong>下一步建议：</strong>${escapeHtml(latestAttempt.hint)}</p>` : ""}
+    ${latestAttempt.evidenceNote ? `<p class="feedback-note"><strong>建议回看：</strong>${escapeHtml(latestAttempt.evidenceNote)}</p>` : ""}
+    ${latestAttempt.citations?.length ? buildCitationListMarkup(latestAttempt.citations, "最近反馈还没有绑定到页码。") : ""}
     <div class="attempt-history-list">
       ${summary.attempts.map(buildAttemptDetailMarkup).join("")}
     </div>
@@ -3912,6 +4382,9 @@ function renderLearnView() {
     dom.learnEmptyState.classList.remove("hidden");
     dom.learnLayout.classList.add("hidden");
     dom.openQuestionHistoryButton.disabled = true;
+    if (dom.learnWeaknessCard) {
+      dom.learnWeaknessCard.classList.add("hidden");
+    }
     if (dom.manageActiveQuestButton) {
       dom.manageActiveQuestButton.disabled = true;
     }
@@ -3960,12 +4433,14 @@ function renderLearnView() {
 
   renderRoadmap(quest);
   renderFeedback(quest);
+  renderWeaknessPanel(quest);
   renderTimeline(quest);
 
   if (!activeNode) {
     dom.openQuestionHistoryButton.disabled = true;
     dom.questionPanel.classList.add("hidden");
     dom.questionEmpty.classList.remove("hidden");
+    renderQuestionEvidence(null);
     return;
   }
 
@@ -3979,6 +4454,7 @@ function renderLearnView() {
   dom.currentQuestionDifficulty.textContent = formatDifficultyBadge(quest, activeNode);
   dom.currentQuestionGoal.textContent = activeNode.goal || "继续把主干、应用和边界条件讲具体。";
   dom.currentQuestionWhy.textContent = activeNode.whyItMatters || "这道题的提示会显示在这里。";
+  renderQuestionEvidence(activeNode);
 }
 
 function renderReviewModeButtons() {
@@ -4010,13 +4486,13 @@ async function buildReviewCandidates(mode) {
   );
 
   if (mode === "weak") {
-    candidates = candidates.filter((candidate) => {
-      const latestAttempt = getLatestAttempt(candidate.node);
-      return latestAttempt && (
-        ["retry_same_question", "follow_up_required", "review-needs-refresh"].includes(latestAttempt.verdict) ||
-        Number(latestAttempt.score || 100) < 80
-      );
-    });
+    candidates = candidates
+      .map((candidate) => ({
+        ...candidate,
+        diagnosis: getWeaknessDiagnosisForNode(candidate.node)
+      }))
+      .filter((candidate) => candidate.diagnosis && candidate.diagnosis.score > 0)
+      .sort((left, right) => right.diagnosis.score - left.diagnosis.score);
   }
 
   if (mode === "recent") {
@@ -4030,7 +4506,7 @@ function pickReviewCandidate(mode, candidates) {
   if (!candidates.length) {
     return null;
   }
-  if (mode === "recent") {
+  if (mode === "recent" || mode === "weak") {
     return candidates[0];
   }
   const index = Math.floor(Math.random() * candidates.length);
@@ -4123,6 +4599,8 @@ function renderReviewView() {
           </div>
         </div>
         <p class="muted">${escapeHtml(review.node.goal || "试着不看提示，重新把这题讲完整。")}</p>
+        ${review.node.evidenceNote ? `<p class="muted">${escapeHtml(review.node.evidenceNote)}</p>` : ""}
+        ${buildCitationListMarkup(review.node.citations || [], "这道复习题暂时没有绑定出处。")}
         <label class="field-block">
           <span>复习回答</span>
           <textarea id="review-answer-input" rows="7" placeholder="现在开始复述，尽量不要偷看原答案。" spellcheck="false"></textarea>
@@ -4286,6 +4764,9 @@ function renderThemeOptions() {
 
 function renderBackgroundControls() {
   const background = appState.ui.background || createDefaultBackgroundState();
+  const panelOpacity = normalizePanelOpacity(appState.ui.panelOpacity, 100);
+  dom.panelOpacity.value = String(panelOpacity);
+  dom.panelOpacityValue.textContent = `${panelOpacity}%`;
   dom.backgroundOpacity.value = String(background.opacity);
   dom.backgroundPositionX.value = String(background.positionX);
   dom.backgroundPositionY.value = String(background.positionY);
@@ -4299,8 +4780,8 @@ function renderBackgroundControls() {
   dom.backgroundPreview.style.backgroundPosition = `${background.positionX}% ${background.positionY}%`;
   dom.backgroundPreview.style.setProperty("--preview-bg-opacity", String(clamp(Number(background.opacity || 0), 0, 100) / 100));
   dom.backgroundPreviewCaption.textContent = background.image
-    ? `透明度 ${background.opacity}% · 水平 ${background.positionX}% · 垂直 ${background.positionY}%`
-    : "还没有自定义背景";
+    ? `界面 ${panelOpacity}% · 背景 ${background.opacity}% · 水平 ${background.positionX}% · 垂直 ${background.positionY}%`
+    : `界面透明度 ${panelOpacity}% · 还没有自定义背景`;
   dom.clearBackgroundButton.disabled = !background.image;
 }
 
@@ -4333,6 +4814,7 @@ async function bootstrap() {
       appState.ui = {
         ...createDefaultUiState(),
         ...persistedUi,
+        panelOpacity: normalizePanelOpacity(persistedUi?.panelOpacity, 100),
         background: {
           ...createDefaultBackgroundState(),
           ...(persistedUi?.background || {})
@@ -4638,6 +5120,10 @@ dom.backgroundFileInput?.addEventListener("change", () => {
   const [file] = dom.backgroundFileInput.files || [];
   loadCustomBackgroundFile(file);
   dom.backgroundFileInput.value = "";
+});
+
+dom.panelOpacity?.addEventListener("input", () => {
+  setPanelOpacity(normalizePanelOpacity(dom.panelOpacity.value, 100));
 });
 
 dom.importPdfButton?.addEventListener("click", () => {
