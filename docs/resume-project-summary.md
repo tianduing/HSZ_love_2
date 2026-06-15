@@ -4,6 +4,7 @@
 
 - 仓库地址：[study-quest-desktop](https://github.com/tianduing/HSZ_love_2)
 - 当前增强版分支：[codex/resume-upgrade-study-assistant](https://github.com/tianduing/HSZ_love_2/tree/codex/resume-upgrade-study-assistant)
+- 高含金量迁移版叙事：[resume-project-summary-multi-agent.md](resume-project-summary-multi-agent.md)
 
 ## 项目背景
 
