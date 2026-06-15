@@ -18,9 +18,14 @@
     <div class="layout-wrapper">
       <aside class="sidebar glass-panel">
         <section class="brand-panel">
+          <div class="window-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           <div class="brand">
             <div class="brand-icon">
-              <i class="fa-solid fa-brain"></i>
+              <i class="fa-solid fa-sun"></i>
             </div>
             <div class="brand-copy">
               <p class="eyebrow">仅予你的晴天</p>
@@ -31,13 +36,6 @@
         </section>
 
         <section class="sidebar-tools glass-subpanel">
-          <label class="search-shell">
-            <span class="search-icon">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </span>
-            <input id="project-search" type="search" placeholder="搜索学习项目..." spellcheck="false" />
-          </label>
-
           <div class="sidebar-quick-actions">
             <button class="ghost-button sidebar-action" data-open-create type="button">
               <i class="fa-solid fa-plus"></i>
@@ -146,10 +144,16 @@
               <h2 id="view-title">学习工作台</h2>
               <span id="quest-count-pill" class="badge">0 个项目</span>
             </div>
-            <p id="view-subtitle" class="header-subtitle">项目、主线、复习队列都收在同一处。</p>
+            <p id="view-subtitle" class="header-subtitle">把今天要推进的主线、该回看的复习和材料入口都收在同一张安静的工作台里。</p>
           </div>
 
           <div class="toolbar">
+            <div id="top-search-slot" class="top-search-slot">
+              <label class="search-shell top-search-shell">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input id="project-search" type="search" placeholder="搜索项目 / 题目 / 标签" />
+              </label>
+            </div>
             <button id="theme-toggle" class="icon-btn" type="button" title="切换日夜主题">
               <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
             </button>
@@ -166,7 +170,7 @@
         <p id="preview-banner" class="preview-banner hidden">当前是浏览器预览版，桌面安装版会沿用同一套界面。</p>
 
         <section id="home-view" class="view-pane">
-          <section class="dashboard">
+          <section class="dashboard home-dashboard">
             <article class="stat-card glass-panel">
               <div class="stat-info">
                 <div id="home-stat-projects" class="stat-value">0</div>
@@ -209,13 +213,13 @@
           </section>
 
           <section class="workspace home-workspace">
-            <article class="path-panel glass-panel">
+            <article class="path-panel glass-panel home-route-panel">
               <div class="path-title-row">
                 <div>
-                  <p class="path-title">项目列表</p>
-                  <h3>最近项目</h3>
+                  <p class="path-title">学习路线</p>
+                  <h3>当前主线预览</h3>
                 </div>
-                <button class="mini-action" data-view-jump="library" type="button">查看全部</button>
+                <button class="mini-action" data-view-jump="learn" type="button">进入闯关</button>
               </div>
               <div id="home-project-list" class="project-collection"></div>
             </article>
@@ -234,16 +238,32 @@
                 <div id="home-focus-card" class="focus-stack"></div>
               </article>
 
-              <aside class="coach-rail">
-                <article class="glass-panel rail-card">
+              <aside class="coach-rail home-side-rail">
+                <article class="glass-panel rail-card home-summary-card">
                   <div class="section-head">
                     <div>
-                      <p class="eyebrow">复习队列</p>
+                      <p class="eyebrow">今日节奏</p>
+                      <h3>学习数据</h3>
+                    </div>
+                    <span id="home-streak-pill" class="status-pill neutral">持续推进</span>
+                  </div>
+                  <div id="home-side-summary" class="home-side-summary"></div>
+                </article>
+
+                <article class="glass-panel rail-card home-review-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">复习提醒</p>
                       <h3>优先回看</h3>
                     </div>
                     <button id="start-global-review" class="mini-action" type="button">开始复习</button>
                   </div>
                   <div id="home-review-list" class="queue-list"></div>
+                </article>
+
+                <article class="glass-panel rail-card quote-rail-card home-quote-card">
+                  <p class="eyebrow">今日一句</p>
+                  <blockquote id="home-quote-text" class="home-quote-text">每一次向前的一点点，都是在为未来的自己留光。</blockquote>
                 </article>
               </aside>
             </div>
@@ -379,6 +399,8 @@
                     </article>
                   </div>
 
+                  <div id="current-question-evidence" class="question-evidence-panel"></div>
+
                   <div class="question-history-actions">
                     <button id="open-question-history" class="ghost-button" type="button">
                       <i class="fa-solid fa-clock-rotate-left"></i>
@@ -423,6 +445,16 @@
                     <span id="feedback-verdict" class="status-pill neutral">等待回答</span>
                   </div>
                   <div id="feedback-panel" class="feedback-panel"></div>
+                </article>
+
+                <article id="learn-weakness-card" class="glass-panel rail-card">
+                  <div class="section-head">
+                    <div>
+                      <p class="eyebrow">诊断</p>
+                      <h3>薄弱点雷达</h3>
+                    </div>
+                  </div>
+                  <div id="learn-weakness-panel" class="timeline-list"></div>
                 </article>
 
                 <article id="learn-timeline-card" class="glass-panel rail-card">
@@ -518,7 +550,7 @@
               <div class="path-title-row">
                 <div>
                   <p class="path-title">文学小游戏</p>
-                  <h3>休闲区：诗词与成语</h3>
+                  <h3>休闲区：诗词与成语接龙</h3>
                 </div>
                 <span class="badge subtle-badge">放松一下，也顺手补点文学素养</span>
               </div>
@@ -654,6 +686,11 @@
                 </div>
 
                 <div class="field-grid single-column-grid">
+                  <label class="field-block">
+                    <span>界面透明度 <strong id="panel-opacity-value">100%</strong></span>
+                    <input id="panel-opacity" type="range" min="20" max="100" value="100" />
+                  </label>
+
                   <label class="field-block">
                     <span>背景透明度 <strong id="background-opacity-value">55%</strong></span>
                     <input id="background-opacity" type="range" min="0" max="100" value="55" />

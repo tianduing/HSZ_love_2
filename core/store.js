@@ -187,6 +187,18 @@ function normalizeAttempt(attempt, index) {
     gaps: Array.isArray(attempt?.gaps) ? attempt.gaps.map(cleanText).filter(Boolean).slice(0, 3) : [],
     missing: Array.isArray(attempt?.missing) ? attempt.missing.map(cleanText).filter(Boolean).slice(0, 3) : [],
     improve: cleanText(attempt?.improve),
+    citations: Array.isArray(attempt?.citations)
+      ? attempt.citations.map((citation) => ({
+          documentId: cleanText(citation?.documentId),
+          chunkId: cleanText(citation?.chunkId),
+          documentName: truncateText(citation?.documentName, 120),
+          label: truncateText(citation?.label, 60),
+          pageStart: clampNumber(citation?.pageStart ?? 0, 0, 99999, 0),
+          pageEnd: clampNumber(citation?.pageEnd ?? citation?.pageStart ?? 0, 0, 99999, 0),
+          preview: truncateText(citation?.preview, 220)
+        })).filter((citation) => citation.documentName && citation.label).slice(0, 3)
+      : [],
+    evidenceNote: cleanText(attempt?.evidenceNote),
     durationSeconds: clampNumber(attempt?.durationSeconds ?? 0, 0, MAX_DURATION_SECONDS, 0),
     createdAt
   };
@@ -255,6 +267,18 @@ function normalizeNode(node, index, fallbackTimestamp) {
     attempts,
     reviewCount: clampNumber(node?.reviewCount ?? 0, 0, 999999, 0),
     lastReviewAt: node?.lastReviewAt || null,
+    citations: Array.isArray(node?.citations)
+      ? node.citations.map((citation) => ({
+          documentId: cleanText(citation?.documentId),
+          chunkId: cleanText(citation?.chunkId),
+          documentName: truncateText(citation?.documentName, 120),
+          label: truncateText(citation?.label, 60),
+          pageStart: clampNumber(citation?.pageStart ?? 0, 0, 99999, 0),
+          pageEnd: clampNumber(citation?.pageEnd ?? citation?.pageStart ?? 0, 0, 99999, 0),
+          preview: truncateText(citation?.preview, 220)
+        })).filter((citation) => citation.documentName && citation.label).slice(0, 3)
+      : [],
+    evidenceNote: cleanText(node?.evidenceNote),
     createdAt: node?.createdAt || updatedAt,
     updatedAt,
     completedAt: node?.completedAt || null,
@@ -552,6 +576,18 @@ function createRootNode(planItem, index, isActive) {
     attempts: [],
     reviewCount: 0,
     lastReviewAt: null,
+    citations: Array.isArray(planItem?.citations)
+      ? planItem.citations.map((citation) => ({
+          documentId: cleanText(citation?.documentId),
+          chunkId: cleanText(citation?.chunkId),
+          documentName: truncateText(citation?.documentName, 120),
+          label: truncateText(citation?.label, 60),
+          pageStart: clampNumber(citation?.pageStart ?? 0, 0, 99999, 0),
+          pageEnd: clampNumber(citation?.pageEnd ?? citation?.pageStart ?? 0, 0, 99999, 0),
+          preview: truncateText(citation?.preview, 220)
+        })).filter((citation) => citation.documentName && citation.label).slice(0, 3)
+      : [],
+    evidenceNote: cleanText(planItem?.evidenceNote),
     createdAt: now,
     updatedAt: now,
     completedAt: null,
@@ -659,6 +695,18 @@ function createChildNode(parentNode, followUpQuestion, sortOrder) {
     attempts: [],
     reviewCount: 0,
     lastReviewAt: null,
+    citations: Array.isArray(followUpQuestion?.citations)
+      ? followUpQuestion.citations.map((citation) => ({
+          documentId: cleanText(citation?.documentId),
+          chunkId: cleanText(citation?.chunkId),
+          documentName: truncateText(citation?.documentName, 120),
+          label: truncateText(citation?.label, 60),
+          pageStart: clampNumber(citation?.pageStart ?? 0, 0, 99999, 0),
+          pageEnd: clampNumber(citation?.pageEnd ?? citation?.pageStart ?? 0, 0, 99999, 0),
+          preview: truncateText(citation?.preview, 220)
+        })).filter((citation) => citation.documentName && citation.label).slice(0, 3)
+      : [],
+    evidenceNote: cleanText(followUpQuestion?.evidenceNote),
     createdAt: now,
     updatedAt: now,
     completedAt: null,
@@ -681,6 +729,18 @@ function createAttemptRecord(node, mode, answer, evaluation, createdAt, duration
     gaps: Array.isArray(evaluation.feedback?.gaps) ? evaluation.feedback.gaps.map(cleanText).filter(Boolean).slice(0, 3) : [],
     missing: Array.isArray(evaluation.feedback?.missing) ? evaluation.feedback.missing.map(cleanText).filter(Boolean).slice(0, 3) : [],
     improve: cleanText(evaluation.feedback?.improve),
+    citations: Array.isArray(evaluation.citations)
+      ? evaluation.citations.map((citation) => ({
+          documentId: cleanText(citation?.documentId),
+          chunkId: cleanText(citation?.chunkId),
+          documentName: truncateText(citation?.documentName, 120),
+          label: truncateText(citation?.label, 60),
+          pageStart: clampNumber(citation?.pageStart ?? 0, 0, 99999, 0),
+          pageEnd: clampNumber(citation?.pageEnd ?? citation?.pageStart ?? 0, 0, 99999, 0),
+          preview: truncateText(citation?.preview, 220)
+        })).filter((citation) => citation.documentName && citation.label).slice(0, 3)
+      : [],
+    evidenceNote: cleanText(evaluation.evidenceNote),
     durationSeconds: clampNumber(durationSeconds, 0, MAX_DURATION_SECONDS, 0),
     createdAt
   };

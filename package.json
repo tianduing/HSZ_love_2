@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "check": "node --check main.js && node --check preload.js && node --check core\\store.js && node --check core\\openai.js && node --check src\\renderer.js",
+    "check": "node --check main.js && node --check preload.js && node --check core\\store.js && node --check core\\openai.js && node --check core\\retrieval.js && node --check src\\renderer.js",
     "dist:win": "electron-builder --win nsis --x64",
     "dist:dir": "electron-builder --dir --win nsis --x64"
   },

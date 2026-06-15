@@ -1,5 +1,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const {
+  buildCitationRecord,
+  citationsFromEvidenceIds,
+  formatEvidenceContext,
+  hydrateCitationRecords,
+  rankDocumentChunks,
+  summarizeCitationTargets
+} = require("./retrieval");
 
 const TEMPLATE_GUIDES = {
   general: {
@@ -245,6 +253,68 @@ function shouldUseFallbackRoadmap(input, roadmap) {
   return malformed || metaHeavyCount >= Math.ceil(roadmap.length / 2);
 }
 
+function buildNodeEvidenceEntries(sourceDocuments, node, topic, limit = 3) {
+  return rankDocumentChunks(
+    sourceDocuments,
+    [
+      topic,
+      cleanText(node?.title),
+      cleanText(node?.goal),
+      cleanText(node?.whyItMatters)
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    { limit }
+  );
+}
+
+function attachRoadmapCitations(roadmap, input) {
+  const sourceDocuments = Array.isArray(input?.sourceDocuments) ? input.sourceDocuments : [];
+  if (!sourceDocuments.length) {
+    return roadmap;
+  }
+  const topic = deriveTopicFromInput(input);
+  return roadmap.map((item) => {
+    const evidenceEntries = buildNodeEvidenceEntries(sourceDocuments, item, topic, 3);
+    const citations = evidenceEntries.map(buildCitationRecord).slice(0, 3);
+    return {
+      ...item,
+      citations,
+      evidenceNote: citations.length
+        ? `建议先对照 ${summarizeCitationTargets(citations)} 再作答。`
+        : ""
+    };
+  });
+}
+
+function buildNodeEvidenceContext(quest, node, limit = 3) {
+  const sourceDocuments = Array.isArray(quest?.sourceDocuments) ? quest.sourceDocuments : [];
+  if (!sourceDocuments.length) {
+    return [];
+  }
+
+  const storedEvidence = hydrateCitationRecords(node?.citations || [], sourceDocuments, { limit });
+  const seen = new Set();
+  const merged = [];
+
+  storedEvidence.forEach((entry) => {
+    const key = `${entry.documentId}:${entry.chunkId}`;
+    seen.add(key);
+    merged.push(entry);
+  });
+
+  buildNodeEvidenceEntries(sourceDocuments, node, quest?.topic, limit + 1).forEach((entry) => {
+    const key = `${entry.documentId}:${entry.chunkId}`;
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    merged.push(entry);
+  });
+
+  return merged.slice(0, limit);
+}
+
 function getResponseText(responseJson) {
   if (typeof responseJson.output_text === "string" && responseJson.output_text.trim()) {
     return responseJson.output_text;
@@ -356,11 +426,12 @@ function sanitizeFollowUpQuestion(rawFollowUpQuestion, node) {
     title: cleanText(rawFollowUpQuestion?.title) || `请把“${node.title}”放进真实场景里再解释一次。`,
     goal: cleanText(rawFollowUpQuestion?.goal) || "继续补足应用场景、判断依据和边界条件。",
     reason: cleanText(rawFollowUpQuestion?.reason) || "主干已经碰到了，但还需要落到更具体的判断与应用。",
-    difficulty: Math.min(5, Math.max(1, Number(rawFollowUpQuestion?.difficulty || node.difficulty || 3)))
+    difficulty: Math.min(5, Math.max(1, Number(rawFollowUpQuestion?.difficulty || node.difficulty || 3))),
+    evidenceNote: cleanText(rawFollowUpQuestion?.evidenceNote)
   };
 }
 
-function normalizeLearningEvaluation(rawEvaluation, answer, quest, node, settings) {
+function normalizeLearningEvaluation(rawEvaluation, answer, quest, node, settings, evidenceEntries = []) {
   const allowedVerdicts = new Set([
     "retry_same_question",
     "follow_up_required",
@@ -414,10 +485,33 @@ function normalizeLearningEvaluation(rawEvaluation, answer, quest, node, setting
         : "请继续把真实场景、取舍理由和边界条件说具体。";
   }
 
+  normalized.citations = citationsFromEvidenceIds(
+    evidenceEntries,
+    rawEvaluation?.citationIds,
+    {
+      limit: 3,
+      fallbackLimit: finalVerdict === "complete_and_advance" ? 1 : 2
+    }
+  );
+  normalized.evidenceNote = normalized.citations.length
+    ? `建议回看 ${summarizeCitationTargets(normalized.citations)}。`
+    : "";
+
+  if (normalized.citations.length && finalVerdict !== "complete_and_advance") {
+    const evidenceHint = `先对照 ${summarizeCitationTargets(normalized.citations)} 再补答案。`;
+    normalized.hint = normalized.hint
+      ? `${normalized.hint} ${evidenceHint}`
+      : evidenceHint;
+  }
+
   if (finalVerdict === "follow_up_required") {
     normalized.followUpQuestion = finalVerdict === "follow_up_required"
       ? sanitizeFollowUpQuestion(rawEvaluation?.followUpQuestion, node)
       : null;
+    if (normalized.followUpQuestion) {
+      normalized.followUpQuestion.citations = normalized.citations;
+      normalized.followUpQuestion.evidenceNote = normalized.evidenceNote;
+    }
   } else {
     normalized.followUpQuestion = null;
   }
@@ -425,7 +519,7 @@ function normalizeLearningEvaluation(rawEvaluation, answer, quest, node, setting
   return normalized;
 }
 
-function normalizeReviewEvaluation(rawEvaluation, answer) {
+function normalizeReviewEvaluation(rawEvaluation, answer, evidenceEntries = []) {
   const allowedVerdicts = new Set([
     "review-locked-in",
     "review-needs-refresh"
@@ -455,6 +549,24 @@ function normalizeReviewEvaluation(rawEvaluation, answer) {
 
   if (!normalized.hint && verdict === "review-needs-refresh") {
     normalized.hint = "先用一句话说本质，再补一个真实场景和判断依据。";
+  }
+
+  normalized.citations = citationsFromEvidenceIds(
+    evidenceEntries,
+    rawEvaluation?.citationIds,
+    {
+      limit: 3,
+      fallbackLimit: verdict === "review-needs-refresh" ? 2 : 1
+    }
+  );
+  normalized.evidenceNote = normalized.citations.length
+    ? `建议回看 ${summarizeCitationTargets(normalized.citations)}。`
+    : "";
+
+  if (normalized.citations.length && verdict === "review-needs-refresh") {
+    normalized.hint = normalized.hint
+      ? `${normalized.hint} 先对照 ${summarizeCitationTargets(normalized.citations)}。`
+      : `先对照 ${summarizeCitationTargets(normalized.citations)}。`;
   }
 
   return normalized;
@@ -566,15 +678,25 @@ async function generateQuestPlan(settings, input) {
     `本轮采用的训练模板：${template.label}。要求：${template.guidance}`
   ].join("\n");
 
+  const sourceDocuments = Array.isArray(input?.sourceDocuments) ? input.sourceDocuments : [];
+  const sourceSummary = sourceDocuments.length
+    ? sourceDocuments
+        .slice(0, 3)
+        .map((document) => `${document.name}（${document.pageCount || 0} 页，${document.chunks?.length || 0} 个片段）`)
+        .join("；")
+    : "";
   const userPrompt = [
     `学习主题：${topic}`,
     `学习材料：${cleanText(input.material)}`,
+    sourceSummary ? `已导入材料：${sourceSummary}` : "",
     `当前水平：${level}`,
     `目标：${goal}`,
     `时间限制：${timebox}`,
     `主问题数量：${input.rootQuestionCount}`,
     "请生成一个层层推进、有明确目标感的主问题路线图。"
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const result = await callResponsesApi(settings, systemPrompt, userPrompt);
   if (shouldUseFallbackRoadmap(input, result.roadmap)) {
@@ -582,14 +704,19 @@ async function generateQuestPlan(settings, input) {
       sessionTitle: `${topic} 闯关路线`,
       missionBrief: `围绕“${topic}”按主干理解、结构串联、场景应用和复盘辨错来推进。`,
       launchNote: profile.launchNote,
-      roadmap: buildFallbackRoadmap(input)
+      roadmap: attachRoadmapCitations(buildFallbackRoadmap(input), input)
     };
   }
-  return result;
+  return {
+    ...result,
+    roadmap: attachRoadmapCitations(Array.isArray(result.roadmap) ? result.roadmap : [], input)
+  };
 }
 
 async function evaluateLearningAnswer(settings, quest, node, answer) {
   const profile = getLearnerProfile(quest?.level);
+  const evidenceEntries = buildNodeEvidenceContext(quest, node, 3);
+  const evidenceContext = formatEvidenceContext(evidenceEntries);
   const recentAttempts = (node.attempts || []).slice(-2).map((attempt) => ({
     verdict: attempt.verdict,
     answer: attempt.answer,
@@ -603,6 +730,7 @@ async function evaluateLearningAnswer(settings, quest, node, answer) {
     "禁止阿谀奉承，禁止使用“非常棒”“完美”“天才”这类夸张表述。",
     "评分必须克制：90 分以上只给真正讲清主干、关键依据、真实场景和边界条件的回答；75 到 89 分表示基本过关但仍有明显缺口；60 到 74 分表示部分正确但不够扎实；60 分以下表示核心内容仍不稳定。",
     "如果用户答偏了，优先给提示而不是完整答案。",
+    evidenceContext ? "如果提供了材料证据，请优先用这些证据判断回答是否贴合原文，并只从给定证据里挑 citationIds。" : "当前没有材料证据可引用。",
     `当前学习者层级：${profile.label}。${profile.evaluationGuidance}`,
     `当前节点追问深度：${getFollowUpDepth(node)}，允许的最大追问深度：${profile.maxFollowUpDepth}。如果当前节点已经达到追问上限，禁止再生成新的子问题，只能在 retry_same_question 和 complete_and_advance 之间选择。`,
     "请严格返回 JSON，不要加 Markdown，不要加解释。",
@@ -612,6 +740,7 @@ async function evaluateLearningAnswer(settings, quest, node, answer) {
     '  "score": 0 到 100 的整数,',
     '  "coachReply": "1 到 3 句自然语言反馈",',
     '  "hint": "给用户下一步修正提示，可为空字符串",',
+    '  "citationIds": ["从已给证据中选择的 ID，最多 3 个"],',
     '  "feedback": {',
     '    "strengths": ["数组，最多 3 条"],',
     '    "gaps": ["数组，最多 3 条"],',
@@ -636,20 +765,26 @@ async function evaluateLearningAnswer(settings, quest, node, answer) {
     `当前问题：${node.path} ${node.title}`,
     `当前问题目标：${node.goal || "无"}`,
     `为什么重要：${node.whyItMatters || "无"}`,
+    evidenceContext ? `当前材料证据：\n${evidenceContext}` : "",
     `最近两次尝试：${JSON.stringify(recentAttempts, null, 2)}`,
     `用户最新回答：${answer}`
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   const rawEvaluation = await callResponsesApi(settings, systemPrompt, userPrompt);
-  return normalizeLearningEvaluation(rawEvaluation, answer, quest, node, settings);
+  return normalizeLearningEvaluation(rawEvaluation, answer, quest, node, settings, evidenceEntries);
 }
 
 async function evaluateReviewAnswer(settings, quest, node, answer) {
+  const evidenceEntries = buildNodeEvidenceContext(quest, node, 3);
+  const evidenceContext = formatEvidenceContext(evidenceEntries);
   const systemPrompt = [
     "你是一个学习复习抽问裁判。",
     "你只需要判断用户这次复习答得扎不扎实，并给出简短反馈。",
     "禁止过度夸赞，评分要保守，不要因为语气自信就虚高给分。",
     "90 分以上应当极少出现，只在复述准确、结构完整、场景明确时给出。",
+    evidenceContext ? "如果提供了材料证据，请优先根据这些证据来判断复述是否准确，并只返回给定证据里的 citationIds。" : "当前没有材料证据可引用。",
     "请严格返回 JSON，不要加 Markdown。",
     "JSON 结构必须是：",
     "{",
@@ -657,6 +792,7 @@ async function evaluateReviewAnswer(settings, quest, node, answer) {
     '  "score": 0 到 100 的整数,',
     '  "coachReply": "1 到 3 句自然语言反馈",',
     '  "hint": "下一步修正提示，可为空字符串",',
+    '  "citationIds": ["从已给证据中选择的 ID，最多 3 个"],',
     '  "feedback": {',
     '    "strengths": ["数组，最多 3 条"],',
     '    "gaps": ["数组，最多 3 条"],',
@@ -670,11 +806,14 @@ async function evaluateReviewAnswer(settings, quest, node, answer) {
     formatQuestContext(quest),
     `复习抽问节点：${node.path} ${node.title}`,
     `节点目标：${node.goal || "无"}`,
+    evidenceContext ? `当前材料证据：\n${evidenceContext}` : "",
     `用户本次回答：${answer}`
-  ].join("\n\n");
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   const rawEvaluation = await callResponsesApi(settings, systemPrompt, userPrompt);
-  return normalizeReviewEvaluation(rawEvaluation, answer);
+  return normalizeReviewEvaluation(rawEvaluation, answer, evidenceEntries);
 }
 
 module.exports = {
