@@ -77,7 +77,7 @@ npm run dist:win
 
 - 仓库地址：[study-quest-desktop](https://github.com/tianduing/HSZ_love_2)
 - 简历版项目说明：[docs/resume-project-summary.md](docs/resume-project-summary.md)
-- Multi-Agent 迁移版项目叙事：[docs/resume-project-summary-multi-agent.md](docs/resume-project-summary-multi-agent.md)
+- 多模态增强版简历文案：[docs/resume-project-summary-multi-agent.md](docs/resume-project-summary-multi-agent.md)
 
 ## 简历版项目描述
 

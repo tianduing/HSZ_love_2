@@ -44,4 +44,4 @@
 
 - README 新增 GitHub 链接与简历版项目描述，方便直接用于项目展示与投递材料
 - 新增 `docs/resume-project-summary.md`，整理项目背景、技术栈、量化结果与简历 / 面试可复用话术
-- 新增 `docs/resume-project-summary-multi-agent.md`，用于把学习助手升级为 Multi-Agent 高含金量项目叙事与实现蓝图
+- 重写 `docs/resume-project-summary-multi-agent.md`，聚焦多模态、意图识别、反馈闭环与模型评测，并补充理想化量化结果参考与简历成稿
